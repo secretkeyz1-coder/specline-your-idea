@@ -8,6 +8,9 @@ import { foldRequirementSections, linkRequirementKeys, renderMarkdown, sectionCh
 const withoutTitle = (content: string | null | undefined) => (content ?? "").replace(/^\s*#\s[^\n]*\n+/, "");
 import { BAD_ID, formUuid } from "$lib/server/ids.js";
 
+import { designReadinessIssues } from "@sdd/contracts";
+import { approvalErrorIssues } from "$lib/design-editor.js";
+
 const TABS = ["requirements", "stack", "design", "system"] as const;
 
 export const load: PageServerLoad = async ({ fetch, cookies, params, url }) => {
@@ -25,12 +28,13 @@ export const load: PageServerLoad = async ({ fetch, cookies, params, url }) => {
   // Back from the hand-written editor.
   const saved = url.searchParams.get("saved") === "1";
 
-  type Revision = { id: string; version: number; status: string; content: string; createdAt: string };
+  type Revision = { id: string; version: number; status: string; content: string; createdAt: string; structuredContent: unknown };
   type ArtifactView = { artifact: { id: string; approvedRevisionId: string | null } | null; revisions: Revision[] };
   type RequirementsView = {
     revision: { id: string; version: number; status: string; content: string; approvedAt: string | null } | null;
     approved_revision?: { id: string; version: number; content: string } | null;
     revisions?: Array<{ id: string; version: number; status: string; content: string }>;
+    approved_requirements?: Array<{ key: string }>;
     requirements: Array<{ key: string; title: string; statement: string; priority: string; type: string; acceptance_criteria: Array<{ key: string; statement: string }> }>;
   };
 
@@ -108,7 +112,10 @@ export const load: PageServerLoad = async ({ fetch, cookies, params, url }) => {
 
   // Only what the page reads: the API's `revisions` carries every version's full text.
   const requirementsView = { revision: requirements.revision, approved_revision: requirements.approved_revision ? { version: requirements.approved_revision.version } : null, requirements: requirements.requirements };
-  return { tab, justLocked, fromDiscovery, saved, ai, html, changes, requirements: requirementsView, stack, design, designSystem, dsPreview, routing };
+  const designIssues = design.revisions[0]?.status === "DRAFT"
+    ? designReadinessIssues(design.revisions[0].structuredContent, (requirements.approved_requirements ?? requirements.requirements).map(r => r.key))
+    : [];
+  return { designIssues, tab, justLocked, fromDiscovery, saved, ai, html, changes, requirements: requirementsView, stack, design, designSystem, dsPreview, routing };
 };
 
 function projectId(params: { projectId: string }): string {
@@ -157,7 +164,7 @@ export const actions: Actions = {
       return { ok: true, notice: `${what} approved and locked — later changes become a new version.` };
     } catch (error) {
       rethrowKitError(error);
-      if (error instanceof ApiError) return fail(error.status, { message: error.message });
+      if (error instanceof ApiError) return fail(error.status, { message: error.message, issues: approvalErrorIssues(error.details) });
       return fail(500, { message: "Approval failed." });
     }
   },

@@ -2,6 +2,8 @@ import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types.js";
 import { api, ApiError, rethrowKitError, sessionFrom, throwLoadError } from "$lib/server/api.js";
 
+import { designEditorInitial } from "$lib/design-editor.js";
+
 type Revision = { id: string; version: number; status: string; structuredContent: unknown };
 
 /**
@@ -13,17 +15,17 @@ export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
   try {
     const [design, requirements, stack] = await Promise.all([
       api<{ artifact: { approvedRevisionId: string | null } | null; revisions: Revision[] }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/artifacts/design`),
-      api<{ approved_revision: { id: string } | null; requirements: Array<{ key: string; title: string }> }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/requirements`),
+      api<{ approved_revision: { id: string } | null; requirements: Array<{ key: string; title: string }>; approved_requirements?: Array<{ key: string; title: string }> }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/requirements`),
       api<{ artifact: { approvedRevisionId: string | null } | null; revisions: Revision[] }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/artifacts/stack`),
     ]);
     // Revisions arrive newest first: open the newest draft, else the approved one.
     const base = design.revisions.find((r) => r.status === "DRAFT") ?? design.revisions.find((r) => r.status === "APPROVED") ?? null;
     const lockedStack = stack.revisions.find((r) => r.status === "APPROVED") ?? null;
     return {
-      initial: (base?.structuredContent as Record<string, unknown> | null) ?? null,
+      initial: base ? designEditorInitial(base.structuredContent) : null,
       basedOn: base ? { version: base.version, status: base.status } : null,
       requirementsApproved: Boolean(requirements.approved_revision),
-      requirements: requirements.requirements.map((r) => ({ key: r.key, title: r.title })),
+      requirements: (requirements.approved_requirements ?? requirements.requirements).map((r) => ({ key: r.key, title: r.title })),
       stackLocked: Boolean(lockedStack),
     };
   } catch (e) {

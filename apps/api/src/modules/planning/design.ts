@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { schema, type DbExecutor } from "@sdd/db";
-import { DesignArtifactSchema, type DesignArtifact, type RequirementsArtifact } from "@sdd/contracts";
+import { decodeDesignContent, DesignArtifactSchema, type DesignArtifact, type RequirementsArtifact } from "@sdd/contracts";
 import { designPathExists, productContext } from "./quality.js";
 import { errors } from "@sdd/shared";
 import type { GatewayDeps } from "@sdd/ai";
@@ -111,10 +111,11 @@ export async function refineDesign(
   const approvedStack = await getApprovedRevision(db, input.projectId, "stack");
   if (!approvedStack) throw errors.conflict("STACK_NOT_APPROVED", "Approve the stack baseline before refining the design (FR-036)");
   const artifact = await getOrCreateArtifact(db, { projectId: input.projectId, artifactType: "design" });
-  const current = artifact.currentDraftRevisionId
+  const stored = artifact.currentDraftRevisionId
     ? (((await db.select().from(schema.artifactRevisions).where(eq(schema.artifactRevisions.id, artifact.currentDraftRevisionId)).limit(1))[0] ?? null)?.structuredContent as DesignArtifact | null)
     : null;
-  if (!current) throw errors.conflict("NO_DESIGN_DRAFT", "Generate a design before refining");
+  if (!stored) throw errors.conflict("NO_DESIGN_DRAFT", "Generate a design before refining");
+  const current = DesignArtifactSchema.parse(decodeDesignContent(stored));
   const project = await getProject(db, input.projectId);
   const requirements = await listRequirementsForRevision(db, approvedReq.revision.id);
   const stack = await listStackComponents(db, approvedStack.revision.id);
@@ -170,7 +171,7 @@ export async function editDesignDraft(
     throw errors.conflict("STACK_NOT_APPROVED", "Approve the stack baseline before the technical design is authored (FR-036)");
   }
   const artifact = await getOrCreateArtifact(db, { projectId: input.projectId, artifactType: "design" });
-  const parsed = DesignArtifactSchema.parse(input.data);
+  const parsed = DesignArtifactSchema.parse(decodeDesignContent(input.data));
   const reqs = await listRequirementsForRevision(db, approvedReq.revision.id);
   // Same coverage analyzer the AI path uses, so manual designs get identical
   // "no design path" findings for uncovered requirements.

@@ -10,3 +10,4 @@ export { ZodError, z } from "zod";
 export * from "./design-system.js";
 
 export * from "./verification.js";
+export * from "./design-quality.js";

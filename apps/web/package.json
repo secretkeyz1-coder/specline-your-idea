@@ -10,6 +10,7 @@
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
+    "@sdd/contracts": "workspace:*",
     "@fontsource-variable/fira-code": "^5.3.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@xyflow/svelte": "^1.7.0",

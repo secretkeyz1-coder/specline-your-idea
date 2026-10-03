@@ -4,6 +4,9 @@
   import { ArrowLeft, Plus, Trash2 } from "lucide-svelte";
   import Notice from "$lib/components/Notice.svelte";
 
+  import { designReadinessIssues } from "@sdd/contracts";
+  import { designEditorInitial, initialCoverage, designEditorPayload, type DeliveryCheck } from "$lib/design-editor.js";
+
   interface Component { name: string; responsibility: string; interfaces: string }
   interface Decision { description: string; blocking: boolean }
   interface Doc {
@@ -17,6 +20,8 @@
     security: string;
     deployment: string;
     unresolved_decisions: Decision[];
+    requirement_coverage: import("@sdd/contracts").DesignArtifact["requirement_coverage"];
+    delivery_checks: DeliveryCheck[];
   }
 
   let {
@@ -37,12 +42,12 @@
   const start: Partial<Doc> = untrack(() => {
     if (form?.payload) {
       try {
-        return JSON.parse(form.payload) as Doc;
+        return designEditorInitial(JSON.parse(form.payload));
       } catch {
         /* fall through */
       }
     }
-    return data.initial ?? {};
+    return designEditorInitial(data.initial);
   });
 
   let overview = $state(start.overview ?? "");
@@ -57,6 +62,9 @@
   let deployment = $state(start.deployment ?? "");
   let decisions = $state<Decision[]>((start.unresolved_decisions ?? []).map((d) => ({ description: d.description, blocking: Boolean(d.blocking) })));
   if (components.length === 0) components.push({ name: "", responsibility: "", interfaces: "" });
+
+  let coverage = $state(untrack(() => initialCoverage(start, data.requirements.map(r => r.key))));
+  let checks = $state<DeliveryCheck[]>((start.delivery_checks ?? []).map(c => ({ ...c, expected_paths: [...c.expected_paths] })));
 
   let saving = $state(false);
   let attempted = $state(false);
@@ -102,7 +110,7 @@
   }
 
   const payload = $derived(
-    JSON.stringify({
+    JSON.stringify(designEditorPayload({
       overview: overview.trim(),
       architecture: { summary: archSummary.trim(), diagram_text: diagram.trim() },
       components: components
@@ -111,18 +119,17 @@
       data_model: dataModel.trim(),
       api_contracts: contracts.trim(),
       state_machines: states.trim(),
-      // Worked out on the server against the approved requirements.
-      requirement_coverage: [],
       testing_strategy: testing.trim(),
       security: security.trim(),
       deployment: deployment.trim(),
       unresolved_decisions: decisions.filter((d) => d.description.trim()).map((d) => ({ description: d.description.trim(), blocking: d.blocking })),
-    }),
+    }, coverage, checks)),
   );
+  const approvalIssues = $derived(designReadinessIssues(JSON.parse(payload), data.requirements.map(r => r.key)));
 
   // The optional sections, behind one "More detail" disclosure (open when one already holds text).
   const OPTIONAL = [
-    { id: "contracts", label: "API contracts", hint: "Endpoints or functions, inputs and outputs." },
+    { id: "contracts", label: "API contracts", hint: "Endpoints or functions, inputs and outputs. State explicitly if not applicable." },
     { id: "states", label: "State machines & workflows", hint: "States, transitions and who triggers them." },
     { id: "security", label: "Security", hint: "Auth, data access, secrets." },
     { id: "deployment", label: "Deployment", hint: "Where it runs, env vars, ports." },
@@ -255,8 +262,48 @@
       </section>
     </div>
 
+    <section aria-labelledby="sec-coverage" class="flex flex-col gap-3">
+      <h2 id="sec-coverage" class="text-[18px] font-bold">Requirement coverage</h2>
+      <p class="text-[13px] text-base-content/80">For each approved requirement, name a populated section or component and explicitly assess its implementation path. Text alone does not establish coverage.</p>
+      {#each coverage as c, i (c.requirement_key)}
+        <div class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_160px]">
+          <p class="text-[13px]"><span class="font-mono">{c.requirement_key}</span> {data.requirements.find(r => r.key === c.requirement_key)?.title}</p>
+          <input class="input w-full" aria-label={`Design section for ${c.requirement_key}`} placeholder="e.g. components: poll_store" maxlength="160" bind:value={c.design_section} />
+          <select class="select w-full" aria-label={`Coverage status for ${c.requirement_key}`} bind:value={c.status}>
+            <option value="NO_PATH">No path</option><option value="PARTIAL">Partial</option><option value="PATH_DEFINED">Path defined</option>
+          </select>
+        </div>
+      {/each}
+    </section>
+
+    <section aria-labelledby="sec-delivery" class="flex flex-col gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="sec-delivery" class="text-[18px] font-bold">Delivery checks</h2>
+        <button type="button" class="btn btn-ghost btn-sm" disabled={checks.length >= 6} onclick={() => checks.push({ purpose: "build", command: "", expected_paths: [], outcome: "" })}><Plus class="size-4" aria-hidden="true" />Add check</button>
+      </div>
+      <p class="text-[13px] text-base-content/80">Define bounded executable checks for build, startup and a core journey. Use a test fixture that stops the app, not a long-running server. These commands are plans, not executed here.</p>
+      {#each checks as c, i (i)}
+        <div class="grid gap-2 rounded-box border border-line p-3">
+          <div class="flex gap-2">
+            <select class="select flex-1" aria-label={`Delivery check ${i + 1} purpose`} bind:value={c.purpose}><option value="build">Build</option><option value="startup">Startup</option><option value="journey">Journey</option><option value="deployment">Deployment</option></select>
+            <button type="button" class="btn btn-ghost btn-square" aria-label={`Remove delivery check ${i + 1}`} onclick={() => checks.splice(i, 1)}><Trash2 class="size-4" aria-hidden="true" /></button>
+          </div>
+          <input class="input w-full font-mono" aria-label={`Delivery check ${i + 1} command`} placeholder="npm run test:startup" maxlength="400" bind:value={c.command} />
+          <textarea class="textarea w-full" aria-label={`Delivery check ${i + 1} expected paths, one per line`} placeholder="Expected paths, one per line (optional)" value={c.expected_paths.join(String.fromCharCode(10))} oninput={(event) => c.expected_paths = event.currentTarget.value.split(String.fromCharCode(10))}></textarea>
+          <input class="input w-full" aria-label={`Delivery check ${i + 1} outcome`} placeholder="Observable passing outcome" maxlength="800" bind:value={c.outcome} />
+        </div>
+      {/each}
+    </section>
+
+    <Notice tone={approvalIssues.length ? "warn" : "success"}>
+      {#if approvalIssues.length}
+        <p class="font-semibold">Draft needs changes before approval. You can still save it.</p>
+        <ul class="mt-2 list-disc pl-5">{#each approvalIssues as issue}<li>{issue}</li>{/each}</ul>
+      {:else}Material design checks pass. Save and review the draft before approval.{/if}
+    </Notice>
+
     <details class="collapse collapse-arrow rounded-box border border-line bg-base-100" open={moreOpen}>
-      <summary class="collapse-title min-h-13 text-[14px] font-semibold">More detail <span class="font-normal text-base-content/80">optional</span></summary>
+      <summary class="collapse-title min-h-13 text-[14px] font-semibold">Approval detail <span class="font-normal text-base-content/80">state explicitly when not applicable</span></summary>
       <div class="collapse-content flex flex-col gap-6">
         {#each OPTIONAL as f (f.id)}
           <section class="flex flex-col gap-1.5" aria-labelledby={`sec-${f.id}`}>

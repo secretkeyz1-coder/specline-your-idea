@@ -200,6 +200,12 @@ export type StackDecision = z.infer<typeof StackDecisionSchema>;
 
 /* ─────────────────────────── Design (docs/21 §5) ─────────────────────────── */
 
+/** Older Bun SQL JSONB rows can contain a JSON string rather than an object. */
+export function decodeDesignContent(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  try { return JSON.parse(value); } catch { return value; }
+}
+
 export const DesignArtifactSchema = z.object({
   overview: z.string().max(4000),
   architecture: z.object({

@@ -98,6 +98,7 @@ export function planningRoutes(infra: Infra) {
         return {
           revision,
           approved_revision: approvedRevision,
+          approved_requirements: approvedRevision ? await listRequirementsForRevision(ctx.infra.db, approvedRevision.id) : [],
           artifact,
           requirements: revision ? await listRequirementsForRevision(ctx.infra.db, revision.id) : [],
           revisions,

@@ -4,7 +4,7 @@ function sqlMaxVersion() {
   return sql<number>`coalesce(max(${schema.artifactRevisions.version}), 0)`;
 }
 import { schema, type DbExecutor } from "@sdd/db";
-import type { ArtifactType, ProjectLifecycle } from "@sdd/contracts";
+import { decodeDesignContent, type ArtifactType, type ProjectLifecycle } from "@sdd/contracts";
 import { DomainError, errors, sha256Hex } from "@sdd/shared";
 import { audit, type AuditSource } from "../audit/service.js";
 import { setActiveRevision, updateLifecycle } from "../project/service.js";
@@ -115,7 +115,11 @@ async function createDraftRevisionTx(
       version,
       contentFormat: input.contentFormat ?? "json",
       content,
-      structuredContent: (input.structuredContent ?? null) as ArtifactRevision["structuredContent"],
+      // Force text transport before the JSONB cast: Bun SQL otherwise encodes
+      // Drizzle's already-serialized JSON as a JSON string. Scope to design.
+      structuredContent: artifact.artifactType === "design" && input.structuredContent != null
+        ? sql`cast(cast(${JSON.stringify(decodeDesignContent(input.structuredContent))} as text) as jsonb)`
+        : (input.structuredContent ?? null) as ArtifactRevision["structuredContent"],
       status: "DRAFT",
       derivedFrom: input.derivedFrom ?? [],
       aiGenerationRunId: input.aiGenerationRunId ?? null,
@@ -186,13 +190,11 @@ export async function approveRevision(
       if (!parsed.success) throw errors.validation("Requirements contain invalid actor/workflow/criterion references", parsed.error.flatten());
     }
     if (artifact.artifactType === "design") {
-      const { DesignArtifactSchema } = await import("@sdd/contracts");
-      const { designApprovalIssues } = await import("../planning/quality.js");
-      const { analyzeDesignCoverage } = await import("../planning/design.js");
+      const { designReadinessIssues } = await import("@sdd/contracts");
       const { listRequirementsForRevision } = await import("../planning/requirements.js");
       const baseline = await getApprovedRevision(tx, artifact.projectId, "requirements");
       const reqs = baseline ? await listRequirementsForRevision(tx, baseline.revision.id) : [];
-      const issues = designApprovalIssues(analyzeDesignCoverage(DesignArtifactSchema.parse(fresh!.structuredContent), reqs));
+      const issues = designReadinessIssues(fresh!.structuredContent, reqs.map(r => r.key));
       if (issues.length) throw errors.conflict("DESIGN_NOT_READY", "Resolve material design gaps before approval", { issues });
     }
     if (artifact.artifactType === "ux") {
@@ -420,7 +422,7 @@ export async function getApprovedRevision(
     .limit(1);
   if (!artifact?.approvedRevisionId) return null;
   const revision = await getRevision(db, artifact.approvedRevisionId);
-  return { artifact, revision };
+  return { artifact, revision: type === "design" ? { ...revision, structuredContent: decodeDesignContent(revision.structuredContent) } : revision };
 }
 
 export function structuredOf<T>(revision: ArtifactRevision): T | null {

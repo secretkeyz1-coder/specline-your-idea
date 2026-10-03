@@ -35,6 +35,7 @@
     form,
   }: {
     data: {
+      designIssues: string[];
       tab: "requirements" | "stack" | "design" | "system";
       /** From the project layout: the one next step. */
       journey?: Journey;
@@ -95,7 +96,7 @@
         }>;
       };
     };
-    form: { ok?: boolean; notice?: string; message?: string } | null;
+    form: { ok?: boolean; notice?: string; message?: string; issues?: string[] } | null;
   } = $props();
 
   let busy = $state<string | null>(null);
@@ -164,7 +165,7 @@
       return !r ? null : r.status === "DRAFT" ? "ready to approve" : "approved";
     }
     if (data.tab === "stack") return stackApproved ? "locked" : latestRevision ? "not locked" : null;
-    if (data.tab === "design") return latestRevision?.status === "DRAFT" ? "ready to approve" : designApproved ? "approved" : null;
+    if (data.tab === "design") return latestRevision?.status === "DRAFT" ? (data.designIssues.length ? "needs changes" : "ready to approve") : designApproved ? "approved" : null;
     return data.designSystem.draft ? "draft" : data.designSystem.approved ? "in use" : null;
   });
   const inUseVersion = $derived.by((): number | null => {
@@ -298,11 +299,11 @@
   {#if form?.notice}
     <Notice tone="success">{form.notice}</Notice>
   {:else if form?.message}
-    <Notice tone="error">{form.message}</Notice>
+    <Notice tone="error">{form.message}{#if form.issues?.length}<ul class="mt-2 list-disc pl-5">{#each form.issues as issue}<li>{issue}</li>{/each}</ul>{/if}</Notice>
   {/if}
 
   {#if data.saved && !form && (data.tab === "requirements" || data.tab === "design")}
-    <Notice tone="success">Draft saved. Review it, then approve it.</Notice>
+    <Notice tone="success">Draft saved. Review it and resolve any approval issues.</Notice>
   {/if}
   {#if data.fromDiscovery && data.tab === "requirements" && !data.requirements.revision && !form}
     <Notice tone="success">Discovery complete. Next, turn it into numbered requirements.</Notice>
@@ -610,6 +611,10 @@
                 {/if}
               </div>
               {@render changesSummary()}
+              {#if data.designIssues.length}
+                <Notice tone="warn"><p class="font-semibold">Resolve these issues before approval.</p><ul class="mt-2 list-disc pl-5">{#each data.designIssues as issue}<li>{issue}</li>{/each}</ul></Notice>
+                <a class="btn btn-outline" href={`/projects/${pid}/docs/design/edit`}>Edit design to resolve issues</a>
+              {:else}
               <div class="[&>.btn]:w-full max-sm:[&>.btn]:h-12">
                 <DecisionReceipt
                   kind="design"
@@ -621,6 +626,7 @@
                   label={`Approve design v${latestRevision.version}`}
                 />
               </div>
+              {/if}
             </section>
           {/if}
           {@render history()}
