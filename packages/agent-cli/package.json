@@ -1,0 +1,10 @@
+{
+  "name": "@sdd/agent-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Run a locally installed coding-agent CLI (Claude Code, Codex) as a text model — shared by the API server and the sdd-agent daemon",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

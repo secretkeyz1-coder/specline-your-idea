@@ -1,0 +1,5 @@
+ALTER TABLE "task_requirement_links" DROP CONSTRAINT "task_requirement_links_task_id_requirement_id_acceptance_criterion_id_pk";--> statement-breakpoint
+ALTER TABLE "tasks" ALTER COLUMN "risk_factors" SET DEFAULT '{"ambiguity":0,"blast_radius":0,"cross_module":0,"concurrency":0,"database_impact":0,"security":0,"integration":0,"verification":0,"context_size":0}'::jsonb;--> statement-breakpoint
+ALTER TABLE "task_requirement_links" ADD COLUMN "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "task_req_links_with_ac_unique" ON "task_requirement_links" USING btree ("task_id","requirement_id","acceptance_criterion_id") WHERE "task_requirement_links"."acceptance_criterion_id" IS NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "task_req_links_without_ac_unique" ON "task_requirement_links" USING btree ("task_id","requirement_id") WHERE "task_requirement_links"."acceptance_criterion_id" IS NULL;

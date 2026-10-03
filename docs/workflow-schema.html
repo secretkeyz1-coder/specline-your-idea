@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Skema Workflow — SDD Control Plane (1-Prompt Autonomous Execution)</title>
+<style>
+  :root {
+    --ground: #f9fafb; --card: #ffffff; --line: #e5e7eb; --line-strong: #d1d5db;
+    --text: #111827; --muted: #4b5563; --faint: #6b7280;
+    --ok: #15803d; --ok-bg: #f0fdf4; --warn: #b45309; --warn-bg: #fffbeb;
+    --danger: #dc2626; --danger-bg: #fef2f2; --info: #2563eb; --info-bg: #eff6ff;
+    --violet: #7c3aed; --violet-bg: #f5f3ff; --black: #000000;
+    --mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--ground); color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px; line-height: 1.5; padding: 40px 20px 80px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 26px; letter-spacing: -0.02em; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); margin: 44px 0 14px; }
+  .sub { color: var(--muted); margin-top: 6px; max-width: 72ch; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+  .muted { color: var(--muted); } .faint { color: var(--faint); }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 500; }
+  .arrow-down { text-align: center; color: var(--line-strong); font-size: 18px; line-height: 1; padding: 6px 0; }
+
+  /* Topology */
+  .topo { display: grid; grid-template-columns: 1fr 130px 1fr; gap: 0; align-items: stretch; }
+  .zone { border-radius: 10px; padding: 16px 18px; }
+  .zone h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .zone ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .zone li { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; font-size: 13px; }
+  .zone li span { color: var(--faint); font-size: 12px; }
+  .laptop { background: var(--info-bg); border: 1px solid #bfdbfe; }
+  .laptop h3 { color: var(--info); }
+  .vps { background: var(--violet-bg); border: 1px solid #ddd6fe; }
+  .vps h3 { color: var(--violet); }
+  .link-col { display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 0 8px; }
+  .link { text-align: center; font-size: 11px; color: var(--muted); }
+  .link .bar { border-top: 2px dashed var(--line-strong); margin: 4px 0; position: relative; }
+  .link .bar::after { content: "▶"; position: absolute; right: -2px; top: -8px; font-size: 10px; color: var(--line-strong); }
+  .link.out .bar::after { content: ""; }
+  .link.out .bar::before { content: "◀"; position: absolute; left: -2px; top: -8px; font-size: 10px; color: var(--line-strong); }
+
+  /* Pipeline */
+  .pipe { display: flex; flex-direction: column; }
+  .step { display: flex; gap: 14px; align-items: stretch; }
+  .step .num {
+    width: 34px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+  }
+  .step .dot {
+    width: 30px; height: 30px; border-radius: 8px; background: var(--black); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 600;
+  }
+  .step.ghost .dot { background: #fff; color: var(--text); border: 1px solid var(--line-strong); }
+  .step .rail { flex: 1; width: 2px; background: var(--line); margin: 4px 0; }
+  .step:last-of-type .rail { display: none; }
+  .step .body { padding-bottom: 14px; }
+  .step .card { padding: 12px 16px; }
+  .step h4 { font-size: 14px; }
+  .step p { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .tag { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; margin-left: 6px; vertical-align: 1px; }
+  .tag.auto { background: var(--ok-bg); color: var(--ok); }
+  .tag.gate { background: var(--warn-bg); color: var(--warn); }
+  .tag.human { background: var(--info-bg); color: var(--info); }
+
+  /* Loop */
+  .loop { border: 2px dashed var(--line-strong); border-radius: 12px; padding: 18px 18px 14px; position: relative; background: #fff; }
+  .loop-label {
+    position: absolute; top: -11px; left: 18px; background: var(--black); color: #fff;
+    border-radius: 999px; padding: 3px 14px; font-size: 12px; font-weight: 600;
+  }
+  .loop ol { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 8px; }
+  .loop li { display: flex; gap: 12px; align-items: flex-start; background: var(--ground); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .loop li b { font-size: 13px; }
+  .loop li p { font-size: 12.5px; color: var(--muted); }
+  .n { font-family: var(--mono); font-size: 11px; font-weight: 700; background: #fff; border: 1px solid var(--line-strong); border-radius: 6px; padding: 2px 7px; margin-top: 1px; }
+  .back { margin-top: 10px; text-align: center; font-size: 12.5px; color: var(--muted); border-top: 2px dashed var(--line-strong); padding-top: 8px; }
+
+  /* Rails */
+  .rails { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .rail-card { border-radius: 8px; padding: 12px 14px; font-size: 12.5px; border: 1px solid; }
+  .rail-card b { display: flex; align-items: center; gap: 6px; font-size: 12.5px; margin-bottom: 3px; }
+  .r-ok { background: var(--ok-bg); border-color: #bbf7d0; color: var(--ok); }
+  .r-warn { background: var(--warn-bg); border-color: #fde68a; color: var(--warn); }
+  .r-info { background: var(--info-bg); border-color: #bfdbfe; color: var(--info); }
+  .r-vio { background: var(--violet-bg); border-color: #ddd6fe; color: var(--violet); }
+  .r-danger { background: var(--danger-bg); border-color: #fecaca; color: var(--danger); }
+  .prompt {
+    background: #0a0a0a; color: #e5e7eb; border-radius: 10px; padding: 16px 18px;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.7; white-space: pre-wrap;
+  }
+  .prompt .c { color: #6b7280; }
+  .prompt .k { color: #a5b4fc; }
+  @media (max-width: 760px) { .topo { grid-template-columns: 1fr; } .link-col { padding: 10px 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div>
+      <h1>Skema Workflow — SDD Control Plane</h1>
+      <p class="sub">Eksekusi otonom 1-prompt: <b>laptop = pabrik eksekusi</b>, <b>VPS = otak perencanaan</b>. Kode tidak pernah meninggalkan laptop; VPS hanya menyimpan status, spesifikasi, dan bukti.</p>
+    </div>
+    <span class="pill">sddctl v0.1 · auto-approve ON</span>
+  </div>
+
+  <!-- ===================== TOPOLOGY ===================== -->
+  <h2>1 · Topologi Deployment</h2>
+  <div class="topo">
+    <div class="zone laptop">
+      <h3>💻 Laptop — Pabrik Eksekusi</h3>
+      <ul>
+        <li><b>Repository kode</b> <span>(git · tidak pernah di-upload ke control plane)</span></li>
+        <li><b>AI Agent lokal</b> <span>Claude / Codex / Gemini</span></li>
+        <li><b><span class="mono">sdd-agent</span> daemon</b> <span>outbound WSS · AUTO_RUN</span></li>
+        <li><b><span class="mono">sddctl</span> CLI</b> <span>token device-flow (~/.config/sddctl)</span></li>
+        <li><b>Test runner</b> <span>bun test / npm test → evidence PASSED</span></li>
+      </ul>
+    </div>
+    <div class="link-col">
+      <div class="link"><div class="bar"></div>HTTPS · sddctl / MCP</div>
+      <div class="link out"><div class="bar"></div>WSS · daemon (outbound)</div>
+      <div class="link"><div class="bar"></div>SSE · live board</div>
+    </div>
+    <div class="zone vps">
+      <h3>☁️ VPS — Otak Perencanaan</h3>
+      <ul>
+        <li><b>PostgreSQL</b> <span>status = source of truth</span></li>
+        <li><b>API</b> <span>REST · SSE · WSS · MCP (/mcp)</span></li>
+        <li><b>Web UI</b> <span>planning · board · docs · gates</span></li>
+        <li><b>Caddy</b> <span>auto-TLS (SITE_ADDRESS)</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== PLANNING ===================== -->
+  <h2>2 · Fase Perencanaan (sekali per project — lewat Web UI)</h2>
+  <div class="pipe">
+    <div class="step"><div class="num"><div class="dot">01</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Idea</h4><p>Satu paragraf ide + constraints di halaman Start.</p></div></div></div>
+    <div class="step"><div class="num"><div class="dot">02</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Discovery adaptif</h4><p>Batch 5 pertanyaan berdampak tinggi; fakta &amp; asumsi terekam otomatis.</p></div></div></div>
+    <div class="step"><div class="num"><div class="dot">03</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Requirements <span class="tag human">approve manusia</span></h4><p>PRD + acceptance criteria dikunci sebagai baseline v1 (immutable).</p></div></div></div>
+    <div class="step"><div class="num"><div class="dot">04</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Stack + Technical Design <span class="tag human">approve</span></h4><p>AI mengusulkan, manusia mengunci: Frontend / Backend / DB / Deploy.</p></div></div></div>
+    <div class="step"><div class="num"><div class="dot">05</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Decompose (AI) <span class="tag auto">auto-approve ON</span></h4><p>DAG task atomik dibuat — <b>semua langsung READY, tanpa klik Approve</b>, langsung tampil di Board.</p></div></div></div>
+    <div class="step ghost"><div class="num"><div class="dot">06</div></div>
+      <div class="body"><div class="card"><h4>Board siap dieksekusi</h4><p>45 task READY menunggu agen — urutan dijaga guard dependensi saat claim.</p></div></div></div>
+  </div>
+
+  <!-- ===================== EXECUTION LOOP ===================== -->
+  <h2>3 · Inti 1-Prompt: Loop Eksekusi Otonom</h2>
+  <p class="sub" style="margin-bottom:12px">Sekali dijalankan, daemon memakan board dari atas sampai habis. Manusia tidak melakukan apa pun di tengah jalan.</p>
+  <div class="loop">
+    <div class="loop-label">↺ LOOP — berputar otomatis per task</div>
+    <ol>
+      <li><span class="n">1</span><div><b>Satu prompt memulai segalanya</b>
+        <p><span class="mono">sdd-agent connect</span> di laptop (atau 1 prompt ke Claude Code via MCP <span class="mono">https://vps/mcp</span>) — tidak ada perintah lain.</p></div></li>
+      <li><span class="n">2</span><div><b>VPS memilih task berikutnya</b>
+        <p><span class="mono">dispatch-next</span>: task READY prioritas tertinggi yang <b>tidak terblokir DAG</b>. Yang terblokir dilewati, bukan error.</p></div></li>
+      <li><span class="n">3</span><div><b>Claim + lease + heartbeat</b>
+        <p>Klaim atomik; heartbeat otomatis menjaga lease tetap hidup selama pengerjaan.</p></div></li>
+      <li><span class="n">4</span><div><b>Drive AI lokal di repo kamu</b>
+        <p>Daemon menulis file work order → menjalankan <span class="mono">claude / codex / gemini</span> di direktori repo.</p></div></li>
+      <li><span class="n">5</span><div><b>Verifikasi = bukti</b>
+        <p>Perintah verifikasi dari kontrak dijalankan; hasil <b>PASSED/FAILED</b> dilaporkan ke VPS sebagai evidence (C2).</p></div></li>
+      <li><span class="n">6</span><div><b>Submit → policy BATCH_REVIEW</b>
+        <p>Task lolos ke DONE dengan flag <span class="mono">unreviewed</span> — tidak macet menunggu review per task.</p></div></li>
+      <li><span class="n">7</span><div><b>Loop balik ke langkah 2</b>
+        <p>Task dependen yang tadi terblokir kini terbuka. Berlanjut sampai board kosong.</p></div></li>
+    </ol>
+    <div class="back">↺ board kosong → lanjut ke Review Batch manusia (langkah 08)</div>
+  </div>
+
+  <!-- ===================== CLOSE OUT ===================== -->
+  <h2>4 · Penutup: Review Batch &amp; Gerbang Konvergensi</h2>
+  <div class="pipe">
+    <div class="step"><div class="num"><div class="dot">08</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Review batch manusia <span class="tag human">satu sesi review</span></h4><p>Summaries + diff + evidence ditampilkan kolektif; kamu setujui atau buka bug (bug → task perbaikan otomatis).</p></div></div></div>
+    <div class="step"><div class="num"><div class="dot">09</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Convergence audit (C18) <span class="tag gate">gate</span></h4><p>AI merekonsiliasi implementasi vs spesifikasi: blocking findings, blocking bugs, incomplete tasks.</p></div></div></div>
+    <div class="step"><div class="num"><div class="dot">10</div><div class="rail"></div></div>
+      <div class="body"><div class="card"><h4>Feature COMPLETE</h4><p>Gate lolos → fitur dikunci. Temuan audit bisa 1-klik menjadi task perbaikan baru → masuk loop lagi.</p></div></div></div>
+  </div>
+
+  <!-- ===================== 1 PROMPT ===================== -->
+  <h2>5 · "1 Prompt"-nya Sendiri</h2>
+  <div class="prompt"><span class="c"># Satu-satunya hal yang kamu ketik di laptop:</span>
+sdd-agent connect
+
+<span class="c"># — atau, kalau pakai agent MCP-capable (Claude Code):</span>
+<span class="k">MCP:</span> https://sdd.kamu.com/mcp  <span class="c">(Bearer = token sddctl login)</span>
+<span class="k">Prompt:</span> "Kerjakan semua task READY di project VFY340 secara berurutan.
+Untuk setiap task: claim → implement → jalankan verification → report test
+→ submit. Lewati task yang terblokir dependensi. Berhenti saat board kosong
+dan laporkan ringkasan."</div>
+
+  <!-- ===================== SAFETY ===================== -->
+  <h2>6 · Pagarkan Keselamatan (tetap terjaga di mode otonom)</h2>
+  <div class="rails">
+    <div class="rail-card r-ok"><b><span>✔</span> Deps guard di claim</b>Urutan DAG dijaga di titik claim — 409 eksplisit + daftar penghambat, bukan error misterius.</div>
+    <div class="rail-card r-info"><b><span>⏱</span> Lease + heartbeat</b>Run panjang tidak kehilangan klaim; lease kedaluwarsa memunculkan attention event, bukan asumsi.</div>
+    <div class="rail-card r-vio"><b><span>🛡</span> C15 — tanpa self-approve</b>Agen tidak pernah menyetujui pekerjaannya sendiri; policy automation + review batch manusia di ujung.</div>
+    <div class="rail-card r-danger"><b><span>⛔</span> C18 — convergence gate</b>Fitur tidak bisa COMPLETE selama ada blocking finding / bug / task belum DONE.</div>
+    <div class="rail-card r-warn"><b><span>🔒</span> C11/C13 — outbound + tanpa rahasia</b>Daemon konek outbound saja (tanpa port masuk); kredensial &amp; secret tidak pernah masuk prompt/ekspor.</div>
+  </div>
+
+  <p class="faint" style="margin-top:36px; font-size:12px;">
+    SDD Control Plane · skema workflow eksekusi otonom · selaras dengan <span class="mono">docs/SCREENS.md</span>, <span class="mono">docs/12_AGENT_STATE_MACHINE.md</span>, <span class="mono">docs/22_BUG_CONVERGENCE.md</span>
+  </p>
+</div>
+</body>
+</html>

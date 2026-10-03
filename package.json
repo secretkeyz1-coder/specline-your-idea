@@ -1,0 +1,35 @@
+{
+  "name": "agentic-sdd-control-plane",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agentic SDD Control Plane — specification-to-execution control plane for AI coding agents",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"bun run --filter=@sdd/api dev\" \"bun run --filter=@sdd/web dev\"",
+    "dev:api": "bun run --filter '@sdd/api' dev",
+    "dev:web": "bun run --filter '@sdd/web' dev",
+    "dev:cli": "bun run --filter '@sdd/cli' dev",
+    "build": "bun run --filter '*' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun test",
+    "db:generate": "bun run --filter '@sdd/db' generate",
+    "db:migrate": "bun run --filter '@sdd/db' migrate",
+    "db:studio": "bun run --filter '@sdd/db' studio",
+    "db:reset": "bun run --filter '@sdd/db' reset",
+    "infra:up": "docker compose up -d postgres",
+    "infra:down": "docker compose down",
+    "bootstrap": "bun run --filter '@sdd/api' bootstrap"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  }
+}

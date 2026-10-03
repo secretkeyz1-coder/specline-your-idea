@@ -1,0 +1,24 @@
+{
+  "name": "@sdd/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
+  },
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "bun run scripts/migrate.ts",
+    "studio": "drizzle-kit studio",
+    "reset": "bun run scripts/reset.ts"
+  },
+  "dependencies": {
+    "@sdd/contracts": "workspace:*",
+    "@sdd/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
+  }
+}

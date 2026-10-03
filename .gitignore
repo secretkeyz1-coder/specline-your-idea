@@ -1,0 +1,65 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+build/
+.svelte-kit/
+.output/
+*.tsbuildinfo
+
+# environment & secrets
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# machine-local assistant settings and indexes
+.claude/settings.local.json
+.codebase-memory/
+*.pem
+master.key
+
+# local repository link (per docs/10 — must not be committed)
+.sdd/
+
+# databases
+*.db
+*.sqlite
+data/
+
+# logs
+logs/
+*.log
+
+# os/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# test artifacts
+test-results/
+playwright-report/
+coverage/
+
+# drizzle temp
+packages/db/drizzle/meta/_journal.json.bak
+
+# session QA artifacts
+.playwright-mcp/
+.impeccable/
+
+# First public package: preserve local restricted vendors and generated previews
+/Referensi UI/preline/
+/Referensi UI/tabler/
+/Referensi UI/previews/
+/Referensi UI/tailadmin/
+
+# Reversible owner-only documentation archive (tracked paths still require index cleanup)
+/.local-docs/
+# Machine-local Serena settings, caches and memories (local paths preserved)
+/.serena/

@@ -1,0 +1,20 @@
+node_modules
+**/node_modules
+dist
+build
+.svelte-kit
+.git
+.env
+.env.*
+*.log
+docs
+.impeccable
+.playwright-mcp
+apps/web/tests
+test-results
+
+# First public package: preserve local restricted vendors and generated previews
+/Referensi UI/preline/
+/Referensi UI/tabler/
+/Referensi UI/previews/
+/Referensi UI/tailadmin/

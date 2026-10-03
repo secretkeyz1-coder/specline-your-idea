@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agentic SDD — Open Source Frontend Reference</title>
+<meta name="description" content="Open-source frontend reference for idea-to-spec-to-atomic-task AI development planning." />
+<style>
+:root{
+  --bg:#1b2534;
+  --bg-deep:#172130;
+  --panel:#293345;
+  --panel-2:#222c3c;
+  --panel-3:#1e2837;
+  --line:#3a4659;
+  --line-soft:#303c4f;
+  --text:#f4f6f8;
+  --muted:#aab2be;
+  --faint:#738093;
+  --orange:#ef6038;
+  --orange-hover:#ff6c43;
+  --orange-soft:rgba(239,96,56,.12);
+  --green:#18c99a;
+  --green-soft:rgba(24,201,154,.12);
+  --blue:#4d9cff;
+  --blue-soft:rgba(77,156,255,.12);
+  --yellow:#efb80f;
+  --yellow-soft:rgba(239,184,15,.12);
+  --violet:#b26cff;
+  --violet-soft:rgba(178,108,255,.12);
+  --danger:#ff6b6b;
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow:0 18px 55px rgba(4,10,19,.16);
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+::selection{background:rgba(239,96,56,.35)}
+
+/* Shell */
+.app{min-height:100vh}
+.header{height:70px;padding:0 34px;display:grid;grid-template-columns:220px 1fr 220px;align-items:center;border-bottom:1px solid transparent;position:sticky;top:0;z-index:30;background:rgba(27,37,52,.96);backdrop-filter:blur(14px)}
+.brand{font-weight:800;letter-spacing:-.02em}.brand .ai{color:var(--orange)}
+.phasebar{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--faint);font-size:13px;white-space:nowrap}
+.phase{display:flex;align-items:center;gap:8px;transition:.2s}.phase.active{color:var(--text);font-weight:700}.phase.done{color:var(--muted)}
+.phase-dot{width:7px;height:7px;border-radius:999px;background:#596579}.phase.active .phase-dot{background:var(--orange)}.phase.done .phase-dot{background:#8994a4}
+.phase-line{width:80px;height:2px;background:#3e4a5d;border-radius:999px}
+.header-actions{display:flex;justify-content:flex-end;align-items:center;gap:9px}
+.pill{border:1px solid var(--line);background:var(--panel-2);color:var(--muted);border-radius:999px;padding:7px 10px;font-size:12px}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#d7c99b;color:#172130;font-weight:800;border:2px solid rgba(255,255,255,.16)}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);display:grid;place-items:center}
+.icon-btn:hover{color:var(--text);border-color:#56647a}
+
+.view{display:none}.view.active{display:block}
+.page{width:min(1080px,calc(100% - 44px));margin:0 auto;padding:76px 0 80px}
+.page.wide{width:min(1380px,calc(100% - 44px))}
+.page.narrow{width:min(880px,calc(100% - 44px))}
+.eyebrow{font-size:12px;color:var(--orange);font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:42px;line-height:1.08;letter-spacing:-.04em;margin-bottom:14px}
+h2{font-size:28px;letter-spacing:-.03em;margin-bottom:9px}
+h3{font-size:17px;margin-bottom:7px}
+.lead{font-size:19px;line-height:1.55;color:var(--muted);margin-bottom:0}
+.muted{color:var(--muted)}.faint{color:var(--faint)}
+
+.btn{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:12px;padding:11px 16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px}
+.btn:hover{border-color:#59677c;background:#2a3547}.btn.primary{background:var(--orange);border-color:var(--orange);color:white}.btn.primary:hover{background:var(--orange-hover)}.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}.btn.small{padding:8px 11px;min-height:34px;font-size:12px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card.soft{background:var(--panel-2);box-shadow:none}
+.input,textarea,select{width:100%;border:1px solid var(--line);background:var(--panel-3);color:var(--text);border-radius:12px;outline:none}
+.input,select{height:48px;padding:0 15px}textarea{padding:14px 15px;resize:vertical;line-height:1.55}
+.input:focus,textarea:focus,select:focus{border-color:#66758d;box-shadow:0 0 0 3px rgba(239,96,56,.07)}
+textarea::placeholder,input::placeholder{color:#7f8a9b}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:transparent;color:#d8dde5;border-radius:999px;padding:8px 13px;font-size:13px}.chip:hover,.chip.selected{border-color:var(--orange);background:var(--orange-soft);color:#fff}.chip.add{border-style:dashed;color:var(--muted)}
+.label{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:7px;display:block}
+.tag{font-size:11px;border-radius:999px;padding:5px 8px;background:#202b3b;border:1px solid var(--line);color:var(--muted)}
+
+/* Idea */
+.hero{text-align:center;padding-top:92px}.hero-icon{width:58px;height:58px;border-radius:18px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto 26px;font-size:24px;border:1px solid rgba(24,201,154,.09)}
+.hero h1{font-size:48px}.hero .lead{max-width:660px;margin:0 auto}.code-pill{display:inline-flex;padding:3px 9px;border-radius:999px;background:#263655;color:#b9cafa;font-family:var(--mono);font-size:12px}
+.idea-box{width:min(730px,100%);margin:34px auto 0;padding:18px 18px 12px;text-align:left}.idea-box textarea{border:0;background:transparent;padding:0;min-height:112px;font-size:16px;box-shadow:none}.idea-toolbar{display:flex;align-items:center;gap:8px;border-top:1px solid rgba(255,255,255,.02);padding-top:10px}.idea-toolbar .send{margin-left:auto;width:44px;height:44px;border-radius:12px;background:var(--orange);border:0;color:white;font-size:20px}.recent-link{display:inline-flex;gap:8px;align-items:center;margin-top:34px;color:var(--muted);font-size:13px}
+
+/* Discovery */
+.head-row{display:flex;align-items:flex-end;gap:20px;margin-bottom:34px}.head-row .copy{flex:1}.progress-mini{width:170px}.progress-mini .top{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}.progress-track{height:5px;background:#334055;border-radius:999px;overflow:hidden}.progress-track i{display:block;height:100%;background:var(--orange);border-radius:999px}
+.question-list{display:grid}.question{padding:26px 0;border-bottom:1px solid var(--line-soft)}.question:first-child{padding-top:0}.question-head{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;align-items:start}.qnum{width:28px;height:28px;border-radius:50%;background:var(--orange);display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px}.question-title{font-size:16px;font-weight:750;line-height:1.48}.skip{border:0;background:transparent;color:var(--muted);padding:2px}.answer-area{margin:14px 0 0 44px}.choices{display:flex;flex-wrap:wrap;gap:9px}.question textarea{min-height:84px}
+.next-row{display:flex;justify-content:flex-end;margin-top:30px}
+
+/* Tech */
+.tech-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:32px 0}.choice-card{padding:28px;min-height:190px;cursor:pointer;transition:.18s}.choice-card:hover{border-color:#59677c;transform:translateY(-1px)}.choice-card.selected{border:2px solid var(--orange);background:#2a2f3d;box-shadow:0 0 0 3px rgba(239,96,56,.07)}.choice-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;margin-bottom:18px;background:var(--orange-soft);color:var(--orange);font-weight:800}.choice-card:nth-child(2) .choice-icon{background:var(--green-soft);color:var(--green)}.choice-card p{color:var(--muted);font-size:16px;line-height:1.55;margin-bottom:0}
+.section-kicker{color:var(--muted);font-size:16px;margin:18px 0 16px}.tech-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.tech-card{padding:22px}.tech-card-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}.tech-ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-weight:900}.tech-ico.front{background:var(--blue-soft);color:var(--blue)}.tech-ico.back{background:var(--green-soft);color:var(--green)}.tech-ico.db{background:var(--yellow-soft);color:var(--yellow)}.tech-ico.deploy{background:var(--violet-soft);color:var(--violet)}.tech-card b{display:block;font-size:17px}.tech-card span{color:var(--muted);font-size:13px}.tech-footer{display:flex;justify-content:flex-end;margin-top:26px}
+
+/* Plan canvas */
+.plan-shell{width:min(1500px,calc(100% - 30px));margin:0 auto;padding:22px 0 30px}.plan-top{height:52px;display:flex;align-items:center;gap:10px;padding:0 16px}.breadcrumb{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:9px}.breadcrumb b{color:var(--text)}.plan-actions{margin-left:auto;display:flex;align-items:center;gap:8px}.canvas{height:calc(100vh - 155px);min-height:620px;position:relative;overflow:hidden;border-top:1px solid var(--line-soft);background-color:var(--bg-deep);background-image:radial-gradient(#465369 1px,transparent 1px);background-size:24px 24px}.canvas svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.edge{fill:none;stroke:#a3adbb;stroke-width:2;opacity:.85}.node{position:absolute;width:265px;padding:18px;border:1px solid var(--line);background:#222d3d;border-radius:16px;box-shadow:0 12px 35px rgba(5,11,20,.12)}.node.root{border:2px solid var(--orange);left:7%;top:41%;width:280px}.node.feature.f1{left:40%;top:17%}.node.feature.f2{left:40%;top:42%}.node.feature.f3{left:40%;top:67%}.node.sub.s1{left:73%;top:12%;width:300px}.node.sub.s2{left:73%;top:39%;width:300px}.node.sub.s3{left:73%;top:66%;width:300px}.node-head{display:flex;align-items:flex-start;gap:11px}.node-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 34px;background:var(--orange-soft);color:var(--orange);font-weight:900}.node.feature .node-ico{background:var(--green-soft);color:var(--green)}.node.feature.f2 .node-ico{background:var(--blue-soft);color:var(--blue)}.node.feature.f3 .node-ico{background:#e6e9ee10;color:#c9d1dd}.node b{display:block;font-size:14px;margin-bottom:4px}.node p{font-size:11px;color:var(--muted);line-height:1.45;margin:0}.sub-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800;margin-bottom:10px}.subitem{height:30px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;gap:9px;padding:0 11px;color:#dce1e7;font-size:12px;margin-top:7px}.bullet{width:7px;height:7px;border-radius:50%;background:var(--green)}.s2 .bullet{background:var(--blue)}.s3 .bullet{background:#9aa6b7}.zoom-controls{position:absolute;left:18px;bottom:18px;display:grid;background:#202b3b;border:1px solid var(--line);border-radius:10px;overflow:hidden}.zoom-controls button{width:36px;height:36px;background:transparent;border:0;border-bottom:1px solid var(--line);color:#dce2e9}.zoom-controls button:last-child{border-bottom:0}
+
+/* Documentation */
+.workspace-top{display:flex;align-items:center;gap:20px;margin-bottom:28px}.workspace-top .grow{flex:1}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line-soft);margin-bottom:28px}.tab{border:0;background:transparent;color:var(--muted);padding:13px 14px;border-bottom:2px solid transparent}.tab.active{color:#fff;border-bottom-color:var(--orange);font-weight:700}.doc-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:30px}.doc-nav{display:grid;gap:6px;align-content:start}.doc-link{padding:10px 12px;border-radius:10px;color:var(--muted);border:1px solid transparent}.doc-link.active{background:var(--panel-2);border-color:var(--line);color:#fff}.doc-paper{padding:34px 38px}.doc-paper h2{font-size:26px}.doc-paper h3{font-size:17px;margin-top:30px}.doc-paper p,.doc-paper li{color:#c2c9d2;line-height:1.72}.doc-paper code{font-family:var(--mono);background:#1d2736;border:1px solid var(--line);padding:2px 6px;border-radius:6px;color:#cbd7ff}.callout{border-left:3px solid var(--orange);background:var(--orange-soft);padding:15px 16px;border-radius:0 10px 10px 0;color:#e8d4ce}
+
+/* Tasks */
+.task-summary{display:flex;align-items:center;gap:10px;margin:22px 0}.summary-chip{border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:9px 12px;font-size:12px;color:var(--muted)}.summary-chip b{color:#fff}.task-list{display:grid;gap:10px}.task-row{display:grid;grid-template-columns:115px minmax(0,1fr) 130px 110px 46px;gap:14px;align-items:center;padding:15px 17px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);transition:.16s}.task-row:hover{border-color:#59677c;background:#263244}.task-id{font-family:var(--mono);font-size:12px;color:#91a0b5}.task-name b{display:block;margin-bottom:4px}.task-name span{font-size:12px;color:var(--muted)}.status{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}.status i{width:7px;height:7px;border-radius:50%;background:#738093}.status.ready i{background:var(--blue)}.status.progress i{background:var(--yellow)}.status.review i{background:var(--violet)}.status.done i{background:var(--green)}.hardness{font-size:12px;color:var(--muted)}.hardness b{color:#fff}.arrow-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#202a39;color:#bcc5d1}
+
+/* Work order */
+.workorder{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22px}.wo-card{padding:26px}.wo-title{display:flex;align-items:flex-start;gap:20px}.wo-title .grow{flex:1}.wo-title h1{font-size:30px}.wo-section{margin-top:14px;padding:22px}.wo-section h3{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.checklist{display:grid;gap:9px}.check{display:flex;gap:10px;align-items:flex-start}.checkmark{width:20px;height:20px;border-radius:6px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:12px;flex:0 0 20px}.check div{font-size:13px;line-height:1.45}.scope{display:grid;grid-template-columns:1fr 1fr;gap:12px}.scope-box{padding:14px;border:1px solid var(--line);border-radius:12px;background:#202a39}.scope-box b{font-size:12px;display:block;margin-bottom:9px}.scope-box code{font-family:var(--mono);font-size:11px;color:#c0cbdb;display:block;margin-top:5px}.prompt-box{font-family:var(--mono);font-size:12px;line-height:1.7;background:#172130;border:1px solid var(--line);border-radius:12px;padding:16px;color:#d2d9e3;white-space:pre-wrap}.side-stack{display:grid;gap:14px;align-content:start}.meta-card{padding:19px}.meta-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:12px}.meta-row:last-child{border-bottom:0}.meta-row span{color:var(--muted)}
+
+/* Settings */
+.provider-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.provider{padding:20px}.provider-top{display:flex;align-items:center;gap:12px}.provider-logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#25354b;border:1px solid var(--line);font-weight:900}.provider .grow{flex:1}.provider small{color:var(--muted)}.connected{color:var(--green);font-size:12px}.routing{margin-top:18px}.route-row{display:grid;grid-template-columns:150px 1fr 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}.route-row:last-child{border:0}.route-row b{font-size:13px}.route-row select{height:42px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);opacity:0;pointer-events:none;background:#101825;color:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:10px;transition:.2s;z-index:99}.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:980px){
+  .header{grid-template-columns:1fr auto}.phasebar{display:none}.header-actions .pill{display:none}.page{padding-top:44px}.tech-grid,.tech-choice,.provider-list{grid-template-columns:1fr}.doc-layout,.workorder{grid-template-columns:1fr}.doc-nav{grid-auto-flow:column;overflow:auto}.route-row{grid-template-columns:1fr}.task-row{grid-template-columns:90px minmax(0,1fr) 100px}.task-row .hardness,.task-row .arrow-btn{display:none}.canvas{overflow:auto}.node{transform:scale(.85);transform-origin:top left}}
+@media(max-width:640px){
+  .header{padding:0 16px;height:60px}.header-actions .btn{display:none}.page{width:calc(100% - 28px)}h1{font-size:34px}.hero{padding-top:58px}.hero h1{font-size:40px}.head-row{display:block}.progress-mini{margin-top:20px;width:100%}.question-head{grid-template-columns:30px 1fr}.skip{display:none}.answer-area{margin-left:42px}.tech-choice{grid-template-columns:1fr}.task-row{grid-template-columns:80px minmax(0,1fr)}.task-row .status{display:none}.scope{grid-template-columns:1fr}.plan-shell{width:100%}.canvas{height:700px}.node.root{left:20px;top:60px}.node.feature.f1{left:340px;top:30px}.node.feature.f2{left:340px;top:250px}.node.feature.f3{left:340px;top:470px}.node.sub{display:none}}
+
+/* =========================================================
+   V4 — DISTINCT OPEN-SOURCE UI DIRECTION
+   Inspired by guided planning UX, not by any specific visual.
+   ========================================================= */
+:root{
+  --bg:#111827;
+  --bg-deep:#0d1524;
+  --panel:#172235;
+  --panel-2:#141f30;
+  --panel-3:#0f1a2a;
+  --line:#2a3950;
+  --line-soft:#223147;
+  --text:#f6f8fb;
+  --muted:#9aa8bb;
+  --faint:#68788e;
+  --orange:#7c8cff;
+  --orange-hover:#91a0ff;
+  --orange-soft:rgba(124,140,255,.13);
+  --green:#38d6b0;
+  --green-soft:rgba(56,214,176,.11);
+  --blue:#67b7ff;
+  --blue-soft:rgba(103,183,255,.11);
+  --yellow:#f0c86e;
+  --yellow-soft:rgba(240,200,110,.11);
+  --violet:#bf8cff;
+  --violet-soft:rgba(191,140,255,.11);
+  --radius:16px;
+}
+body{background:linear-gradient(180deg,#101827 0,#111827 55%,#0f1726 100%)}
+.header{height:64px;grid-template-columns:250px 1fr 250px;padding:0 28px;border-bottom:1px solid rgba(255,255,255,.045);background:rgba(16,24,39,.93)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800}
+.brand-mark{width:29px;height:29px;border-radius:9px;background:linear-gradient(135deg,var(--orange),var(--green));display:grid;place-items:center;color:#0c1423;font-size:13px;font-weight:950}
+.brand-copy{display:flex;flex-direction:column;line-height:1.05}.brand-copy small{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-top:4px}
+.phasebar{gap:4px;background:#0f1928;border:1px solid var(--line-soft);padding:4px;border-radius:12px;width:max-content;justify-self:center}
+.phase{gap:7px;padding:7px 11px;border-radius:8px;font-size:12px}.phase.active{background:#1b2940;color:#fff}.phase.done{color:#aebbd0}.phase-dot{width:6px;height:6px}.phase-line{display:none}.phase.active .phase-dot{background:var(--green)}
+.header-actions{gap:6px}.oss-link{height:34px;padding:0 11px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--muted);display:inline-flex;align-items:center;gap:7px;font-size:12px}.oss-link:hover{border-color:var(--line);color:#fff;background:var(--panel-2)}
+.icon-btn{width:34px;height:34px;border-radius:9px}.avatar{display:none}.pill{display:none}
+.page{padding-top:62px}.page.narrow{width:min(920px,calc(100% - 44px))}
+.eyebrow{color:var(--green)}
+.btn.primary{background:var(--orange);border-color:var(--orange)}.btn.primary:hover{background:var(--orange-hover)}
+.chip:hover,.chip.selected{border-color:#5469f4;background:var(--orange-soft)}
+
+/* Start screen: split layout, deliberately not a centered hero clone */
+.start-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(480px,1.2fr);gap:70px;align-items:center;min-height:calc(100vh - 128px);padding:35px 0 70px}
+.start-copy h1{font-size:58px;max-width:560px;margin:12px 0 18px}.start-copy .lead{max-width:560px;font-size:18px}.start-kicker{display:inline-flex;align-items:center;gap:8px;color:#b7c4d7;font-size:12px;font-weight:700}.start-kicker i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px var(--green-soft)}
+.start-steps{display:grid;gap:10px;margin-top:30px;max-width:520px}.start-step{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;color:var(--muted);font-size:13px}.start-step b{width:26px;height:26px;border-radius:8px;background:#18263a;border:1px solid var(--line);display:grid;place-items:center;color:#dce5f3;font-size:11px}
+.composer{padding:0;overflow:hidden;background:linear-gradient(180deg,#182438,#151f31);border-color:#31415b;box-shadow:0 28px 80px rgba(0,0,0,.22)}
+.composer-head{padding:18px 20px 13px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between}.composer-head b{font-size:13px}.local-badge{font-size:10px;color:var(--green);background:var(--green-soft);border:1px solid rgba(56,214,176,.18);padding:5px 8px;border-radius:999px}
+.composer textarea{min-height:210px;border:0;border-radius:0;background:transparent;padding:22px 20px;font-size:17px;line-height:1.6;box-shadow:none}.composer-footer{padding:13px 14px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--line-soft)}.composer-footer .btn.primary{margin-left:auto}.hint-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.hint{font-size:11px;color:var(--faint);border:1px solid var(--line-soft);border-radius:999px;padding:6px 9px}
+
+/* Discovery: one question at a time */
+.discovery-wrap{width:min(900px,calc(100% - 44px));margin:0 auto;padding:60px 0 80px}.discovery-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}.discovery-count{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:9px}.mini-ring{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) 0 40%,#26354b 40% 100%);position:relative}.mini-ring:after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--bg)}.mini-ring b{position:relative;z-index:1;font-size:9px;color:#fff}
+.focus-question{padding:34px;background:linear-gradient(180deg,#172337,#141f31)}.question-meta{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--green);font-weight:800;margin-bottom:14px}.focus-question h1{font-size:32px;line-height:1.25;max-width:760px}.focus-question .lead{font-size:15px}.answer-block{margin-top:26px}.answer-block textarea{min-height:105px}.question-actions{display:flex;gap:8px;margin-top:22px;align-items:center}.question-actions .spacer{flex:1}.understood{margin-top:18px;padding:18px 20px;border:1px dashed #33445d;border-radius:14px;background:rgba(15,26,42,.55)}.understood-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.understood-top b{font-size:12px}.understood-top span{font-size:11px;color:var(--faint)}
+
+/* Tech: segmented choice + compact layer rows */
+.stack-mode{display:inline-flex;padding:4px;background:#0e1827;border:1px solid var(--line);border-radius:12px;margin:28px 0 22px}.stack-mode button{border:0;background:transparent;color:var(--muted);padding:9px 14px;border-radius:8px;font-weight:700}.stack-mode button.selected{background:#1c2a42;color:#fff;box-shadow:inset 0 0 0 1px #354763}.recommend-box{display:flex;gap:18px;align-items:flex-start;padding:18px 20px;margin-bottom:16px;background:var(--green-soft);border:1px solid rgba(56,214,176,.16);border-radius:14px}.recommend-box strong{color:#dffbf4}.recommend-box p{margin:4px 0 0;color:#a9c8c0;font-size:13px;line-height:1.55}.tech-list{display:grid;gap:10px}.tech-line{display:grid;grid-template-columns:190px 1fr auto;align-items:center;gap:18px;padding:15px 16px;border:1px solid var(--line);background:var(--panel-2);border-radius:13px}.tech-line .tech-name{display:flex;align-items:center;gap:11px}.tech-dot{width:31px;height:31px;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:900}.tech-line select{height:42px}.tech-note{font-size:11px;color:var(--faint);white-space:nowrap}
+
+/* Planning: distinct column workspace */
+.plan-top{padding:0 10px 0 4px}.canvas{background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:34px 34px}.plan-board{position:absolute;inset:0;padding:50px 55px;display:grid;grid-template-columns:285px 1fr;gap:80px;align-items:center}.intent-card{border:1px solid #4d5fff;background:linear-gradient(180deg,#192642,#172139);border-radius:18px;padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.18)}.intent-card .intent-label{font-size:10px;color:#aebaff;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.intent-card h2{font-size:24px;margin:9px 0}.intent-card p{color:var(--muted);line-height:1.6;margin:0}.feature-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.feature-stack{display:grid;gap:12px;align-self:stretch}.feature-card{padding:19px;border:1px solid var(--line);background:rgba(23,34,53,.94);border-radius:15px;position:relative}.feature-card:before{content:"";position:absolute;left:-19px;top:31px;width:18px;border-top:1px solid #485a74}.feature-card h3{font-size:15px}.feature-card p{color:var(--muted);font-size:12px;line-height:1.5}.mini-items{display:grid;gap:6px;margin-top:12px}.mini-item{font-size:11px;color:#bdc7d6;background:#111d2e;border:1px solid #293a52;border-radius:8px;padding:8px 9px;display:flex;align-items:center;gap:8px}.mini-item i{width:6px;height:6px;background:var(--green);border-radius:50%}.mini-item:nth-child(2) i{background:var(--blue)}.mini-item:nth-child(3) i{background:var(--violet)}
+
+@media(max-width:980px){.start-grid{grid-template-columns:1fr;gap:36px;min-height:auto;padding-top:40px}.start-copy h1{font-size:46px}.tech-line{grid-template-columns:1fr}.tech-note{white-space:normal}.plan-board{grid-template-columns:1fr;gap:24px;overflow:auto;align-items:start}.feature-columns{grid-template-columns:1fr}.feature-card:before{display:none}}
+@media(max-width:760px){.header{grid-template-columns:1fr auto}.phasebar{display:none}.header-actions .oss-link:first-child{display:none}.start-copy h1{font-size:40px}.start-grid{padding-top:15px}.composer textarea{min-height:170px}.discovery-wrap{padding-top:35px}.focus-question{padding:24px}.focus-question h1{font-size:26px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+  <a class="brand" href="#" data-go="idea">
+    <span class="brand-mark">S</span>
+    <span class="brand-copy">Agentic SDD<small>open source planner</small></span>
+  </a>
+  <div class="phasebar" id="phasebar">
+    <div class="phase active" data-phase="input"><span class="phase-dot"></span>Discover</div>
+    <div class="phase" data-phase="docs"><span class="phase-dot"></span>Define</div>
+    <div class="phase" data-phase="export"><span class="phase-dot"></span>Build</div>
+  </div>
+  <div class="header-actions">
+    <button class="oss-link" data-go="docs">☷ Docs</button>
+    <button class="oss-link" onclick="toast('GitHub repository')">⌘ GitHub</button>
+    <button class="icon-btn" data-go="settings" title="AI settings">⚙</button>
+  </div>
+</header>
+
+<!-- 1 IDEA -->
+<section class="view active" id="view-idea" data-phase="input">
+  <main class="page wide">
+    <div class="start-grid">
+      <div class="start-copy">
+        <div class="start-kicker"><i></i>Mulai dari ide mentah</div>
+        <h1>Jelaskan apa yang ingin kamu bangun.</h1>
+        <p class="lead">AI akan membantu mengubahnya menjadi requirement, keputusan teknis, dan pekerjaan kecil yang bisa langsung diberikan ke coding agent.</p>
+        <div class="start-steps">
+          <div class="start-step"><b>01</b><span>AI bertanya seperlunya untuk menutup bagian ide yang masih ambigu.</span></div>
+          <div class="start-step"><b>02</b><span>Kamu memilih tech stack sendiri atau menerima rekomendasi.</span></div>
+          <div class="start-step"><b>03</b><span>Hasil akhirnya menjadi specification dan atomic agent work orders.</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="card composer">
+          <div class="composer-head"><b>High-level idea</b><span class="local-badge">● provider milikmu</span></div>
+          <textarea id="ideaText" placeholder="Contoh: Saya ingin membuat website open-source untuk mengubah ide project menjadi specification dan task kecil yang bisa dikerjakan AI coding agent..."></textarea>
+          <div class="composer-footer">
+            <button class="btn small">＋ Referensi</button>
+            <button class="btn small">ID Bahasa Indonesia</button>
+            <button class="btn primary" data-go="discovery">Mulai discovery →</button>
+          </div>
+        </div>
+        <div class="hint-row"><span class="hint">Tidak perlu PRD</span><span class="hint">Boleh masih ambigu</span><span class="hint">Bisa mulai dari codebase existing</span></div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- 2 DISCOVERY -->
+<section class="view" id="view-discovery" data-phase="input">
+  <main class="discovery-wrap">
+    <div class="discovery-header">
+      <div><div class="eyebrow">Discovery round 1</div><h2 style="margin:7px 0 0">Lengkapi yang benar-benar penting</h2></div>
+      <div class="discovery-count"><span>Pertanyaan 2 dari 5</span><span class="mini-ring"><b>40</b></span></div>
+    </div>
+    <article class="card focus-question">
+      <div class="question-meta">Problem & user</div>
+      <h1>Siapa yang paling sering mengalami masalah ini, dan bagaimana mereka menyelesaikannya sekarang?</h1>
+      <p class="lead">Tidak perlu formal. Ceritakan situasi nyata supaya AI tidak menebak konteks produkmu.</p>
+      <div class="answer-block"><textarea placeholder="Contoh: developer solo yang biasanya menulis planning di chat AI lalu copy-paste task satu per satu ke Codex..."></textarea></div>
+      <div class="choices" style="margin-top:13px"><button class="chip">Developer solo</button><button class="chip">Small team</button><button class="chip">Software house</button><button class="chip add">＋ Jawaban lain</button></div>
+      <div class="question-actions"><button class="btn ghost">Lewati</button><span class="spacer"></span><button class="btn">← Sebelumnya</button><button class="btn primary" onclick="toast('Jawaban tersimpan')">Simpan & lanjut →</button></div>
+    </article>
+    <div class="understood">
+      <div class="understood-top"><b>Yang sudah dipahami AI</b><span>dapat diedit nanti</span></div>
+      <div class="choices"><span class="tag">Open source</span><span class="tag">AI coding agent</span><span class="tag">Spec-driven workflow</span><span class="tag">Local CLI / MCP</span></div>
+    </div>
+    <div class="next-row"><button class="btn primary" data-go="stack">Requirement sudah cukup · Pilih teknologi →</button></div>
+  </main>
+</section>
+
+<!-- 3 STACK -->
+<section class="view" id="view-stack" data-phase="input">
+  <main class="page narrow">
+    <div class="eyebrow">Technical preferences</div>
+    <h1 style="margin-top:8px">Tentukan batas teknologinya.</h1>
+    <p class="lead">AI boleh merekomendasikan, tetapi keputusan akhir tetap milik user.</p>
+
+    <div class="stack-mode">
+      <button class="selected" data-stack-mode>Gunakan rekomendasi AI</button>
+      <button data-stack-mode>Saya pilih manual</button>
+    </div>
+
+    <div class="recommend-box"><div>✦</div><div><strong>Rekomendasi saat ini cocok untuk aplikasi web TypeScript end-to-end.</strong><p>SvelteKit untuk UI, Bun + Elysia untuk control API, Drizzle untuk schema/data access, PostgreSQL untuk source of truth, dan Docker Compose untuk self-hosting.</p></div></div>
+
+    <div class="tech-list">
+      <div class="tech-line"><div class="tech-name"><span class="tech-dot" style="background:var(--blue-soft);color:var(--blue)">FE</span><div><b>Frontend</b><div class="faint" style="font-size:11px">UI application</div></div></div><select><option>SvelteKit + TypeScript</option><option>React / Next.js</option><option>Vue / Nuxt</option></select><span class="tech-note">recommended</span></div>
+      <div class="tech-line"><div class="tech-name"><span class="tech-dot" style="background:var(--green-soft);color:var(--green)">API</span><div><b>Backend</b><div class="faint" style="font-size:11px">Control plane</div></div></div><select><option>Bun + Elysia</option><option>Bun native</option><option>Node.js</option></select><span class="tech-note">recommended</span></div>
+      <div class="tech-line"><div class="tech-name"><span class="tech-dot" style="background:var(--yellow-soft);color:var(--yellow)">DB</span><div><b>Data</b><div class="faint" style="font-size:11px">ORM + database</div></div></div><select><option>Drizzle + PostgreSQL</option><option>SQLite</option><option>MySQL</option></select><span class="tech-note">source of truth</span></div>
+      <div class="tech-line"><div class="tech-name"><span class="tech-dot" style="background:var(--violet-soft);color:var(--violet)">OPS</span><div><b>Deployment</b><div class="faint" style="font-size:11px">Self-hosting</div></div></div><select><option>Docker Compose</option><option>VPS native</option><option>Cloud platform</option></select><span class="tech-note">changeable</span></div>
+    </div>
+    <div class="tech-footer"><button class="btn primary" data-go="plan">Generate high-level plan →</button></div>
+  </main>
+</section>
+
+<!-- 4 PLAN MAP -->
+<section class="view" id="view-plan" data-phase="docs">
+  <div class="plan-shell">
+    <div class="plan-top">
+      <div class="breadcrumb"><b>Agentic SDD</b><span>/</span><span>My project</span><span>/</span><b>High-level plan</b></div>
+      <div class="plan-actions"><button class="btn small" onclick="toast('Fit view')">Fit</button><button class="btn small" onclick="toast('Planning regenerated')">↻ Regenerate</button><button class="btn primary small" data-go="docs">Buka specification →</button></div>
+    </div>
+    <div class="canvas">
+      <div class="plan-board">
+        <div class="intent-card"><div class="intent-label">Project intent</div><h2>Agentic SDD Planner</h2><p>Planning workspace yang mengubah high-level idea menjadi specification, atomic tasks, dan execution contract untuk AI coding agent.</p><div class="hint-row"><span class="hint">Open source</span><span class="hint">Self-hostable</span></div></div>
+        <div class="feature-columns">
+          <div class="feature-stack"><div class="feature-card"><div class="eyebrow">01 · Discover</div><h3>Idea & clarification</h3><p>Menutup ambiguity sebelum desain teknis dibuat.</p><div class="mini-items"><div class="mini-item"><i></i>High-level idea</div><div class="mini-item"><i></i>Adaptive questions</div><div class="mini-item"><i></i>Readiness gate</div></div></div></div>
+          <div class="feature-stack"><div class="feature-card"><div class="eyebrow">02 · Define</div><h3>Spec & technical design</h3><p>Mengubah hasil discovery menjadi kontrak implementasi.</p><div class="mini-items"><div class="mini-item"><i></i>Requirements</div><div class="mini-item"><i></i>Architecture & data</div><div class="mini-item"><i></i>Atomic task graph</div></div></div></div>
+          <div class="feature-stack"><div class="feature-card"><div class="eyebrow">03 · Build</div><h3>Agent execution</h3><p>Membawa task dari ready sampai verified tanpa kehilangan konteks.</p><div class="mini-items"><div class="mini-item"><i></i>Copy work-order prompt</div><div class="mini-item"><i></i>CLI / MCP status sync</div><div class="mini-item"><i></i>Review & convergence</div></div></div></div>
+        </div>
+      </div>
+      <div class="zoom-controls"><button>＋</button><button>−</button><button>⌗</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 DOCS -->
+<section class="view" id="view-docs" data-phase="docs">
+  <main class="page wide">
+    <div class="workspace-top"><div class="grow"><div class="eyebrow">Planning generated</div><h1 style="font-size:34px;margin-top:8px">Dokumentasi project</h1><p class="muted">Mulai dari ringkas. Detail teknis bisa dibuka saat dibutuhkan.</p></div><button class="btn" onclick="toast('Export Markdown')">Export Markdown</button><button class="btn primary" data-go="tasks">Lihat atomic tasks →</button></div>
+    <div class="tabs"><button class="tab active">Overview</button><button class="tab">Requirements</button><button class="tab">Design</button><button class="tab">Data model</button><button class="tab">API</button><button class="tab">UAT</button></div>
+    <div class="doc-layout">
+      <aside class="doc-nav"><button class="doc-link active">Product overview</button><button class="doc-link">User & problem</button><button class="doc-link">Scope MVP</button><button class="doc-link">Tech stack</button><button class="doc-link">Architecture</button><button class="doc-link">Acceptance</button></aside>
+      <article class="card doc-paper"><span class="eyebrow">Overview</span><h2>Agentic SDD Planner</h2><p>Website yang mengubah high-level idea menjadi planning yang cukup jelas untuk dikerjakan AI coding agent. Sistem menggali kebutuhan lewat pertanyaan adaptif, menyusun specification, memilih atau menerima tech stack, lalu memecah pekerjaan menjadi task atomic.</p><div class="callout"><b>Prinsip utama:</b> user tidak perlu melihat seluruh detail teknis sekaligus. Informasi muncul secara progresif sesuai tahap planning.</div><h3>Outcome utama</h3><ul><li>User dapat memulai hanya dari satu paragraf ide.</li><li>AI berhenti bertanya ketika requirement readiness sudah cukup.</li><li>Setiap atomic task mempunyai objective, scope, acceptance criteria, verification, dan prompt agent.</li><li>Status eksekusi dapat disinkronkan melalui CLI atau MCP.</li></ul><h3>Tech stack</h3><p><code>SvelteKit + TypeScript</code> untuk frontend, <code>Bun + Elysia</code> untuk backend, <code>Drizzle ORM</code> dan <code>PostgreSQL</code> untuk data.</p></article>
+    </div>
+  </main>
+</section>
+
+<!-- 6 TASKS -->
+<section class="view" id="view-tasks" data-phase="docs">
+  <main class="page wide">
+    <div class="workspace-top"><div class="grow"><div class="eyebrow">Execution plan</div><h1 style="font-size:34px;margin-top:8px">Atomic tasks</h1><p class="muted">Task kecil, punya dependency jelas, dan bisa dieksekusi agent satu per satu.</p></div><button class="btn" onclick="toast('Task graph')">Lihat graph</button><button class="btn primary" onclick="toast('Copy semua READY prompt')">Copy ready prompts</button></div>
+    <div class="task-summary"><span class="summary-chip"><b>24</b> Ready</span><span class="summary-chip"><b>3</b> In progress</span><span class="summary-chip"><b>2</b> Need review</span><span class="summary-chip"><b>61</b> Done</span></div>
+    <div class="task-list">
+      <div class="task-row"><div class="task-id">TASK-081</div><div class="task-name"><b>Create task lease schema</b><span>Agent execution · Database</span></div><span class="status done"><i></i>Done</span><span class="hardness">Hardness <b>2/5</b></span><button class="arrow-btn" data-go="task">→</button></div>
+      <div class="task-row"><div class="task-id">TASK-082</div><div class="task-name"><b>Implement task claim service</b><span>Agent execution · Backend</span></div><span class="status done"><i></i>Done</span><span class="hardness">Hardness <b>3/5</b></span><button class="arrow-btn" data-go="task">→</button></div>
+      <div class="task-row"><div class="task-id">TASK-083</div><div class="task-name"><b>Add concurrent claim test</b><span>Agent execution · Testing</span></div><span class="status progress"><i></i>In progress</span><span class="hardness">Hardness <b>3/5</b></span><button class="arrow-btn" data-go="task">→</button></div>
+      <div class="task-row"><div class="task-id">TASK-084</div><div class="task-name"><b>Implement atomic task claim endpoint</b><span>Agent execution · API</span></div><span class="status review"><i></i>Need review</span><span class="hardness">Hardness <b>2/5</b></span><button class="arrow-btn" data-go="task">→</button></div>
+      <div class="task-row"><div class="task-id">TASK-085</div><div class="task-name"><b>Add lease heartbeat endpoint</b><span>Agent execution · API</span></div><span class="status ready"><i></i>Ready</span><span class="hardness">Hardness <b>2/5</b></span><button class="arrow-btn" data-go="task">→</button></div>
+      <div class="task-row"><div class="task-id">TASK-086</div><div class="task-name"><b>Display active run status</b><span>Agent execution · Frontend</span></div><span class="status ready"><i></i>Ready</span><span class="hardness">Hardness <b>1/5</b></span><button class="arrow-btn" data-go="task">→</button></div>
+    </div>
+  </main>
+</section>
+
+<!-- 7 TASK WORK ORDER -->
+<section class="view" id="view-task" data-phase="export">
+  <main class="page wide">
+    <div class="workorder">
+      <div>
+        <div class="card wo-card wo-title"><div class="grow"><div class="eyebrow">TASK-084 · Work order</div><h1 style="margin-top:8px">Implement atomic task claim endpoint</h1><p class="muted">Satu task, satu outcome yang bounded, satu hasil yang bisa diverifikasi.</p></div><button class="btn" onclick="copyPrompt()">Copy prompt</button></div>
+        <section class="card wo-section"><h3>Objective</h3><p class="muted" style="margin-bottom:0;line-height:1.7">Buat endpoint claim yang atomic sehingga dua agent tidak bisa mengambil task READY yang sama secara bersamaan.</p></section>
+        <section class="card wo-section"><h3>Acceptance criteria</h3><div class="checklist"><div class="check"><span class="checkmark">✓</span><div>READY task dapat di-claim oleh executor yang authorized.</div></div><div class="check"><span class="checkmark">✓</span><div>Claim kedua secara concurrent mendapat conflict dan tidak membuat run duplikat.</div></div><div class="check"><span class="checkmark">✓</span><div>Owner, run ID, dan lease expiry tersimpan.</div></div><div class="check"><span class="checkmark">✓</span><div>Test membuktikan hanya satu claim yang menang.</div></div></div></section>
+        <section class="card wo-section"><h3>Scope</h3><div class="scope"><div class="scope-box"><b>Allowed</b><code>apps/api/src/modules/task/**</code><code>apps/api/tests/task/**</code></div><div class="scope-box"><b>Do not touch</b><code>apps/web/**</code><code>apps/api/src/modules/auth/**</code></div></div></section>
+        <section class="card wo-section"><div style="display:flex;align-items:center;margin-bottom:12px"><h3 style="margin:0">Agent prompt</h3><button class="btn small" style="margin-left:auto" onclick="copyPrompt()">Copy</button></div><div class="prompt-box" id="promptText">You are executing TASK-084.
+
+Run:
+sddctl task context TASK-084 --format agent
+sddctl task claim TASK-084
+sddctl task start TASK-084
+
+Follow the task contract exactly.
+Run the required verification.
+When complete, submit for review.
+Do not self-approve. If scope is ambiguous, block the task instead of guessing.</div></section>
+      </div>
+      <aside class="side-stack">
+        <div class="card meta-card"><h3 style="font-size:14px">Status</h3><div class="meta-row"><span>Workflow</span><b style="color:var(--violet)">Need review</b></div><div class="meta-row"><span>Hardness</span><b>2 / 5</b></div><div class="meta-row"><span>Dependencies</span><b>2 / 2 done</b></div><div class="meta-row"><span>Parallel safe</span><b>Yes</b></div></div>
+        <div class="card meta-card"><h3 style="font-size:14px">Latest run</h3><div class="meta-row"><span>Agent</span><b>Codex Local</b></div><div class="meta-row"><span>Duration</span><b>4m 28s</b></div><div class="meta-row"><span>Tests</span><b style="color:var(--green)">14 passed</b></div><div class="meta-row"><span>Files</span><b>5 changed</b></div></div>
+        <button class="btn primary" onclick="toast('Task approved')">Approve</button><button class="btn" onclick="toast('Changes requested')">Request changes</button><button class="btn" data-go="tasks">← Kembali ke tasks</button>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- 8 SETTINGS -->
+<section class="view" id="view-settings" data-phase="input">
+  <main class="page wide">
+    <div class="workspace-top"><div class="grow"><h1 style="font-size:34px">AI settings</h1><p class="muted">Hubungkan provider milikmu, buat AI Profile, lalu pilih profile untuk setiap role planning.</p></div><button class="btn" data-go="idea">← Kembali</button><button class="btn primary" onclick="toast('Form tambah provider')">+ Add provider</button></div>
+    <div class="provider-list">
+      <div class="card provider"><div class="provider-top"><div class="provider-logo">O</div><div class="grow"><b>OpenAI</b><br><small>API key pribadi</small></div><span class="connected">● Connected</span></div></div>
+      <div class="card provider"><div class="provider-top"><div class="provider-logo">A</div><div class="grow"><b>Anthropic</b><br><small>API key pribadi</small></div><span class="connected">● Connected</span></div></div>
+      <div class="card provider"><div class="provider-top"><div class="provider-logo">OR</div><div class="grow"><b>OpenAI-compatible</b><br><small>Custom base URL + API credential</small></div><span class="connected">● Connected</span></div></div>
+      <div class="card provider"><div class="provider-top"><div class="provider-logo">HTTP</div><div class="grow"><b>Custom HTTP</b><br><small>Custom endpoint + request mapping</small></div><span class="faint" style="font-size:12px">Not configured</span></div></div>
+    </div>
+    <div class="card routing wo-card"><h2 style="font-size:22px">AI Profiles</h2><p class="muted">Model dan perilaku disimpan terpisah dari koneksi provider.</p><div class="route-row"><b>Fast planner</b><span class="faint">OpenAI connection · model-fast</span><button class="btn small">Edit</button></div><div class="route-row"><b>Deep reasoning</b><span class="faint">Anthropic connection · model-reasoning</span><button class="btn small">Edit</button></div><div class="route-row"><b>Reviewer</b><span class="faint">OpenAI-compatible · review-model</span><button class="btn small">Edit</button></div></div>
+    <div class="card routing wo-card"><h2 style="font-size:22px">Role routing</h2><p class="muted">Project boleh override default workspace.</p><div class="route-row"><b>Discovery</b><select><option>Fast planner</option><option>Deep reasoning</option></select><span></span></div><div class="route-row"><b>Specification</b><select><option>Deep reasoning</option><option>Fast planner</option></select><span></span></div><div class="route-row"><b>Architecture</b><select><option>Deep reasoning</option></select><span></span></div><div class="route-row"><b>Task decomposition</b><select><option>Deep reasoning</option></select><span></span></div><div class="route-row"><b>Review</b><select><option>Reviewer</option></select><span></span></div></div>
+  </main>
+</section>
+
+<div class="toast" id="toast">Copied</div>
+<script>
+const phaseByView={idea:'input',discovery:'input',stack:'input',plan:'docs',docs:'docs',tasks:'docs',task:'export',settings:'input'};
+function navigate(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target=document.getElementById('view-'+name); if(!target)return;
+  target.classList.add('active');
+  const current=phaseByView[name]||'input';
+  const order=['input','docs','export']; const idx=order.indexOf(current);
+  document.querySelectorAll('.phase').forEach(p=>{const i=order.indexOf(p.dataset.phase);p.classList.toggle('active',i===idx);p.classList.toggle('done',i<idx)});
+  window.scrollTo({top:0,behavior:'instant'});
+}
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();navigate(el.dataset.go)}));
+document.querySelectorAll('[data-tech-choice]').forEach(el=>el.addEventListener('click',()=>{document.querySelectorAll('[data-tech-choice]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}));
+document.querySelectorAll('[data-stack-mode]').forEach(el=>el.addEventListener('click',()=>{document.querySelectorAll('[data-stack-mode]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}));
+document.querySelectorAll('.chip').forEach(el=>el.addEventListener('click',()=>{if(!el.classList.contains('add'))el.classList.toggle('selected')}));
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__t);window.__t=setTimeout(()=>t.classList.remove('show'),1800)}
+async function copyPrompt(){const text=document.getElementById('promptText').innerText;try{await navigator.clipboard.writeText(text);toast('Agent prompt copied')}catch(e){toast('Copy tidak tersedia di context ini')}}
+</script>
+<script type="application/json" id="design-contract">
+{
+  "purpose":"Visual reference only; implement as reusable Svelte components, not copied one-to-one",
+  "framework":"SvelteKit + Svelte 5 + TypeScript",
+  "runtime_backend":"Bun + Elysia",
+  "database":"PostgreSQL + Drizzle ORM",
+  "design_direction":"distinct open-source guided workflow with progressive disclosure",
+  "primary_flow":["idea","discovery","stack","plan-map","documentation","atomic-tasks","task-work-order"],
+  "principles":[
+    "No permanent sidebar during planning",
+    "Open-source product: no monetization-tier or upsell CTA in core UI",
+    "Reference screenshots inform UX only; do not copy their brand, exact layout, typography, spacing or component composition",
+    "Ask only a few adaptive questions per round",
+    "Keep technical detail hidden until documentation/task stage",
+    "Mind-map is a high-level plan visualization, not the database source of truth",
+    "Task work order exposes objective, acceptance, scope, verification and agent prompt",
+    "Website database remains authoritative for task state"
+  ]
+}
+</script>
+</body>
+</html>

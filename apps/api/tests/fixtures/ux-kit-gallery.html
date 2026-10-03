@@ -1,0 +1,72 @@
+<style>
+.x-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--ds-gap)}
+@media (min-width: 1100px){.x-layout{grid-template-columns:minmax(0,1fr) 20rem;align-items:start}}
+.x-side{position:sticky;top:5rem;display:flex;flex-direction:column;gap:var(--ds-gap)}
+</style>
+<div class="ds-page-header"><div><nav class="ds-breadcrumb" aria-label="Breadcrumb"><a href="#">Projects</a><span>/</span><span aria-current="page">Warehouse Cikarang Phase 2</span></nav><h1>Warehouse Cikarang Phase 2</h1><p class="ds-page-desc">Plan, check and freeze the schedule baseline before the S-curve is computed.</p></div>
+<div class="ds-page-actions"><button class="ds-btn" type="button"><i data-icon="history"></i>History</button><details class="ds-dropdown"><summary class="ds-btn ds-btn-ghost ds-btn-icon" aria-label="More actions"><i data-icon="ellipsis"></i></summary><div class="ds-menu"><button class="ds-menu-item" type="button"><i data-icon="download"></i>Export CSV</button><div class="ds-menu-sep"></div><button class="ds-menu-item ds-menu-item-danger" type="button"><i data-icon="trash-2"></i>Delete draft</button></div></details><button class="ds-btn ds-btn-primary" type="button"><i data-icon="lock"></i>Freeze baseline</button></div></div>
+<ol class="ds-steps"><li class="ds-step-done">Build WBS</li><li class="ds-step-done">Weights 100%</li><li aria-current="step">Director review</li><li>Freeze</li></ol>
+<div class="ds-alert ds-alert-warn"><i data-icon="triangle-alert"></i><div><strong>Root weight is 98.50%.</strong> Add 1.50% to a leaf task of 4. MEP before the baseline can be frozen.</div></div>
+<div class="ds-grid-4">
+<div class="ds-card ds-stat"><div class="ds-stat-head"><span class="ds-stat-label">Actual progress</span><i data-icon="trending-up"></i></div><span class="ds-stat-value">41.85%</span><span class="ds-trend ds-trend-down"><i data-icon="arrow-down-right"></i>−4.35 pts vs plan</span><svg class="ds-spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="0,28 20,24 40,19 60,15 80,11 100,8"/></svg></div>
+<div class="ds-card ds-stat"><div class="ds-stat-head"><span class="ds-stat-label">Root weight</span><i data-icon="scale"></i></div><span class="ds-stat-value">98.50%</span><span class="ds-badge ds-badge-warn ds-badge-dot">Short 1.50%</span></div>
+<div class="ds-card ds-stat"><div class="ds-stat-head"><span class="ds-stat-label">Leaves without vendor</span><i data-icon="users"></i></div><span class="ds-stat-value">3</span><span class="ds-stat-meta">of 12 leaf tasks</span></div>
+<div class="ds-card ds-stat"><div class="ds-stat-head"><span class="ds-stat-label">Schedule</span><i data-icon="calendar"></i></div><span class="ds-stat-value">39 weeks</span><span class="ds-stat-meta">02 Nov 2026 – 30 Jul 2027</span></div>
+</div>
+<div class="ds-toolbar">
+<div class="ds-field ds-field-grow"><label class="ds-label" for="g-q">Search</label><div class="ds-input-icon"><i data-icon="search"></i><input class="ds-input" id="g-q" placeholder="Task code or name"></div></div>
+<div class="ds-field"><label class="ds-label" for="g-s">Status</label><select class="ds-select" id="g-s"><option>All statuses</option></select></div>
+<div class="ds-field"><label class="ds-label" for="g-v">Vendor</label><select class="ds-select" id="g-v"><option>All vendors</option></select></div>
+<div class="ds-toolbar-end"><button class="ds-btn" type="button"><i data-icon="filter"></i>Filter</button></div>
+</div>
+<div class="ds-card ds-card-flush">
+<div class="ds-table-toolbar">
+<div class="ds-field ds-field-grow"><label class="ds-label" for="g-t">Find task</label><div class="ds-input-icon"><i data-icon="search"></i><input class="ds-input" id="g-t" placeholder="e.g. 2.1 foundation"></div></div>
+<div class="ds-field"><label class="ds-label" for="g-tv">Vendor</label><select class="ds-select" id="g-tv"><option>All vendors</option></select></div>
+<div class="ds-chips"><span class="ds-chip ds-chip-active">Level 2<i data-icon="x"></i></span><button class="ds-chip" type="button"><i data-icon="plus"></i>Filter</button></div>
+<div class="ds-toolbar-end"><button class="ds-btn ds-btn-ghost ds-btn-sm" type="button"><i data-icon="chevrons-up-down"></i>Expand all</button><button class="ds-btn ds-btn-sm" type="button"><i data-icon="plus"></i>Add child task</button></div>
+</div>
+<div class="ds-bulkbar"><strong>2 selected</strong><button class="ds-btn ds-btn-sm" type="button">Assign vendor</button><button class="ds-btn ds-btn-sm ds-btn-ghost" type="button">Clear</button></div>
+<table class="ds-table ds-table-cards"><thead><tr><th class="ds-check"><input type="checkbox" aria-label="Select all"></th><th>Project</th><th>Period</th><th>Baseline</th><th>Progress</th><th>Deviation</th><th>Manager</th><th class="ds-actions"><span class="ds-small">Actions</span></th></tr></thead><tbody>
+<tr class="is-selected"><td class="ds-check"><input type="checkbox" aria-label="Select row 1" checked></td><td data-label="Project"><div class="ds-media-title">Construction of the Cikarang Logistics Warehouse Phase Two with the Access Road and Drainage Works</div><div class="ds-media-sub">PRJ-2026-014 · 42 WBS tasks</div></td><td data-label="Period" class="ds-nowrap">02 Mar 2026 – 18 Dec 2026</td><td data-label="Baseline"><span class="ds-badge ds-badge-info">Active v2.0</span></td><td data-label="Progress" class="ds-num">61.25%<div class="ds-progress"><span style="width:61%"></span></div><span class="ds-media-sub">Plan 68.40%</span></td><td data-label="Deviation"><span class="ds-badge ds-badge-danger ds-badge-dot">−7.15% · Late</span></td><td data-label="Manager"><div class="ds-media"><span class="ds-avatar ds-avatar-sm">RM</span><div class="ds-media-body"><span class="ds-media-title">Rina Maharani</span><span class="ds-media-sub">Project Manager</span></div></div></td><td class="ds-actions"><details class="ds-dropdown"><summary class="ds-btn ds-btn-ghost ds-btn-icon ds-btn-sm" aria-label="Row actions"><i data-icon="ellipsis"></i></summary><div class="ds-menu"><button class="ds-menu-item" type="button">Open WBS</button></div></details></td></tr>
+<tr><td class="ds-check"><input type="checkbox" aria-label="Select row 2"></td><td data-label="Project"><div class="ds-media-title">Renovation of the Surabaya Branch Office</div><div class="ds-media-sub">PRJ-2026-021 · 28 WBS tasks</div></td><td data-label="Period" class="ds-nowrap">01 Jun 2026 – 27 Nov 2026</td><td data-label="Baseline"><span class="ds-badge ds-badge-info">Active v1.0</span></td><td data-label="Progress" class="ds-num">54.30%<div class="ds-progress"><span style="width:54%"></span></div><span class="ds-media-sub">Plan 52.10%</span></td><td data-label="Deviation"><span class="ds-badge ds-badge-success ds-badge-dot">+2.20% · Ahead</span></td><td data-label="Manager"><div class="ds-media"><span class="ds-avatar ds-avatar-sm">DP</span><div class="ds-media-body"><span class="ds-media-title">Dimas Prasetyo</span><span class="ds-media-sub">Project Manager</span></div></div></td><td class="ds-actions"><details class="ds-dropdown"><summary class="ds-btn ds-btn-ghost ds-btn-icon ds-btn-sm" aria-label="Row actions"><i data-icon="ellipsis"></i></summary><div class="ds-menu"><button class="ds-menu-item" type="button">Open WBS</button></div></details></td></tr>
+</tbody></table>
+<div class="ds-pagination"><span>Showing 1–2 of 12 projects</span><div class="ds-row"><button class="ds-btn ds-btn-sm" type="button"><i data-icon="chevron-left"></i>Previous</button><button class="ds-btn ds-btn-sm" type="button">Next<i data-icon="chevron-right"></i></button></div></div>
+</div>
+<div class="x-layout">
+<div class="ds-stack">
+<div class="ds-card">
+<ul class="ds-tree">
+<li><div class="ds-tree-row"><button class="ds-tree-toggle" type="button" aria-label="Collapse"><i data-icon="chevron-down"></i></button><span class="ds-tree-label"><strong>1 · Preparation works</strong></span><span class="ds-tree-meta">6.00% <i data-icon="lock"></i></span></div>
+<ul><li><div class="ds-tree-row is-selected"><span class="ds-tree-leaf"></span><span class="ds-tree-label">1.1 · Mobilisation and site office</span><span class="ds-tree-meta">2.50% · Internal team</span></div></li>
+<li><div class="ds-tree-row"><span class="ds-tree-leaf"></span><span class="ds-tree-label">1.2 · Land clearing and levelling</span><span class="ds-tree-meta">3.50% · CV Karya Tanah Mandiri</span></div></li></ul></li>
+</ul>
+</div>
+<section class="ds-section"><div class="ds-section-head"><h2>Revision board</h2><div class="ds-tabs" role="tablist"><button class="ds-tab" role="tab" aria-selected="true" type="button">Open</button><button class="ds-tab" role="tab" aria-selected="false" type="button">Closed</button></div></div>
+<div class="ds-board">
+<div class="ds-board-col"><div class="ds-board-col-head">Submitted <span class="ds-badge">2</span></div><div class="ds-board-card"><strong>Add loading dock canopy</strong><span class="ds-small ds-muted">Hendra Wijaya · 22 Sep</span></div><div class="ds-board-card"><strong>Move zone B foundation</strong><span class="ds-badge ds-badge-warn ds-badge-dot">Waiting for Director</span></div></div>
+<div class="ds-board-col"><div class="ds-board-col-head">In review <span class="ds-badge">1</span></div><div class="ds-board-card"><strong>Revise MEP weights</strong><span class="ds-small ds-muted">Rina Maharani · 23 Sep</span></div></div>
+<div class="ds-board-col"><div class="ds-board-col-head">Frozen <span class="ds-badge">4</span></div><div class="ds-board-card"><strong>Baseline v2.0</strong><span class="ds-small ds-muted">17 Aug 2026</span></div></div>
+</div></section>
+<div class="ds-card"><div class="ds-card-header"><div><h3 class="ds-card-title">Weekly S-curve</h3><p class="ds-card-desc">Plan and verified actual, cumulative.</p></div></div>
+<svg viewBox="0 0 600 220" role="img" aria-label="S-curve"><polyline points="0,210 100,190 200,150 300,100 400,60 500,30 600,10" style="fill:none;stroke:var(--ds-fg-muted)"/><polyline points="0,210 100,195 200,160 300,120" style="fill:none;stroke:var(--ds-accent)"/></svg></div>
+</div>
+<aside class="x-side">
+<div class="ds-card"><div class="ds-card-header"><h3 class="ds-card-title">Baseline status</h3></div>
+<dl class="ds-dl ds-dl-rows"><div><dt>Active version</dt><dd>v2.0</dd></div><div><dt>Frozen by</dt><dd>Hendra Wijaya</dd></div><div><dt>Period</dt><dd>06 Jul 2026 – 30 Apr 2027</dd></div></dl></div>
+<div class="ds-card"><div class="ds-card-header"><h3 class="ds-card-title">Activity</h3></div>
+<ol class="ds-timeline"><li><span class="ds-timeline-dot ds-timeline-dot-warn"><i data-icon="pencil"></i></span><div><div class="ds-timeline-title">Draft v3.0 created</div><div class="ds-timeline-meta">Hendra Wijaya · 22 Sep 2026</div></div></li><li><span class="ds-timeline-dot ds-timeline-dot-success"><i data-icon="lock"></i></span><div><div class="ds-timeline-title">Baseline v2.0 frozen</div><div class="ds-timeline-meta">Hendra Wijaya · 17 Aug 2026</div></div></li></ol></div>
+<div class="ds-card"><div class="ds-card-header"><h3 class="ds-card-title">Team</h3></div><div class="ds-avatar-group"><span class="ds-avatar ds-avatar-sm">HW</span><span class="ds-avatar ds-avatar-sm">RM</span><span class="ds-avatar ds-avatar-sm">DP</span></div></div>
+</aside>
+</div>
+<div class="ds-master-detail">
+<div class="ds-master-list"><a class="ds-master-item" href="#" aria-current="true"><strong>PRG-0142 Slab casting zone C</strong><span class="ds-small ds-muted">15 m3 · Pending approval</span></a><a class="ds-master-item" href="#"><strong>PRG-0138 Steel columns grid D</strong><span class="ds-small ds-muted">6 units · Rejected</span></a></div>
+<div class="ds-card"><div class="ds-card-header"><h3 class="ds-card-title">PRG-0142 Slab casting zone C</h3><span class="ds-badge ds-badge-warn ds-badge-dot">Pending Approval</span></div><dl class="ds-dl"><div><dt>Volume</dt><dd>15 m3 (95 of 100 m3)</dd></div><div><dt>Submitted by</dt><dd>Agus Setiawan</dd></div></dl></div>
+</div>
+<div class="ds-empty"><i data-icon="inbox"></i><h3>No rejected reports</h3><p>Rejected reports appear here with the reviewer's note.</p><button class="ds-btn" type="button">View all reports</button></div>
+<section class="ds-overlays"><h2>Overlays and states</h2>
+<figure class="ds-frame"><figcaption>Dialog: Add child task</figcaption><div class="ds-stage"><div class="ds-modal"><div class="ds-modal-header"><h2>Add child task</h2><p class="ds-modal-desc">It is added under 2.1 Foundation works.</p></div>
+<div class="ds-form"><div class="ds-field"><label class="ds-label" for="g-n">Task name</label><input class="ds-input" id="g-n" value="Pile cap and tie beam"></div><div class="ds-form-row"><div class="ds-field"><label class="ds-label" for="g-a">Start</label><input class="ds-input" id="g-a" value="30 Nov 2026"></div><div class="ds-field"><label class="ds-label" for="g-b">End</label><input class="ds-input" id="g-b" value="15 Jan 2027"></div></div></div>
+<div class="ds-modal-footer"><button class="ds-btn" type="button">Cancel</button><button class="ds-btn ds-btn-primary" type="button">Add child task</button></div></div></div></figure>
+<figure class="ds-frame"><figcaption>Sheet: Review report</figcaption><div class="ds-stage ds-stage-sheet"><div class="ds-sheet"><div class="ds-modal-header"><h2>Review PRG-0142</h2></div><dl class="ds-dl ds-dl-rows"><div><dt>Volume</dt><dd>15 m3</dd></div></dl><div class="ds-modal-footer"><button class="ds-btn" type="button">Reject</button><button class="ds-btn ds-btn-primary" type="button">Approve</button></div></div></div></figure>
+</section>

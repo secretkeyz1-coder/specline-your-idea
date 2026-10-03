@@ -1,0 +1,25 @@
+# Reverse proxy (T206): path routing so the browser origin serves BOTH apps.
+# /api, /mcp, /openapi, /healthz, /readyz  -> api:4000 (SSE + WebSocket aware)
+# everything else                          -> web:5173
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy api:4000
+	}
+	handle /mcp {
+		reverse_proxy api:4000
+	}
+	handle /openapi/* {
+		reverse_proxy api:4000
+	}
+	handle /healthz {
+		reverse_proxy api:4000
+	}
+	handle /readyz {
+		reverse_proxy api:4000
+	}
+	handle {
+		reverse_proxy web:5173
+	}
+}

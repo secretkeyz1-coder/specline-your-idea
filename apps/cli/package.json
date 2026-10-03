@@ -1,0 +1,26 @@
+{
+  "name": "@sdd/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "sddctl — deterministic local bridge to the Agentic SDD Control Plane",
+  "bin": {
+    "sddctl": "./src/index.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./lib/config": "./src/lib/config.ts",
+    "./lib/api": "./src/lib/api.ts",
+    "./lib/evidence": "./src/lib/evidence.ts",
+    "./lib/ui": "./src/lib/ui.ts"
+  },
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "commander": "^14.0.3",
+    "@sdd/contracts": "workspace:*"
+  }
+}

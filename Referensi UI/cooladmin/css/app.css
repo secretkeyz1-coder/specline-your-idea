@@ -1,0 +1,8401 @@
+@charset "UTF-8";
+/* ============================================================================
+   CoolAdmin — 2026 modern overlay
+   Loaded AFTER css/theme.css. Establishes a fresh design system on top of the
+   legacy stylesheet. Scoped via `body.app` so other pages remain
+   unaffected until they opt in.
+   ============================================================================ */
+body.app {
+  /* Surfaces */
+  --m-bg: #f4f6fa;
+  --m-surface: #ffffff;
+  --m-surface-2: #f8fafc;
+  --m-sidebar: #1c2333;
+  --m-sidebar-soft: #28304a;
+  /* Borders + dividers */
+  --m-border: #e4e7ec;
+  --m-border-soft: #eef0f3;
+  --m-divider: #f1f3f5;
+  /* Text */
+  --m-text: #1f2937;
+  --m-text-muted: #475569;
+  --m-text-faint: #94a3b8;
+  --m-text-on-dark: #f1f5f9;
+  /* Brand + status — anchored to the original CoolAdmin blue (#4272d7)
+     with an additional set of accent hues borrowed from the original
+     gradient tiles for the KPI strip. */
+  --m-accent: #4272d7;
+  --m-accent-rgb: 66, 114, 215;
+  --m-accent-hover: #355cb8;
+  --m-accent-soft: #eaf0fc;
+  /* Inspired-by-original KPI accents */
+  --m-c1: #4272d7; /* blue (revenue) */
+  --m-c1-soft: #eaf0fc;
+  --m-c2: #11998e; /* teal (orders) */
+  --m-c2-soft: #e0f3f1;
+  --m-c3: #f97316; /* warm orange (users) */
+  --m-c3-soft: #fff1e6;
+  --m-c4: #ec4899; /* magenta-pink (conversion) */
+  --m-c4-soft: #fce7f3;
+  --m-success: #10b981;
+  --m-success-soft: #ecfdf5;
+  --m-warning: #f59e0b;
+  --m-warning-soft: #fffbeb;
+  --m-danger: #ef4444;
+  --m-danger-soft: #fef2f2;
+  /* Effects */
+  --m-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --m-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --m-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --m-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+  --m-radius-sm: 6px;
+  --m-radius: 10px;
+  --m-radius-lg: 14px;
+  --m-font: "Inter", "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Layout overrides */
+  background: var(--m-bg);
+  color: var(--m-text);
+  font-family: var(--m-font);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scope every rule below under .app so legacy pages aren't affected. */
+body.app,
+body.app .page-wrapper,
+body.app .page-container {
+  background: var(--m-bg);
+}
+
+/* ----------------------------------------------------------------------------
+   Sidebar — calmer dark navy, refined typography, accessible contrast
+   The legacy markup uses `navbar__list` (BEM, double underscore) and
+   `navbar__sub-list`. We re-skin the sidebar entirely; legacy `color`/
+   `font-size`/`padding` rules from theme.css are explicitly overridden.
+   ---------------------------------------------------------------------------- */
+body.app .menu-sidebar {
+  background: var(--m-sidebar);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  width: 260px;
+}
+
+body.app .page-container {
+  padding-left: 260px;
+}
+
+/* Logo strip — make the logo readable on the dark navy. */
+body.app .menu-sidebar .logo {
+  background: var(--m-sidebar);
+  border-right: 0; /* override legacy `1px solid #e5e5e5` */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+  padding: 0 20px;
+  height: 64px;
+}
+
+body.app .menu-sidebar .logo a {
+  display: inline-flex;
+  align-items: center;
+}
+
+body.app .menu-sidebar .logo img {
+  height: 26px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+/* Scroll container — match topbar height and remove the legacy 75px math. */
+body.app .menu-sidebar__content {
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+body.app .menu-sidebar__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.app .menu-sidebar__content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+/* Nav structure — overrides legacy theme.css rules ('navbar-sidebar' wraps,
+   '.navbar__list' is the top-level list, '.navbar__sub-list' is nested). */
+body.app .navbar-sidebar {
+  padding: 12px 12px 24px;
+}
+
+body.app .navbar-sidebar .navbar__list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+body.app .navbar-sidebar .navbar__list li {
+  list-style: none;
+}
+
+/* Top-level link — readable contrast (~7:1) at 14px regular. */
+body.app .navbar-sidebar .navbar__list > li > a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  margin: 2px 0;
+  color: #cbd5e1; /* slate-300 — ~7.4:1 on #0f172a */
+  border-radius: var(--m-radius-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: background-color 120ms ease, color 120ms ease;
+  position: relative;
+}
+
+body.app .navbar-sidebar .navbar__list > li > a > i {
+  width: 18px;
+  font-size: 15px;
+  color: #94a3b8; /* slate-400 */
+  text-align: center;
+  margin-right: 0; /* override legacy 19px */
+  flex-shrink: 0;
+  transition: color 120ms ease;
+}
+
+body.app .navbar-sidebar .navbar__list > li > a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+body.app .navbar-sidebar .navbar__list > li > a:hover > i {
+  color: #e2e8f0;
+}
+
+/* Active item — brand-blue pill background + accent rail on the left. */
+body.app .navbar-sidebar .navbar__list > li.active > a {
+  background: rgba(var(--m-accent-rgb), 0.2);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+body.app .navbar-sidebar .navbar__list > li.active > a > i {
+  color: #93b4ec; /* light wash of the brand blue */
+}
+
+body.app .navbar-sidebar .navbar__list > li.active > a::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--m-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Disclosure caret on `has-sub` items. */
+body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow {
+  padding-right: 32px;
+}
+
+body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow::after {
+  content: "\f078"; /* fa-chevron-down */
+  font-family: "Font Awesome 7 Free";
+  font-weight: 900;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 200ms ease, color 120ms ease;
+}
+
+body.app .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow.open::after {
+  transform: translateY(-50%) rotate(180deg);
+  color: #cbd5e1;
+}
+
+/* Sub-list — properly nested with an indent guide rail, no awkward 34px
+   indent. Text is large enough to read but visually subordinated. */
+body.app .navbar-sidebar .navbar__list .navbar__sub-list {
+  list-style: none;
+  padding: 4px 0 6px 30px; /* override legacy 34px */
+  margin: 0 0 4px;
+  position: relative;
+}
+
+body.app .navbar-sidebar .navbar__list .navbar__sub-list::before {
+  /* Vertical guide rail, aligned to where the parent icon sits. */
+  content: "";
+  position: absolute;
+  left: 23px;
+  top: 4px;
+  bottom: 6px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.app .navbar-sidebar .navbar__list .navbar__sub-list li {
+  list-style: none;
+  margin: 0;
+}
+
+body.app .navbar-sidebar .navbar__list .navbar__sub-list li a {
+  display: block;
+  padding: 6px 12px; /* override legacy 11.5px 0 */
+  font-size: 13px;
+  color: #94a3b8; /* slate-400 */
+  border-radius: var(--m-radius-sm);
+  text-decoration: none;
+  margin: 1px 0;
+  transition: background-color 120ms ease, color 120ms ease;
+  position: relative;
+}
+
+body.app .navbar-sidebar .navbar__list .navbar__sub-list li a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+body.app .navbar-sidebar .navbar__list .navbar__sub-list li.active > a,
+body.app .navbar-sidebar .navbar__list .navbar__sub-list li > a.active {
+  background: rgba(var(--m-accent-rgb), 0.14);
+  color: #ffffff;
+}
+
+/* Optional section heading between groups (markup opt-in). */
+body.app .navbar-sidebar .nav-group-label {
+  padding: 14px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ----------------------------------------------------------------------------
+   Topbar — flat white, slim, single border
+   ---------------------------------------------------------------------------- */
+body.app .header-desktop {
+  background: var(--m-surface);
+  box-shadow: none;
+  border-bottom: 1px solid var(--m-border);
+}
+
+body.app .header-desktop .section__content {
+  padding: 0 24px;
+}
+
+body.app .header-wrap {
+  height: 64px;
+  align-items: center;
+}
+
+body.app .form-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 380px;
+  max-width: 100%;
+  height: 38px;
+  border-radius: var(--m-radius-sm);
+  background: var(--m-surface-2);
+  border: 1px solid var(--m-border);
+  overflow: hidden;
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+body.app .form-header:focus-within {
+  background: var(--m-surface);
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+body.app .form-header__icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--m-text-faint);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+body.app .form-header .au-input {
+  background: transparent;
+  border: 0;
+  width: 100%;
+  height: 36px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text);
+  padding: 0 56px 0 36px;
+  outline: none;
+}
+
+body.app .form-header .au-input::placeholder {
+  color: var(--m-text-faint);
+}
+
+body.app .form-header__hint {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 4px;
+  color: var(--m-text-faint);
+  font-family: var(--m-font);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+body.app .form-header:focus-within .form-header__hint {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+/* Hide the legacy submit button if it still exists in older markup. */
+body.app .form-header .au-btn--submit {
+  display: none;
+}
+
+body.app .header-button {
+  gap: 4px;
+}
+
+body.app .noti__item {
+  margin-right: 4px;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--m-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease;
+}
+
+body.app .noti__item:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .noti__item i {
+  font-size: 16px;
+  color: var(--m-text-muted);
+}
+
+body.app .noti__item:hover i {
+  color: var(--m-text);
+}
+
+body.app .noti__item .quantity {
+  background: var(--m-danger);
+  width: 8px;
+  height: 8px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 50%;
+  text-indent: -9999px;
+  overflow: hidden;
+  top: 8px;
+  right: 8px;
+}
+
+body.app .account-item {
+  margin-left: 8px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  transition: background 120ms ease;
+}
+
+body.app .account-item:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .account-item .image {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+body.app .account-item > .content > a {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+}
+
+body.app .account-item > .content > a:after {
+  color: var(--m-text-faint);
+  font-size: 10px;
+}
+
+body.app .account-dropdown,
+body.app .mess-dropdown,
+body.app .email-dropdown,
+body.app .notifi-dropdown {
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-lg);
+}
+
+/* ----------------------------------------------------------------------------
+   Page header (title + actions row)
+   ---------------------------------------------------------------------------- */
+body.app .page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+body.app .page-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--m-text);
+  margin: 0;
+}
+
+body.app .page-header .subtitle {
+  color: var(--m-text-muted);
+  font-size: 13.5px;
+  margin: 4px 0 0;
+}
+
+body.app .page-header__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ----------------------------------------------------------------------------
+   Modern button
+   ---------------------------------------------------------------------------- */
+body.app .m-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--m-radius-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+body.app .m-btn:active {
+  transform: translateY(0.5px);
+}
+
+body.app .m-btn--primary {
+  background: var(--m-accent);
+  color: #fff;
+  border-color: var(--m-accent);
+}
+
+body.app .m-btn--primary:hover {
+  background: #4338ca;
+  border-color: #4338ca;
+  color: #fff;
+}
+
+body.app .m-btn--ghost {
+  background: var(--m-surface);
+  color: var(--m-text);
+  border-color: var(--m-border);
+}
+
+body.app .m-btn--ghost:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .m-btn i {
+  font-size: 12px;
+}
+
+/* ----------------------------------------------------------------------------
+   Modern card
+   ---------------------------------------------------------------------------- */
+body.app .m-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  padding: 20px;
+}
+
+body.app .m-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -4px 0 16px;
+  gap: 12px;
+}
+
+body.app .m-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+body.app .m-card__subtitle {
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+  margin: 2px 0 0;
+}
+
+/* ----------------------------------------------------------------------------
+   Stat card (KPI tile)
+   ---------------------------------------------------------------------------- */
+body.app .stat-card {
+  position: relative;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  padding: 18px 20px 0;
+  overflow: hidden;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+body.app .stat-card:hover {
+  border-color: #d6dae0;
+  box-shadow: var(--m-shadow-sm);
+}
+
+body.app .stat-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+body.app .stat-card__label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--m-text-muted);
+  margin: 0;
+}
+
+body.app .stat-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--m-radius-sm);
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+/* Per-tile palette echoing the original gradient tile family
+   (c1 blue / c2 teal / c3 orange / c4 pink). */
+body.app .stat-card__icon--c1 {
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+}
+
+body.app .stat-card__icon--c2 {
+  background: var(--m-c2-soft);
+  color: var(--m-c2);
+}
+
+body.app .stat-card__icon--c3 {
+  background: var(--m-c3-soft);
+  color: var(--m-c3);
+}
+
+body.app .stat-card__icon--c4 {
+  background: var(--m-c4-soft);
+  color: var(--m-c4);
+}
+
+/* Backwards-compat aliases (kept in case other pages opt in later). */
+body.app .stat-card__icon--success {
+  background: var(--m-success-soft);
+  color: var(--m-success);
+}
+
+body.app .stat-card__icon--warning {
+  background: var(--m-warning-soft);
+  color: var(--m-warning);
+}
+
+body.app .stat-card__icon--danger {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+body.app .stat-card__value {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--m-text);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app .stat-card__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+
+body.app .stat-card__delta--up {
+  color: var(--m-success);
+}
+
+body.app .stat-card__delta--down {
+  color: var(--m-danger);
+}
+
+body.app .stat-card__delta i {
+  font-size: 10px;
+}
+
+body.app .stat-card__delta-period {
+  color: var(--m-text-faint);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+body.app .stat-card__sparkline {
+  margin: 10px -20px 0;
+  height: 56px;
+  position: relative;
+}
+
+body.app .stat-card__sparkline canvas {
+  display: block;
+  width: 100% !important;
+  height: 56px !important;
+}
+
+/* ----------------------------------------------------------------------------
+   Section title (used above content blocks where the inner card has its own header)
+   ---------------------------------------------------------------------------- */
+body.app .section-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 6px;
+}
+
+/* ----------------------------------------------------------------------------
+   Date range chip
+   ---------------------------------------------------------------------------- */
+body.app .date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius-sm);
+  font-size: 13px;
+  color: var(--m-text);
+  cursor: pointer;
+}
+
+body.app .date-chip i {
+  color: var(--m-text-faint);
+  font-size: 12px;
+}
+
+body.app .date-chip:hover {
+  background: var(--m-surface-2);
+}
+
+/* ----------------------------------------------------------------------------
+   Activity feed
+   ---------------------------------------------------------------------------- */
+body.app .activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--m-divider);
+  align-items: flex-start;
+}
+
+body.app .activity-item:last-child {
+  border-bottom: 0;
+}
+
+body.app .activity-item__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+  background: var(--m-accent-soft);
+}
+
+body.app .activity-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .activity-item__text {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--m-text);
+  line-height: 1.45;
+}
+
+body.app .activity-item__text b {
+  font-weight: 600;
+}
+
+body.app .activity-item__time {
+  font-size: 12px;
+  color: var(--m-text-faint);
+  margin-top: 2px;
+  display: block;
+}
+
+/* ----------------------------------------------------------------------------
+   Tasks list
+   ---------------------------------------------------------------------------- */
+body.app .task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .task-item:last-child {
+  border-bottom: 0;
+}
+
+body.app .task-item input[type=checkbox] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--m-border);
+  border-radius: 5px;
+  background: var(--m-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+body.app .task-item input[type=checkbox]:hover {
+  border-color: var(--m-accent);
+}
+
+body.app .task-item input[type=checkbox]:checked {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+}
+
+body.app .task-item input[type=checkbox]:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: center;
+}
+
+body.app .task-item__title {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--m-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+body.app .task-item input[type=checkbox]:checked + .task-item__title {
+  color: var(--m-text-faint);
+  text-decoration: line-through;
+}
+
+body.app .task-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--m-text-faint);
+  flex-shrink: 0;
+}
+
+body.app .priority-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+body.app .priority-chip--high {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+body.app .priority-chip--medium {
+  background: var(--m-warning-soft);
+  color: var(--m-warning);
+}
+
+body.app .priority-chip--low {
+  background: var(--m-success-soft);
+  color: var(--m-success);
+}
+
+/* ----------------------------------------------------------------------------
+   Top products table
+   ---------------------------------------------------------------------------- */
+body.app .m-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+body.app .m-table th,
+body.app .m-table td {
+  padding: 10px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .m-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+body.app .m-table th {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-bottom: 8px;
+}
+
+body.app .m-table td.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--m-text);
+}
+
+body.app .m-table .row-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--m-text);
+  font-weight: 500;
+}
+
+body.app .m-table .row-product__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+body.app .trend-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+body.app .trend-mini--up {
+  color: var(--m-success);
+}
+
+body.app .trend-mini--down {
+  color: var(--m-danger);
+}
+
+/* ----------------------------------------------------------------------------
+   Footer (legacy CoolAdmin footer needs softening)
+   ---------------------------------------------------------------------------- */
+body.app .copyright p {
+  color: var(--m-text-faint);
+  font-size: 12.5px;
+  margin: 0;
+}
+
+body.app .copyright a {
+  color: var(--m-text-muted);
+}
+
+/* ----------------------------------------------------------------------------
+   Layout container — replace the rigid 116px top padding inherited from
+   `theme.css`'s `.main-content` rule with breathing room appropriate for the
+   slim 64px topbar.
+   ---------------------------------------------------------------------------- */
+body.app .main-content {
+  padding-top: 64px;
+}
+
+body.app .main-content > .section__content--p30 {
+  padding: 28px 28px 60px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 991px) {
+  body.app .main-content {
+    padding-top: 0;
+  }
+  body.app .main-content > .section__content--p30 {
+    padding: 16px 16px 40px;
+  }
+}
+/* Spacing utility used by the new dashboard layout */
+body.app .stack-y > * + * {
+  margin-top: 16px;
+}
+
+body.app .stack-y-lg > * + * {
+  margin-top: 24px;
+}
+
+body.app .row-tight {
+  row-gap: 16px;
+}
+
+/* ============================================================================
+   Hamburger button + responsive sidebar (collapse on desktop, drawer on mobile)
+   ============================================================================ */
+/* Hamburger button — sits at the left of the topbar. */
+body.app .sidebar-toggle {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--m-radius-sm);
+  margin-right: 12px;
+  color: var(--m-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease;
+  flex-shrink: 0;
+}
+
+body.app .sidebar-toggle:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .sidebar-toggle__bars {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: background-color 120ms ease;
+}
+
+body.app .sidebar-toggle__bars::before,
+body.app .sidebar-toggle__bars::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 200ms ease;
+}
+
+body.app .sidebar-toggle__bars::before {
+  top: -6px;
+}
+
+body.app .sidebar-toggle__bars::after {
+  top: 6px;
+}
+
+/* Close (X) button inside the sidebar header — only visible on mobile. */
+body.app .sidebar-close {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  margin-left: auto;
+  cursor: pointer;
+  border-radius: var(--m-radius-sm);
+  align-items: center;
+  justify-content: center;
+}
+
+body.app .sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+/* Always-on responsive sidebar (overrides legacy `d-none d-lg-block` on
+   `.menu-sidebar`). On mobile the sidebar lives off-screen and slides in
+   when `body.sidebar-open` is set. */
+body.app .menu-sidebar {
+  display: block !important;
+  transition: transform 220ms ease, width 200ms ease;
+}
+
+/* ----------------------------------------------------------------------------
+   Logo: square brand mark + wordmark
+   ---------------------------------------------------------------------------- */
+body.app .menu-sidebar .logo .logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff;
+  overflow: hidden;
+  line-height: 1;
+}
+
+body.app .menu-sidebar .logo .logo-mark {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #4272d7 0%, #3155b3 100%);
+  box-shadow: 0 4px 12px rgba(66, 114, 215, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+body.app .menu-sidebar .logo .logo-text {
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* DESKTOP: collapsed-to-icons rail */
+@media (min-width: 992px) {
+  body.app.sidebar-collapsed .menu-sidebar {
+    width: 72px;
+  }
+  body.app.sidebar-collapsed .page-container {
+    padding-left: 72px;
+  }
+  /* Logo strip — hide wordmark, centre the square mark. */
+  body.app.sidebar-collapsed .menu-sidebar .logo {
+    padding: 0;
+    justify-content: center;
+  }
+  body.app.sidebar-collapsed .menu-sidebar .logo .logo-link {
+    gap: 0;
+    max-width: 36px;
+  }
+  body.app.sidebar-collapsed .menu-sidebar .logo .logo-text {
+    display: none;
+  }
+  /* Container: drop the legacy 35px navbar-sidebar padding. Items below
+     handle their own horizontal breathing so each button can span the
+     full rail width with consistent gutters. */
+  body.app.sidebar-collapsed .navbar-sidebar {
+    padding: 14px 0 24px !important;
+  }
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list {
+    padding: 0;
+    margin: 0;
+  }
+  /* List item: holds the horizontal padding so the inner <a> spans 100%. */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li {
+    position: relative;
+    margin: 0;
+    padding: 0 12px;
+  }
+  /* Each link is a full-width 44px-tall icon button. `!important` defeats
+     legacy `.navbar-sidebar .navbar__list li a { display: block; padding: 15px 0; ... }`
+     which otherwise leaks through and breaks centering. */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    width: 100% !important;
+    height: 44px !important;
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    font-size: 0 !important; /* collapses the raw text node */
+    line-height: 1 !important;
+    color: #b8c4d6;
+    background: transparent;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: background-color 120ms ease, color 120ms ease;
+    box-sizing: border-box;
+  }
+  /* Force every icon to a fixed 24px square with text-align: center so the
+     glyph sits in the same x-position regardless of FA glyph width
+     (`fa-bell` is narrower than `fa-tachometer-alt`, etc.). */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li > a > i {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    text-align: center;
+    color: inherit;
+    flex-shrink: 0;
+    transition: color 120ms ease;
+  }
+  /* Disclosure caret has no purpose in collapsed mode. */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.has-sub > a.js-arrow::after {
+    display: none !important;
+  }
+  /* Hover — subtle; clearly distinct from the filled active state. */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:hover,
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible {
+    background: rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+  }
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:hover > i,
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li:not(.active) > a:focus-visible > i {
+    color: #ffffff;
+  }
+  /* Active — flat brand-blue pill, no glow shadow. */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a {
+    background: var(--m-accent);
+    color: #ffffff;
+    box-shadow: none;
+  }
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a > i {
+    color: #ffffff;
+  }
+  /* Suppress the legacy off-screen `::before` rail used in expanded mode. */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list > li.active > a::before {
+    display: none;
+  }
+  /* Sub-lists fully hidden in collapsed mode (no fly-out menus yet). */
+  body.app.sidebar-collapsed .navbar-sidebar .navbar__list .navbar__sub-list {
+    display: none !important;
+  }
+}
+/* ----------------------------------------------------------------------------
+   Floating sidebar tooltip (rendered into <body> by JS so it escapes the
+   sidebar's `overflow-y: auto` scroll container).
+   ---------------------------------------------------------------------------- */
+.sidebar-tooltip {
+  position: fixed;
+  background: #0f172a;
+  color: #fff;
+  font-family: var(--m-font, system-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.sidebar-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* MOBILE / TABLET: drawer behavior */
+@media (max-width: 991.98px) {
+  body.app .menu-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 86vw;
+    z-index: 1050;
+    transform: translateX(-100%);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  }
+  body.app.sidebar-open .menu-sidebar {
+    transform: translateX(0);
+  }
+  body.app .page-container {
+    padding-left: 0;
+  }
+  /* Surface the close button on mobile only */
+  body.app .sidebar-close {
+    display: inline-flex;
+  }
+  /* The legacy mobile header is redundant now that the unified sidebar
+     handles mobile via the topbar hamburger. Hide it; the desktop header
+     stays visible at all breakpoints in app theme. */
+  body.app .header-mobile,
+  body.app .navbar-mobile {
+    display: none !important;
+  }
+  body.app .header-desktop {
+    display: block !important;
+  }
+  body.app .main-content {
+    padding-top: 64px;
+  }
+}
+/* Backdrop (created by JS when the mobile sidebar opens). */
+body.app .sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+body.app.sidebar-open .sidebar-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.app.sidebar-open {
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Topbar dropdown panels — modernised content layout
+   The legacy CSS triangle arrows (`:after`) are flattened. The 305px-min
+   panels are slimmed and re-typed with crisp Inter sizing.
+   ============================================================================ */
+body.app .mess-dropdown,
+body.app .email-dropdown,
+body.app .notifi-dropdown,
+body.app .account-dropdown {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-lg);
+  min-width: 320px;
+  width: 320px;
+  margin-top: 8px;
+  transform-origin: right top;
+  overflow: hidden;
+}
+
+/* Drop the legacy CSS triangle arrows entirely. */
+body.app .mess-dropdown:before,
+body.app .email-dropdown:before,
+body.app .notifi-dropdown:before,
+body.app .account-dropdown:after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Header strip inside each dropdown */
+body.app .mess__title,
+body.app .email__title,
+body.app .notifi__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--m-divider);
+  background: var(--m-surface);
+}
+
+body.app .mess__title p,
+body.app .email__title p,
+body.app .notifi__title p {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--m-text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Item rows */
+body.app .mess__item,
+body.app .email__item,
+body.app .notifi__item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--m-divider);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+body.app .mess__item:hover,
+body.app .email__item:hover,
+body.app .notifi__item:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .mess__item:last-of-type,
+body.app .email__item:last-of-type,
+body.app .notifi__item:last-of-type {
+  border-bottom: 0;
+}
+
+/* Avatars / icon discs */
+body.app .mess__item .image,
+body.app .email__item .image,
+body.app .notifi__item .img-cir {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--m-surface-2);
+}
+
+body.app .mess__item .image img,
+body.app .email__item .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Notification "color disc" rebrand — flat soft-tinted circles, not the
+   legacy bg-c1..bg-c4 saturated swatches. */
+body.app .notifi__item .bg-c1 {
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+}
+
+body.app .notifi__item .bg-c2 {
+  background: var(--m-c2-soft);
+  color: var(--m-c2);
+}
+
+body.app .notifi__item .bg-c3 {
+  background: var(--m-c3-soft);
+  color: var(--m-c3);
+}
+
+body.app .notifi__item .bg-c4 {
+  background: var(--m-c4-soft);
+  color: var(--m-c4);
+}
+
+body.app .notifi__item .img-cir i {
+  font-size: 13px;
+}
+
+/* Item content */
+body.app .mess__item .content,
+body.app .email__item .content,
+body.app .notifi__item .content {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .mess__item .content h6 {
+  margin: 0 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--m-text);
+}
+
+body.app .mess__item .content p,
+body.app .email__item .content p,
+body.app .notifi__item .content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--m-text-muted);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.app .mess__item .content .time,
+body.app .email__item .content span,
+body.app .notifi__item .content .date {
+  display: block;
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  margin-top: 3px;
+}
+
+/* Footer "View all" links */
+body.app .mess__footer,
+body.app .email__footer,
+body.app .notifi__footer {
+  border-top: 1px solid var(--m-divider);
+  background: var(--m-surface-2);
+}
+
+body.app .mess__footer a,
+body.app .email__footer a,
+body.app .notifi__footer a {
+  display: block;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--m-accent);
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+
+body.app .mess__footer a:hover,
+body.app .email__footer a:hover,
+body.app .notifi__footer a:hover {
+  background: var(--m-accent-soft);
+}
+
+/* Account dropdown — info row + items */
+body.app .account-dropdown .info {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-top: 0;
+  border-bottom: 1px solid var(--m-divider);
+  background: linear-gradient(180deg, var(--m-accent-soft) 0%, var(--m-surface) 100%);
+}
+
+body.app .account-dropdown .info .image {
+  float: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+body.app .account-dropdown .info .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.app .account-dropdown .info .content {
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .account-dropdown .info .content .name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+body.app .account-dropdown .info .content .name a {
+  color: var(--m-text);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+body.app .account-dropdown .info .content .email {
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+  line-height: 1.3;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.app .account-dropdown__body {
+  padding: 4px 0;
+}
+
+body.app .account-dropdown__item a,
+body.app .account-dropdown__footer a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  color: var(--m-text);
+  text-decoration: none;
+  transition: background 120ms ease;
+}
+
+body.app .account-dropdown__item a:hover,
+body.app .account-dropdown__footer a:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .account-dropdown__item a i,
+body.app .account-dropdown__footer a i {
+  width: 16px;
+  margin-right: 0; /* override legacy 20px */
+  font-size: 13px;
+  color: var(--m-text-faint);
+}
+
+body.app .account-dropdown__footer {
+  border-top: 1px solid var(--m-divider);
+  background: var(--m-surface-2);
+}
+
+body.app .account-dropdown__footer a {
+  color: var(--m-danger);
+}
+
+body.app .account-dropdown__footer a i {
+  color: var(--m-danger);
+}
+
+/* Open animation — replace the legacy `transform: scale(0)` snap with a
+   subtle fade + slight slide. */
+body.app .mess-dropdown,
+body.app .email-dropdown,
+body.app .notifi-dropdown,
+body.app .account-dropdown {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+}
+
+body.app .js-item-menu.show-dropdown > .mess-dropdown,
+body.app .js-item-menu.show-dropdown > .email-dropdown,
+body.app .js-item-menu.show-dropdown > .notifi-dropdown,
+body.app .js-item-menu.show-dropdown > .account-dropdown {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ============================================================================
+   Topbar layout — gap fixes (sidebar-flush header, tighter icon row, circle avatar)
+   ============================================================================ */
+/* Pin the fixed header to the actual sidebar edge (overriding the legacy
+   `left: 300px` baked for the old 260→300 sidebar). */
+body.app .header-desktop {
+  left: 260px;
+  right: 0;
+  background: var(--m-surface);
+  height: 64px;
+  transition: left 200ms ease;
+  box-shadow: none;
+  border-bottom: 1px solid var(--m-border);
+}
+
+@media (min-width: 992px) {
+  body.app.sidebar-collapsed .header-desktop {
+    left: 72px;
+  }
+}
+@media (max-width: 991.98px) {
+  body.app .header-desktop {
+    left: 0;
+  }
+}
+/* Header content fills its container — no gutter on the left so it sits flush
+   against the sidebar. The legacy `.section__content--p30` injects 30px on
+   the inside, plus Bootstrap's `.container-fluid` adds 12px. Reset both;
+   `.header-wrap` itself owns the inner padding. */
+body.app .header-desktop .section__content,
+body.app .header-desktop .section__content--p30 {
+  padding: 0;
+  overflow: visible;
+}
+
+body.app .header-desktop .container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+}
+
+body.app .header-wrap {
+  padding: 0 16px 0 12px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Push the action cluster all the way to the right; let the search expand. */
+body.app .header-wrap .form-header {
+  margin-left: 4px;
+  flex: 0 1 380px;
+}
+
+body.app .header-button {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+body.app .noti-wrap {
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Override the legacy `.noti-wrap .noti__item:last-child { margin-right: 50px }`
+   that creates the awkward gap before the avatar. */
+body.app .noti-wrap .noti__item,
+body.app .noti-wrap .noti__item:last-child {
+  margin-right: 0;
+}
+
+/* Avatar must be a perfect circle — clamp BOTH dimensions and constrain
+   the inner <img> with object-fit. Legacy rules use `flex: 0 0 45px` and a
+   bare `width: 100%` on the img, which produces an oval. */
+body.app .account-item {
+  margin-left: 6px;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body.app .account-item .image {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  float: none;
+  aspect-ratio: 1/1;
+}
+
+body.app .account-item .image > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+/* Notification bell sizing tightened up — 36px icons inside 38px hover box. */
+body.app .noti__item {
+  margin: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--m-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.app .noti__item i {
+  font-size: 16px;
+  color: var(--m-text-muted);
+  vertical-align: middle;
+}
+
+body.app .noti__item:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .noti__item:hover i {
+  color: var(--m-text);
+}
+
+/* Compact spacing on tablets-narrow */
+@media (max-width: 768px) {
+  body.app .header-wrap {
+    gap: 6px;
+    padding: 0 10px 0 4px;
+  }
+  body.app .form-header {
+    flex: 1 1 auto;
+  }
+  body.app .form-header__hint {
+    display: none;
+  }
+}
+/* ============================================================================
+   Auth pages — modern centered card on a soft tinted background
+   Used by login.html, register.html, forget-pass.html.
+   ============================================================================ */
+body.app.auth-page {
+  background: linear-gradient(135deg, #eaf0fc 0%, #f4f6fa 50%, #fce7f3 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+body.app.auth-page .page-wrapper,
+body.app.auth-page .page-content--bge5,
+body.app.auth-page .container {
+  background: transparent;
+  height: auto;
+  width: 100%;
+  max-width: 440px;
+  padding: 0;
+  margin: 0 auto;
+}
+
+body.app.auth-page .login-wrap {
+  max-width: 440px;
+  margin: 0 auto;
+  padding-top: 0;
+}
+
+body.app.auth-page .login-content {
+  background: #ffffff;
+  border: 1px solid var(--m-border);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  padding: 32px;
+}
+
+body.app.auth-page .auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  text-decoration: none;
+}
+
+body.app.auth-page .auth-brand .logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #4272d7 0%, #3155b3 100%);
+  box-shadow: 0 4px 12px rgba(66, 114, 215, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+body.app.auth-page .auth-brand .logo-text {
+  font-family: var(--m-font);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--m-text);
+}
+
+body.app.auth-page .auth-title {
+  font-family: var(--m-font);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--m-text);
+  text-align: center;
+  margin: 18px 0 4px;
+}
+
+body.app.auth-page .auth-subtitle {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text-muted);
+  text-align: center;
+  margin: 0 0 24px;
+}
+
+body.app.auth-page .login-form .form-group {
+  margin-bottom: 16px;
+}
+
+body.app.auth-page .login-form label {
+  display: block;
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 0 0 6px;
+}
+
+body.app.auth-page .login-form .au-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 14px;
+  color: var(--m-text);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  outline: none;
+}
+
+body.app.auth-page .login-form .au-input::placeholder {
+  color: var(--m-text-faint);
+}
+
+body.app.auth-page .login-form .au-input:focus {
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+body.app.auth-page .login-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 18px 0 24px;
+  font-family: var(--m-font);
+  font-size: 13px;
+}
+
+body.app.auth-page .login-checkbox > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--m-text-muted);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+body.app.auth-page .login-checkbox input[type=checkbox] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--m-border);
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+body.app.auth-page .login-checkbox input[type=checkbox]:checked {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+}
+
+body.app.auth-page .login-checkbox input[type=checkbox]:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+body.app.auth-page .login-checkbox a {
+  color: var(--m-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+body.app.auth-page .login-checkbox a:hover {
+  text-decoration: underline;
+}
+
+/* Submit button (overrides the legacy `.au-btn--green` saturated green) */
+body.app.auth-page .login-form .au-btn {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  background: var(--m-accent);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease;
+}
+
+body.app.auth-page .login-form .au-btn:hover {
+  background: var(--m-accent-hover);
+}
+
+body.app.auth-page .login-form .au-btn:active {
+  transform: translateY(0.5px);
+}
+
+body.app.auth-page .login-form .au-btn--green {
+  background: var(--m-accent);
+}
+
+body.app.auth-page .login-form .au-btn--green:hover {
+  background: var(--m-accent-hover);
+}
+
+/* Social buttons */
+body.app.auth-page .social-login-content {
+  margin-top: 8px;
+}
+
+body.app.auth-page .social-login-content::before {
+  content: "or continue with";
+  display: block;
+  text-align: center;
+  color: var(--m-text-faint);
+  font-family: var(--m-font);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  margin: 18px 0 14px;
+  position: relative;
+}
+
+body.app.auth-page .social-login-content::before {
+  background: linear-gradient(to right, transparent 0%, transparent 30%, #fff 30%, #fff 70%, transparent 70%);
+}
+
+body.app.auth-page .social-button {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.app.auth-page .social-button .au-btn {
+  background: var(--m-surface);
+  color: var(--m-text);
+  border: 1px solid var(--m-border);
+  margin: 0;
+  font-weight: 500;
+}
+
+body.app.auth-page .social-button .au-btn:hover {
+  background: var(--m-surface-2);
+}
+
+body.app.auth-page .social-button .au-btn--blue,
+body.app.auth-page .social-button .au-btn--blue2 {
+  background: var(--m-surface);
+  color: var(--m-text);
+  border: 1px solid var(--m-border);
+}
+
+body.app.auth-page .register-link {
+  text-align: center;
+  margin: 24px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--m-divider);
+  color: var(--m-text-muted);
+  font-family: var(--m-font);
+  font-size: 13.5px;
+}
+
+body.app.auth-page .register-link p {
+  margin: 0;
+}
+
+body.app.auth-page .register-link a {
+  color: var(--m-accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+body.app.auth-page .register-link a:hover {
+  text-decoration: underline;
+}
+
+/* Hide the legacy logo image; the auth-brand markup carries the new mark+text. */
+body.app.auth-page .login-logo {
+  display: none;
+}
+
+/* ============================================================================
+   Modernization of vintage component classes
+   These rules tame legacy class names so existing markup looks modern even
+   without rewriting every page. Used by table.html, form.html, inbox.html, etc.
+   ============================================================================ */
+/* Vintage section titles (`.title-1`, `.title-2`, `.title-3`, `.title-5` etc.)
+   — replace UPPERCASE+letterspace with sentence-case Inter weight 600. */
+body.app .title-1,
+body.app .title-2,
+body.app .title-3,
+body.app .title-4,
+body.app .title-5 {
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--m-text);
+  letter-spacing: -0.005em;
+  text-transform: none;
+  margin: 0 0 12px;
+}
+
+body.app .title-1 {
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+body.app .title-2 {
+  font-size: 17px;
+}
+
+body.app .title-3 i,
+body.app .title-5 i {
+  color: var(--m-accent);
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+/* Saturated blue card — replace with neutral m-card surface. */
+body.app .au-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  padding: 20px;
+}
+
+body.app .au-card-inner {
+  padding: 0;
+}
+
+body.app .au-card--bg-blue {
+  background: var(--m-surface); /* override the loud gradient */
+  color: var(--m-text);
+}
+
+body.app .au-card--bg-blue .table-top-countries tbody td,
+body.app .au-card--bg-blue .table-top-countries tbody tr {
+  color: var(--m-text);
+  border-color: var(--m-divider);
+}
+
+/* Earning table (the main first table on table.html) */
+body.app .table-earning thead th {
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  background: transparent;
+  border-bottom: 1px solid var(--m-border);
+  text-align: left;
+}
+
+body.app .table-earning tbody td {
+  font-size: 13.5px;
+  color: var(--m-text);
+  padding: 12px;
+  background: transparent;
+  border-bottom: 1px solid var(--m-divider);
+  border-color: var(--m-divider);
+}
+
+body.app .table-earning tbody tr:hover td {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+/* Top countries / top campaigns lists.
+   The legacy CSS hard-codes `color: #fff !important` on
+   `.table-top-countries tbody td` (designed for the saturated blue card),
+   so we need `!important` here to defeat it on the new white surface. */
+body.app .table-top-countries,
+body.app .table-top-campaign {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+body.app .table-top-countries tbody td,
+body.app .table-top-campaign.table td {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  padding: 10px 0 !important;
+  color: var(--m-text) !important;
+  border-bottom: 1px solid var(--m-divider) !important;
+  border-top: 0 !important;
+  background: transparent !important;
+  white-space: normal;
+}
+
+body.app .table-top-countries tbody tr td:last-child,
+body.app .table-top-campaign.table tr td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--m-text) !important;
+  font-weight: 500;
+}
+
+body.app .table-top-countries tbody tr td:first-child,
+body.app .table-top-campaign.table tr td:first-child {
+  color: var(--m-text) !important;
+  font-weight: 500;
+}
+
+body.app .table-top-countries tbody tr:last-child td,
+body.app .table-top-campaign.table tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+/* Row hover for both lists. */
+body.app .table-top-countries tbody tr,
+body.app .table-top-campaign.table tbody tr {
+  transition: background 120ms ease;
+}
+
+body.app .table-top-countries tbody tr:hover td,
+body.app .table-top-campaign.table tbody tr:hover td {
+  background: var(--m-surface-2) !important;
+}
+
+/* Top campaigns — accent the value column in brand blue for hierarchy. */
+body.app .table-top-campaign.table tr td:last-child {
+  color: var(--m-accent) !important;
+}
+
+/* User data + Top campaign wrappers — drop the standalone block treatment;
+   they'll be wrapped in `.m-card` containers in updated markup. */
+body.app .user-data,
+body.app .top-campaign {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+body.app .user-data .filters {
+  margin: 0 0 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body.app .user-data__footer {
+  padding: 16px 0 0;
+  text-align: center;
+  border-top: 0;
+}
+
+body.app .au-btn-load {
+  background: transparent;
+  color: var(--m-accent);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius-sm);
+  height: 36px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+body.app .au-btn-load:hover {
+  background: var(--m-accent-soft);
+  border-color: var(--m-accent);
+}
+
+/* Toolbar buttons in the data table section */
+body.app .table-data__tool {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+body.app .table-data__tool-left,
+body.app .table-data__tool-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+body.app .au-btn-filter {
+  height: 36px;
+  padding: 0 14px;
+  background: var(--m-surface);
+  color: var(--m-text);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+body.app .au-btn-filter:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .au-btn-filter i {
+  color: var(--m-text-muted);
+  margin-right: 0;
+  font-size: 12px;
+}
+
+body.app .au-btn--green {
+  background: var(--m-accent) !important;
+  color: #fff !important;
+  border: 0 !important;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--m-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+body.app .au-btn--green:hover {
+  background: var(--m-accent-hover) !important;
+}
+
+body.app .au-btn--small {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}
+
+body.app .select-wrapper select.form-select {
+  height: 36px;
+  padding: 0 32px 0 12px;
+  font-size: 13px;
+  border-radius: var(--m-radius-sm);
+  border-color: var(--m-border);
+  color: var(--m-text);
+  background-color: var(--m-surface);
+}
+
+body.app .select-wrapper select.form-select:focus {
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+/* Role badges */
+body.app .role {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  text-transform: capitalize;
+  line-height: 1;
+}
+
+body.app .role.admin {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .role.user {
+  background: var(--m-c2-soft);
+  color: var(--m-c2);
+}
+
+body.app .role.member {
+  background: var(--m-c3-soft);
+  color: var(--m-c3);
+}
+
+/* Status pills (.status--process / --denied / --approved) */
+body.app .status--process,
+body.app .status--approved,
+body.app .status--denied,
+body.app td.process,
+body.app td.approved,
+body.app td.denied {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+body.app .status--process,
+body.app td.process {
+  background: var(--m-success-soft);
+  color: var(--m-success);
+}
+
+body.app .status--approved,
+body.app td.approved {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .status--denied,
+body.app td.denied {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+/* Table-data2 — drop the floating "tr-shadow" rows for a clean modern table. */
+body.app .table-data2 {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+body.app .table-data2.table thead th {
+  background: transparent;
+  color: var(--m-text-faint);
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--m-border);
+  border-top: 0;
+  text-align: left;
+}
+
+body.app .table-data2.table tbody tr,
+body.app .table-data2.table tr.tr-shadow {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0;
+}
+
+body.app .table-data2.table tbody td {
+  padding: 12px;
+  background: transparent;
+  border-bottom: 1px solid var(--m-divider);
+  border-top: 0;
+  font-size: 13.5px;
+  color: var(--m-text);
+  border-radius: 0 !important;
+}
+
+body.app .table-data2.table tr.spacer {
+  display: none; /* the visual spacer between rows */
+}
+
+body.app .table-data2.table tbody tr:hover td {
+  background: var(--m-surface-2);
+}
+
+body.app .block-email {
+  color: var(--m-accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+/* Action buttons inside table rows */
+body.app .table-data-feature {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+body.app .table-data-feature .item {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: var(--m-radius-sm);
+  color: var(--m-text-faint);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.app .table-data-feature .item:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .table-data-feature .item i {
+  font-size: 12px;
+}
+
+/* Table-data3 — bottom sales table */
+body.app .table-data3 thead th {
+  background: var(--m-surface-2);
+  color: var(--m-text-faint);
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--m-border);
+  border-top: 1px solid var(--m-border);
+}
+
+body.app .table-data3 thead tr th:first-child {
+  border-top-left-radius: var(--m-radius);
+  border-bottom-left-radius: 0;
+  border-left: 1px solid var(--m-border);
+}
+
+body.app .table-data3 thead tr th:last-child {
+  border-top-right-radius: var(--m-radius);
+  border-bottom-right-radius: 0;
+  border-right: 1px solid var(--m-border);
+}
+
+body.app .table-data3 tbody td {
+  padding: 12px 16px;
+  background: transparent;
+  border-bottom: 1px solid var(--m-divider);
+  border-top: 0;
+  font-size: 13.5px;
+  color: var(--m-text);
+}
+
+body.app .table-data3 tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Custom checkboxes (.au-checkbox) */
+body.app .au-checkbox {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  position: relative;
+}
+
+body.app .au-checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body.app .au-checkmark {
+  position: absolute;
+  inset: 0;
+  background: var(--m-surface);
+  border: 1.5px solid var(--m-border);
+  border-radius: 4px;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+body.app .au-checkbox:hover .au-checkmark {
+  border-color: var(--m-accent);
+}
+
+body.app .au-checkbox input:checked ~ .au-checkmark {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+}
+
+body.app .au-checkbox input:checked ~ .au-checkmark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: center;
+}
+
+/* "More" 3-dots in tables */
+body.app .more {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--m-radius-sm);
+  color: var(--m-text-faint);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.app .more:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+/* Inline labels next to user names in the user-data table */
+body.app .table-data__info h6 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--m-text);
+  text-transform: capitalize;
+}
+
+body.app .table-data__info span a {
+  color: var(--m-accent);
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+body.app .table-data__info span a:hover {
+  text-decoration: underline;
+}
+
+/* `table--no-card` wrapper used for raw responsive tables */
+body.app .table--no-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  overflow: hidden;
+}
+
+/* Bootstrap 5 .badge color overrides for cleaner palette in tables */
+body.app .badge.bg-success {
+  background-color: var(--m-success-soft) !important;
+  color: var(--m-success) !important;
+  font-weight: 500;
+}
+
+body.app .badge.bg-warning {
+  background-color: var(--m-warning-soft) !important;
+  color: var(--m-warning) !important;
+  font-weight: 500;
+}
+
+body.app .badge.bg-danger {
+  background-color: var(--m-danger-soft) !important;
+  color: var(--m-danger) !important;
+  font-weight: 500;
+}
+
+body.app .badge.bg-info {
+  background-color: var(--m-c1-soft) !important;
+  color: var(--m-c1) !important;
+  font-weight: 500;
+}
+
+body.app .badge.bg-primary {
+  background-color: var(--m-accent-soft) !important;
+  color: var(--m-accent) !important;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Ranked top-N list (used for "Top campaigns")
+   ============================================================================ */
+body.app .rank-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+body.app .rank-list > li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 14px;
+  row-gap: 6px;
+  align-items: center;
+}
+
+body.app .rank-list__rank {
+  grid-row: span 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--m-surface-2);
+  color: var(--m-text-muted);
+  font-family: var(--m-font);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Highlight the top three with progressively brighter accent treatment. */
+body.app .rank-list > li:nth-child(1) .rank-list__rank {
+  background: var(--m-accent);
+  color: #fff;
+}
+
+body.app .rank-list > li:nth-child(2) .rank-list__rank {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .rank-list > li:nth-child(3) .rank-list__rank {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .rank-list__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  grid-column: 2;
+  align-self: end;
+  line-height: 1.3;
+}
+
+body.app .rank-list__value {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--m-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  align-self: end;
+  line-height: 1.3;
+  grid-column: 3;
+  grid-row: 1;
+}
+
+body.app .rank-list__bar {
+  grid-column: 2/span 2;
+  grid-row: 2;
+  display: block;
+  height: 4px;
+  background: var(--m-divider);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+body.app .rank-list__bar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--rank-pct, 0%);
+  background: linear-gradient(90deg, var(--m-accent) 0%, #6c95e6 100%);
+  border-radius: inherit;
+  transition: width 360ms ease;
+}
+
+/* Top item gets a slightly stronger accent on the bar. */
+body.app .rank-list > li:nth-child(1) .rank-list__bar::after {
+  background: linear-gradient(90deg, var(--m-accent) 0%, #4272d7 100%);
+}
+
+/* ============================================================================
+   Vintage section cards across the dashboard variants and listing pages
+   Used by: index2, index3, index4, inbox, calendar, chart, form, etc.
+   ============================================================================ */
+/* The `<section class="statistic">` wrapper at the top of index2/index3 had a
+   57px top padding and no internal frame. Make it match the dashboard's
+   normal section spacing. */
+body.app .statistic {
+  padding-top: 0;
+}
+
+body.app .statistic .section__content--p30 {
+  padding: 0 28px 0;
+}
+
+/* Each `.statistic__item` is the legacy 4-tile equivalent of the new
+   .stat-card — with a giant 180px decorative icon at the bottom-right and a
+   weight-300 36px number. Reset to a clean modern KPI tile. */
+body.app .statistic__item {
+  background: var(--m-surface) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius);
+  padding: 18px 20px;
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+body.app .statistic__item:hover {
+  border-color: #d6dae0 !important;
+  box-shadow: var(--m-shadow-sm);
+}
+
+body.app .statistic__item h2,
+body.app .statistic__item .number {
+  font-family: var(--m-font);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--m-text) !important;
+  margin: 0 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app .statistic__item .desc {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--m-text-muted) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  display: block;
+}
+
+body.app .statistic__item .icon {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  bottom: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--m-radius-sm);
+  background: var(--m-c1-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+}
+
+body.app .statistic__item .icon i {
+  font-size: 14px !important;
+  line-height: 1;
+  color: var(--m-c1) !important;
+  opacity: 1 !important;
+}
+
+/* Per-tile color variant — overrides the saturated full-tile gradients with
+   accent-tinted icon corners, c1/c2/c3/c4 palette. */
+body.app .statistic__item--blue {
+  background: var(--m-surface) !important;
+}
+
+body.app .statistic__item--blue .icon {
+  background: var(--m-c1-soft);
+}
+
+body.app .statistic__item--blue .icon i {
+  color: var(--m-c1) !important;
+}
+
+body.app .statistic__item--green {
+  background: var(--m-surface) !important;
+}
+
+body.app .statistic__item--green .icon {
+  background: var(--m-c2-soft);
+}
+
+body.app .statistic__item--green .icon i {
+  color: var(--m-c2) !important;
+}
+
+body.app .statistic__item--orange {
+  background: var(--m-surface) !important;
+}
+
+body.app .statistic__item--orange .icon {
+  background: var(--m-c3-soft);
+}
+
+body.app .statistic__item--orange .icon i {
+  color: var(--m-c3) !important;
+}
+
+body.app .statistic__item--red {
+  background: var(--m-surface) !important;
+}
+
+body.app .statistic__item--red .icon {
+  background: var(--m-c4-soft);
+}
+
+body.app .statistic__item--red .icon i {
+  color: var(--m-c4) !important;
+}
+
+/* Auto-rotate icon palette across siblings so 4 statistic tiles each get a
+   different accent without needing the variant classes. */
+body.app .statistic .row > [class*=col-]:nth-child(1) .statistic__item:not([class*="--"]) .icon {
+  background: var(--m-c1-soft);
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(1) .statistic__item:not([class*="--"]) .icon i {
+  color: var(--m-c1) !important;
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(2) .statistic__item:not([class*="--"]) .icon {
+  background: var(--m-c2-soft);
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(2) .statistic__item:not([class*="--"]) .icon i {
+  color: var(--m-c2) !important;
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(3) .statistic__item:not([class*="--"]) .icon {
+  background: var(--m-c3-soft);
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(3) .statistic__item:not([class*="--"]) .icon i {
+  color: var(--m-c3) !important;
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(4) .statistic__item:not([class*="--"]) .icon {
+  background: var(--m-c4-soft);
+}
+
+body.app .statistic .row > [class*=col-]:nth-child(4) .statistic__item:not([class*="--"]) .icon i {
+  color: var(--m-c4) !important;
+}
+
+/* `.statistic2` (alternative tile pattern in index4) — use same look. */
+body.app .statistic2 {
+  background: var(--m-surface) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius);
+  padding: 18px 20px;
+  box-shadow: var(--m-shadow-xs);
+}
+
+/* `.statistic-chart-1` (large stats chart card on index3) */
+body.app .statistic-chart-1,
+body.app .chart-percent-2,
+body.app .chart-percent-3 {
+  background: var(--m-surface) !important;
+  border: 1px solid var(--m-border) !important;
+  border-radius: var(--m-radius);
+  padding: 24px !important;
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px !important;
+}
+
+body.app .statistic-chart-1-note span {
+  font-family: var(--m-font);
+  color: var(--m-text-muted) !important;
+  font-size: 13px;
+}
+
+body.app .statistic-chart-1-note .big {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  color: var(--m-text) !important;
+}
+
+/* `.recent-report2` / `.recent-report3` chart wrappers */
+body.app .recent-report2,
+body.app .recent-report3 {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 20px;
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px;
+}
+
+body.app .recent-report__chart {
+  margin: 0 -8px;
+}
+
+body.app .recent-report2 .chart-info,
+body.app .recent-report3 .chart-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+body.app .recent-report2 .chart-info__left,
+body.app .recent-report3 .chart-info__left {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+body.app .recent-report2 .chart-info-right,
+body.app .recent-report3 .chart-info-right {
+  display: flex;
+  gap: 8px;
+}
+
+body.app .chart-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .chart-note .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+body.app .chart-note .dot--blue {
+  background: var(--m-c1);
+}
+
+body.app .chart-note .dot--green {
+  background: var(--m-c2);
+}
+
+body.app .chart-note .dot--orange {
+  background: var(--m-c3);
+}
+
+body.app .chart-note .dot--red {
+  background: var(--m-c4);
+}
+
+/* `.task-progress` block (skill bars on index2 right column) */
+body.app .task-progress {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 20px;
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px;
+}
+
+body.app .au-progress {
+  margin: 0 0 14px;
+}
+
+body.app .au-progress:last-child {
+  margin-bottom: 0;
+}
+
+body.app .au-progress__title {
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 0 0 6px;
+  display: block;
+}
+
+body.app .au-progress__bar {
+  height: 6px;
+  background: var(--m-divider);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+body.app .au-progress__inner {
+  height: 100%;
+  background: var(--m-accent) !important;
+  border-radius: 999px;
+  transition: width 360ms ease;
+}
+
+/* Override the gradient backgrounds set by `:nth-child` rules in theme.css */
+body.app .au-progress:nth-child(1) .au-progress__inner {
+  background: var(--m-c1) !important;
+}
+
+body.app .au-progress:nth-child(2) .au-progress__inner {
+  background: var(--m-c2) !important;
+}
+
+body.app .au-progress:nth-child(3) .au-progress__inner {
+  background: var(--m-c3) !important;
+}
+
+body.app .au-progress:nth-child(4) .au-progress__inner {
+  background: var(--m-c4) !important;
+}
+
+body.app .au-progress__value {
+  position: absolute;
+  right: 0;
+  top: -22px;
+  font-size: 12px;
+  color: var(--m-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* `.au-task` task list (used by inbox-style sections + index2) */
+body.app .au-task,
+body.app .au-task--border {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  padding: 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+body.app .au-task__title {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--m-divider);
+  border-left: 0 !important;
+  border-right: 0 !important;
+  background: var(--m-surface);
+  margin: 0;
+}
+
+body.app .au-task__title h3,
+body.app .au-task__title .title-3 {
+  margin: 0;
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text);
+  text-transform: none;
+}
+
+body.app .au-task-list {
+  padding: 4px 0;
+}
+
+body.app .au-task__item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--m-divider);
+  background: transparent;
+  border-left: 3px solid transparent;
+  transition: background 120ms ease;
+}
+
+body.app .au-task__item:last-child {
+  border-bottom: 0;
+}
+
+body.app .au-task__item:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .au-task__item--primary {
+  border-left-color: var(--m-accent);
+}
+
+body.app .au-task__item--success {
+  border-left-color: var(--m-success);
+}
+
+body.app .au-task__item--warning {
+  border-left-color: var(--m-warning);
+}
+
+body.app .au-task__item--danger {
+  border-left-color: var(--m-danger);
+}
+
+body.app .au-task__item-inner h5 {
+  margin: 0 0 4px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+}
+
+body.app .au-task__item-inner .time {
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+}
+
+body.app .au-task__footer {
+  padding: 12px 20px;
+  background: var(--m-surface-2);
+  border-top: 1px solid var(--m-divider);
+  text-align: center;
+}
+
+body.app .au-task__footer a {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--m-accent);
+  text-decoration: none;
+}
+
+/* `.au-message` email/message list (used by inbox.html) */
+body.app .au-message {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+body.app .au-message-list {
+  padding: 4px 0;
+}
+
+body.app .au-message__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--m-divider);
+  transition: background 120ms ease;
+  cursor: pointer;
+}
+
+body.app .au-message__item:last-child {
+  border-bottom: 0;
+}
+
+body.app .au-message__item:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .au-message__item.unread {
+  background: var(--m-accent-soft);
+}
+
+body.app .au-message__item.unread:hover {
+  background: rgba(var(--m-accent-rgb), 0.1);
+}
+
+body.app .au-message__item-inner {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.app .au-message__item .av-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+body.app .au-message__item .av-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.app .au-message__item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .au-message__item-text h5 {
+  margin: 0 0 2px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.app .au-message__item.unread .au-message__item-text h5 {
+  font-weight: 600;
+}
+
+body.app .au-message__item-text p {
+  margin: 0;
+  font-family: var(--m-font);
+  font-size: 13px;
+  color: var(--m-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.app .au-message__item-time {
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+body.app .au-message__noti {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--m-accent);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+body.app .au-message__footer {
+  padding: 12px 20px;
+  background: var(--m-surface-2);
+  border-top: 1px solid var(--m-divider);
+  text-align: center;
+}
+
+body.app .au-message__footer a {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--m-accent);
+  text-decoration: none;
+}
+
+/* `.au-chat` chat panel (used by inbox or messaging pages) */
+body.app .au-chat,
+body.app .au-chat--border {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+body.app .au-chat__title {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--m-divider);
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+
+body.app .au-chat__title h3 {
+  margin: 0;
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text);
+  text-transform: none;
+}
+
+body.app .au-chat__content {
+  padding: 16px 20px;
+}
+
+body.app .au-chat-info {
+  padding: 16px 20px;
+  border-top: 1px solid var(--m-divider);
+}
+
+body.app .au-chat-textfield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--m-divider);
+}
+
+/* `.welcome` / `.welcome2` hero blocks (index3 / index4) */
+body.app .welcome,
+body.app .welcome2 {
+  background: linear-gradient(135deg, var(--m-accent-soft) 0%, var(--m-c4-soft) 100%);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 32px;
+  margin-bottom: 16px;
+  box-shadow: var(--m-shadow-xs);
+}
+
+body.app .welcome2 {
+  padding: 40px 32px !important;
+}
+
+body.app .welcome2-greeting {
+  font-family: var(--m-font);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--m-text) !important;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+body.app .welcome2-greeting + p,
+body.app .welcome2 p {
+  color: var(--m-text-muted);
+  font-size: 14px;
+}
+
+/* `.au-card` general modernizing override */
+body.app .au-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px;
+}
+
+body.app .au-card--no-shadow {
+  box-shadow: var(--m-shadow-xs);
+}
+
+body.app .au-card--no-pad {
+  padding: 0;
+}
+
+body.app .au-card--border {
+  border: 1px solid var(--m-border);
+}
+
+body.app .au-card-inner {
+  padding: 20px;
+}
+
+body.app .au-card-title {
+  padding: 16px 20px !important;
+  border-bottom: 1px solid var(--m-divider);
+  background: var(--m-surface) !important;
+  border-top-left-radius: var(--m-radius) !important;
+  border-top-right-radius: var(--m-radius) !important;
+}
+
+body.app .au-card-title h3,
+body.app .au-card-title h4 {
+  margin: 0;
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text);
+  text-transform: none;
+}
+
+/* Section spacing — drop the section__content--p30 huge default padding when
+   it's used inside content rows on dashboard variants. */
+body.app main .section__content--p30 {
+  padding: 28px 28px 60px;
+}
+
+/* ============================================================================
+   Project list (used by index4.html)
+   ============================================================================ */
+body.app .project-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .project-list > li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 16px;
+  row-gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--m-divider);
+  align-items: center;
+}
+
+body.app .project-list > li:last-child {
+  border-bottom: 0;
+}
+
+body.app .project-list__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  line-height: 1.3;
+}
+
+body.app .project-list__meta {
+  font-family: var(--m-font);
+  font-size: 12px;
+  color: var(--m-text-faint);
+  margin-top: 2px;
+  display: block;
+}
+
+body.app .project-list__avatars {
+  display: inline-flex;
+  align-items: center;
+}
+
+body.app .project-list__avatars img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--m-surface);
+  margin-left: -6px;
+  object-fit: cover;
+  background: var(--m-surface-2);
+}
+
+body.app .project-list__avatars img:first-child {
+  margin-left: 0;
+}
+
+body.app .project-list__bar {
+  grid-column: 1/span 2;
+  height: 4px;
+  background: var(--m-divider);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+body.app .project-list__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: var(--pct, 0%);
+  background: var(--m-accent);
+  border-radius: inherit;
+}
+
+body.app .project-list__bar--success::after {
+  background: var(--m-success);
+}
+
+body.app .project-list__bar--warning::after {
+  background: var(--m-warning);
+}
+
+body.app .project-list__bar--danger::after {
+  background: var(--m-danger);
+}
+
+body.app .deadline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .deadline-list > li {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .deadline-list > li:last-child {
+  border-bottom: 0;
+}
+
+body.app .deadline-list__date {
+  flex: 0 0 44px;
+  text-align: center;
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  border-radius: var(--m-radius-sm);
+  padding: 6px 0;
+  font-family: var(--m-font);
+  line-height: 1;
+}
+
+body.app .deadline-list__date strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+body.app .deadline-list__date span {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+body.app .deadline-list__body {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .deadline-list__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 2px 0 2px;
+  line-height: 1.3;
+}
+
+body.app .deadline-list__project {
+  font-family: var(--m-font);
+  font-size: 12px;
+  color: var(--m-text-faint);
+}
+
+/* Team availability list */
+body.app .team-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .team-list > li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .team-list > li:last-child {
+  border-bottom: 0;
+}
+
+body.app .team-list__avatar {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+body.app .team-list__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+body.app .team-list__status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--m-surface);
+}
+
+body.app .team-list__status--online {
+  background: var(--m-success);
+}
+
+body.app .team-list__status--away {
+  background: var(--m-warning);
+}
+
+body.app .team-list__status--busy {
+  background: var(--m-danger);
+}
+
+body.app .team-list__status--offline {
+  background: var(--m-text-faint);
+}
+
+body.app .team-list__name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+}
+
+body.app .team-list__role {
+  display: block;
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+body.app .team-list__badge {
+  font-family: var(--m-font);
+  font-size: 11px;
+  color: var(--m-text-faint);
+  text-transform: capitalize;
+}
+
+/* Donut chart wrapper for marketing dashboard */
+body.app .donut-wrap {
+  height: 260px;
+  position: relative;
+}
+
+/* Page-header subtitle on dashboard variants — slight tweak so the date chip
+   on the right doesn't overlap on narrow widths. */
+body.app .page-header h1 + .subtitle {
+  white-space: normal;
+}
+
+/* ============================================================================
+   Bootstrap form components — modernised under app theme
+   Used by form.html plus any page using Bootstrap's `.card`, `.form-control`,
+   `.btn` etc. Brings them in line with the m-card / m-btn aesthetic.
+   ============================================================================ */
+/* Bootstrap `.card` → m-card-style surface */
+body.app .card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+body.app .card > .card-header,
+body.app .card-header {
+  background: var(--m-surface);
+  color: var(--m-text);
+  border-bottom: 1px solid var(--m-divider);
+  padding: 14px 20px;
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.app .card-header strong {
+  font-weight: 600;
+}
+
+body.app .card-header small {
+  color: var(--m-text-muted);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+body.app .card-body {
+  padding: 20px;
+}
+
+body.app .card-title {
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 12px;
+  text-transform: none;
+}
+
+body.app .card-footer {
+  background: var(--m-surface-2);
+  border-top: 1px solid var(--m-divider);
+  padding: 14px 20px;
+}
+
+/* Form group spacing */
+body.app .form-group {
+  margin-bottom: 16px;
+}
+
+body.app .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Labels */
+body.app .form-control-label,
+body.app .control-label,
+body.app form label:not(.form-check-label):not(.au-checkbox):not(.btn) {
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 0 0 6px;
+  display: inline-block;
+}
+
+/* Inputs / textareas / selects */
+body.app .form-control,
+body.app input.form-control,
+body.app textarea.form-control,
+body.app select.form-control,
+body.app .form-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 14px;
+  background-color: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 14px;
+  color: var(--m-text);
+  line-height: 1.4;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  outline: none;
+  box-shadow: none;
+}
+
+body.app textarea.form-control {
+  height: auto;
+  min-height: 96px;
+  padding: 10px 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+body.app .form-control::placeholder,
+body.app .form-select::placeholder {
+  color: var(--m-text-faint);
+}
+
+body.app .form-control:focus,
+body.app .form-select:focus {
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+  outline: none;
+}
+
+body.app .form-control[readonly],
+body.app .form-control[disabled],
+body.app .form-control:disabled {
+  background-color: var(--m-surface-2);
+  color: var(--m-text-muted);
+  cursor: not-allowed;
+}
+
+/* File input */
+body.app input[type=file].form-control {
+  padding: 7px 12px;
+  line-height: 1.4;
+}
+
+body.app input[type=file]::file-selector-button {
+  background: var(--m-surface-2);
+  border: 1px solid var(--m-border);
+  border-radius: 6px;
+  color: var(--m-text);
+  padding: 4px 12px;
+  margin: 0 12px 0 -8px;
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+body.app input[type=file]::file-selector-button:hover {
+  background: var(--m-divider);
+}
+
+/* Static / plaintext value */
+body.app .form-control-plaintext {
+  color: var(--m-text);
+  font-family: var(--m-font);
+  font-size: 14px;
+  padding: 8px 0;
+  margin: 0;
+}
+
+/* Help text */
+body.app .help-block,
+body.app .form-text {
+  color: var(--m-text-muted);
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Validation states */
+body.app .has-success .form-control,
+body.app .form-control.is-valid,
+body.app .form-control-success {
+  border-color: var(--m-success);
+}
+
+body.app .has-success .form-control:focus,
+body.app .form-control.is-valid:focus,
+body.app .form-control-success:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
+body.app .has-warning .form-control,
+body.app .form-control-warning {
+  border-color: var(--m-warning);
+}
+
+body.app .has-warning .form-control:focus,
+body.app .form-control-warning:focus {
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+body.app .has-danger .form-control,
+body.app .form-control.is-invalid,
+body.app .form-control-danger {
+  border-color: var(--m-danger);
+}
+
+body.app .has-danger .form-control:focus,
+body.app .form-control.is-invalid:focus,
+body.app .form-control-danger:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+body.app .has-success .help-block {
+  color: var(--m-success);
+}
+
+body.app .has-warning .help-block {
+  color: var(--m-warning);
+}
+
+body.app .has-danger .help-block {
+  color: var(--m-danger);
+}
+
+/* Input group (icon prefix / button suffix) */
+body.app .input-group {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-radius: 8px;
+}
+
+body.app .input-group > .form-control {
+  flex: 1 1 auto;
+  border-radius: 0;
+}
+
+body.app .input-group > :first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+body.app .input-group > :last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+body.app .input-group-text,
+body.app .input-group-prepend > .input-group-text,
+body.app .input-group-append > .input-group-text {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--m-surface-2);
+  border: 1px solid var(--m-border);
+  color: var(--m-text-muted);
+  font-family: var(--m-font);
+  font-size: 13px;
+  line-height: 1;
+}
+
+body.app .input-group:focus-within {
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+/* Form-check (checkbox / radio) — Bootstrap 5 native */
+body.app .form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 0;
+  margin-bottom: 8px;
+  min-height: auto;
+}
+
+body.app .form-check-inline {
+  display: inline-flex;
+  margin-right: 16px;
+  margin-bottom: 0;
+}
+
+body.app .form-check-input {
+  margin: 0;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--m-border);
+  border-radius: 4px;
+  background-color: var(--m-surface);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+body.app .form-check-input[type=radio] {
+  border-radius: 50%;
+}
+
+body.app .form-check-input:hover {
+  border-color: var(--m-accent);
+}
+
+body.app .form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.18);
+  border-color: var(--m-accent);
+  outline: none;
+}
+
+body.app .form-check-input:checked {
+  background-color: var(--m-accent);
+  border-color: var(--m-accent);
+}
+
+body.app .form-check-label {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text);
+  cursor: pointer;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+/* Form-actions (button row) */
+body.app .form-actions,
+body.app .form-actions.form-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid var(--m-divider);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+/* Bootstrap `.btn` family — map BS color variants to brand palette */
+body.app .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: 0;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
+}
+
+body.app .btn:active {
+  transform: translateY(0.5px);
+}
+
+body.app .btn:focus,
+body.app .btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.18);
+}
+
+body.app .btn-sm {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}
+
+body.app .btn-lg {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14.5px;
+}
+
+body.app .btn-primary,
+body.app .btn-info {
+  background: var(--m-accent);
+  color: #fff;
+  border-color: var(--m-accent);
+}
+
+body.app .btn-primary:hover,
+body.app .btn-info:hover {
+  background: var(--m-accent-hover);
+  color: #fff;
+  border-color: var(--m-accent-hover);
+}
+
+body.app .btn-secondary {
+  background: var(--m-surface);
+  color: var(--m-text);
+  border-color: var(--m-border);
+}
+
+body.app .btn-secondary:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+  border-color: var(--m-border);
+}
+
+body.app .btn-success {
+  background: var(--m-success);
+  color: #fff;
+  border-color: var(--m-success);
+}
+
+body.app .btn-success:hover {
+  background: #0d9d6e;
+  border-color: #0d9d6e;
+  color: #fff;
+}
+
+body.app .btn-warning {
+  background: var(--m-warning);
+  color: #fff;
+  border-color: var(--m-warning);
+}
+
+body.app .btn-warning:hover {
+  background: #e08a06;
+  border-color: #e08a06;
+  color: #fff;
+}
+
+body.app .btn-danger {
+  background: var(--m-danger);
+  color: #fff;
+  border-color: var(--m-danger);
+}
+
+body.app .btn-danger:hover {
+  background: #d83838;
+  border-color: #d83838;
+  color: #fff;
+}
+
+/* Outline button variants */
+body.app .btn-outline-primary,
+body.app .btn-outline-info {
+  background: transparent;
+  color: var(--m-accent);
+  border-color: var(--m-accent);
+}
+
+body.app .btn-outline-primary:hover,
+body.app .btn-outline-info:hover {
+  background: var(--m-accent);
+  color: #fff;
+}
+
+body.app .btn-outline-secondary {
+  background: transparent;
+  color: var(--m-text);
+  border-color: var(--m-border);
+}
+
+body.app .btn-outline-secondary:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .btn-outline-success {
+  background: transparent;
+  color: var(--m-success);
+  border-color: var(--m-success);
+}
+
+body.app .btn-outline-success:hover {
+  background: var(--m-success);
+  color: #fff;
+}
+
+body.app .btn-outline-warning {
+  background: transparent;
+  color: var(--m-warning);
+  border-color: var(--m-warning);
+}
+
+body.app .btn-outline-warning:hover {
+  background: var(--m-warning);
+  color: #fff;
+}
+
+body.app .btn-outline-danger {
+  background: transparent;
+  color: var(--m-danger);
+  border-color: var(--m-danger);
+}
+
+body.app .btn-outline-danger:hover {
+  background: var(--m-danger);
+  color: #fff;
+}
+
+/* Button group + toolbar */
+body.app .btn-group {
+  display: inline-flex;
+  border-radius: 8px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+body.app .btn-group > .btn {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+body.app .btn-group > .btn:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  margin-left: 0;
+}
+
+body.app .btn-group > .btn:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* Dropdown toggle — keep aligned with btn family */
+body.app .dropdown-toggle::after {
+  border-top-color: currentColor;
+  margin-left: 6px;
+}
+
+body.app .dropdown-menu {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-lg);
+  padding: 6px;
+  font-family: var(--m-font);
+  font-size: 13px;
+}
+
+body.app .dropdown-item {
+  padding: 7px 12px;
+  border-radius: 6px;
+  color: var(--m-text);
+  transition: background 120ms ease;
+}
+
+body.app .dropdown-item:hover,
+body.app .dropdown-item:focus {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .dropdown-divider {
+  border-color: var(--m-divider);
+  margin: 4px 0;
+}
+
+/* Bootstrap "row mb-3" form rows — tighten label-input alignment */
+body.app form .row.mb-3 {
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+body.app form .row.mb-3 > [class*=col-md-3] label {
+  margin-bottom: 0;
+  color: var(--m-text-muted);
+  font-weight: 500;
+}
+
+/* Legacy `.au-input` (used in CC payment form) — match new input styling */
+body.app .au-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 14px;
+  background-color: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 14px;
+  color: var(--m-text);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  outline: none;
+}
+
+body.app .au-input:focus {
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+body.app .au-input--xl {
+  height: 42px;
+}
+
+/* `<hr>` inside cards — softer divider */
+body.app .card hr {
+  border: 0;
+  border-top: 1px solid var(--m-divider);
+  margin: 16px 0;
+}
+
+/* Fieldset legend */
+body.app fieldset {
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 16px 20px;
+  margin: 0 0 16px;
+}
+
+body.app fieldset legend {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--m-text);
+  padding: 0 8px;
+  width: auto;
+  margin-bottom: 0;
+}
+
+/* Calendar event-types legend */
+body.app .legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .legend-list > li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-family: var(--m-font);
+  font-size: 13px;
+  color: var(--m-text);
+}
+
+body.app .legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* FullCalendar 7 — app theme.
+   v7 generates hashed class names, so there is nothing stable to target here.
+   Colors are rebound via the theme's --fc-classic-* custom properties in
+   src/pug/partials/content/calendar.styles.html. Only layout-level rules that
+   sit OUTSIDE the calendar's own markup belong in this file. */
+body.app .calendar-container {
+  padding: 4px;
+}
+
+body.app .fc {
+  font-family: var(--m-font);
+}
+
+/* ============================================================================
+   Inbox — folder tabs, toolbar, email list, pagination
+   ============================================================================ */
+/* Folder tabs (Inbox / Starred / Snoozed / Sent / Drafts / Trash) */
+body.app .inbox-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+body.app .inbox-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+body.app .inbox-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--m-radius-sm);
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.app .inbox-tab:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .inbox-tab.is-active {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .inbox-tab i {
+  font-size: 12px;
+}
+
+body.app .inbox-tab__count {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: var(--m-divider);
+  color: var(--m-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+body.app .inbox-tab.is-active .inbox-tab__count {
+  background: var(--m-accent);
+  color: #fff;
+}
+
+/* Toolbar (bulk actions row) */
+body.app .inbox-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .inbox-toolbar__left,
+body.app .inbox-toolbar__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body.app .icon-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  border-radius: var(--m-radius-sm);
+  color: var(--m-text-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.app .icon-btn:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .icon-btn i {
+  font-size: 13px;
+}
+
+body.app .inbox-toolbar__count {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-faint);
+  margin: 0 8px;
+}
+
+/* Email list */
+body.app .email-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .email-item {
+  display: grid;
+  grid-template-columns: 24px 24px 36px 1fr auto;
+  column-gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--m-divider);
+  cursor: pointer;
+  transition: background 120ms ease;
+  position: relative;
+}
+
+body.app .email-item:last-child {
+  border-bottom: 0;
+}
+
+body.app .email-item:hover {
+  background: var(--m-surface-2);
+}
+
+/* Unread state — left border + soft tint + bolder text */
+body.app .email-item.is-unread {
+  background: var(--m-accent-soft);
+}
+
+body.app .email-item.is-unread::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: var(--m-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+body.app .email-item.is-unread:hover {
+  background: rgba(var(--m-accent-rgb), 0.1);
+}
+
+body.app .email-item.is-unread .email-item__sender,
+body.app .email-item.is-unread .email-item__subject {
+  font-weight: 600;
+  color: var(--m-text);
+}
+
+body.app .email-item__check input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--m-accent);
+  margin: 0;
+}
+
+body.app .email-item__star {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--m-text-faint);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 120ms ease;
+}
+
+body.app .email-item__star:hover {
+  color: var(--m-warning);
+}
+
+body.app .email-item__star i {
+  font-size: 14px;
+}
+
+body.app .email-item__star.is-starred {
+  color: var(--m-warning);
+}
+
+body.app .email-item__star.is-starred:hover {
+  color: #d97706;
+}
+
+body.app .email-item__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+body.app .email-item__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.app .email-item__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+body.app .email-item__sender {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.app .email-item__label {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.app .email-item__label--work {
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+}
+
+body.app .email-item__label--personal {
+  background: var(--m-c2-soft);
+  color: var(--m-c2);
+}
+
+body.app .email-item__label--social {
+  background: var(--m-c3-soft);
+  color: var(--m-c3);
+}
+
+body.app .email-item__label--promo {
+  background: var(--m-c4-soft);
+  color: var(--m-c4);
+}
+
+body.app .email-item__label--alert {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+body.app .email-item__subject {
+  font-family: var(--m-font);
+  font-size: 13px;
+  color: var(--m-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+body.app .email-item__preview {
+  color: var(--m-text-muted);
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+body.app .email-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  flex-shrink: 0;
+}
+
+body.app .email-item__meta i {
+  font-size: 12px;
+}
+
+/* Bottom pagination */
+body.app .inbox-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--m-divider);
+  background: var(--m-surface-2);
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .inbox-pagination__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Stats strip above the inbox card */
+body.app .inbox-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+body.app .inbox-stat {
+  flex: 1 1 180px;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.app .inbox-stat__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+body.app .inbox-stat__body {
+  min-width: 0;
+}
+
+body.app .inbox-stat__label {
+  font-size: 12px;
+  color: var(--m-text-muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+body.app .inbox-stat__value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+/* Smaller email-list grid on narrower viewports */
+@media (max-width: 768px) {
+  body.app .email-item {
+    grid-template-columns: 24px 36px 1fr auto;
+  }
+  body.app .email-item__check {
+    display: none;
+  }
+}
+/* ============================================================================
+   Card showcase patterns (used by card.html)
+   ============================================================================ */
+/* Profile / team member card */
+body.app .profile-card {
+  text-align: center;
+  padding: 24px 20px;
+}
+
+body.app .profile-card__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  overflow: hidden;
+  border: 3px solid var(--m-surface);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+body.app .profile-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.app .profile-card__name {
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 2px;
+}
+
+body.app .profile-card__role {
+  font-family: var(--m-font);
+  font-size: 13px;
+  color: var(--m-text-muted);
+  margin: 0;
+}
+
+body.app .profile-card__divider {
+  border: 0;
+  border-top: 1px solid var(--m-divider);
+  margin: 16px 0;
+}
+
+body.app .profile-card__socials {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.app .profile-card__socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--m-surface-2);
+  color: var(--m-text-muted);
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.app .profile-card__socials a:hover {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .profile-card__socials a i {
+  font-size: 13px;
+}
+
+body.app .profile-card__stats {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 12px 0 0;
+}
+
+body.app .profile-card__stat {
+  flex: 0 0 auto;
+}
+
+body.app .profile-card__stat-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--m-text);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+body.app .profile-card__stat-label {
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+/* Image cover card */
+body.app .cover-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+body.app .cover-card__image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+body.app .cover-card__body {
+  padding: 18px 20px 20px;
+}
+
+body.app .cover-card__tag {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+body.app .cover-card__title {
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 6px;
+  letter-spacing: -0.005em;
+}
+
+body.app .cover-card__text {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+body.app .cover-card__footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--m-divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+body.app .cover-card__author {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .cover-card__author img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Pricing card */
+body.app .pricing-card {
+  padding: 28px 24px;
+  text-align: center;
+  position: relative;
+}
+
+body.app .pricing-card--featured {
+  border-color: var(--m-accent) !important;
+  box-shadow: 0 4px 24px rgba(var(--m-accent-rgb), 0.12);
+}
+
+body.app .pricing-card__badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--m-accent);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+body.app .pricing-card__tier {
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 6px;
+}
+
+body.app .pricing-card__price {
+  margin: 0;
+  font-family: var(--m-font);
+  color: var(--m-text);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+body.app .pricing-card__price small {
+  font-size: 14px;
+  color: var(--m-text-muted);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+body.app .pricing-card__period {
+  color: var(--m-text-faint);
+  font-size: 12.5px;
+  margin: 6px 0 18px;
+}
+
+body.app .pricing-card__features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.app .pricing-card__features li {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--m-text);
+}
+
+body.app .pricing-card__features li i {
+  color: var(--m-success);
+  margin-top: 2px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* Notification / status card */
+body.app .notice-card {
+  display: flex;
+  gap: 14px;
+  padding: 18px 20px;
+}
+
+body.app .notice-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+body.app .notice-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .notice-card__title {
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 4px;
+}
+
+body.app .notice-card__text {
+  font-family: var(--m-font);
+  font-size: 13px;
+  color: var(--m-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+body.app .notice-card__actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+body.app .notice-card--info .notice-card__icon {
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+}
+
+body.app .notice-card--success .notice-card__icon {
+  background: var(--m-success-soft);
+  color: var(--m-success);
+}
+
+body.app .notice-card--warning .notice-card__icon {
+  background: var(--m-warning-soft);
+  color: var(--m-warning);
+}
+
+body.app .notice-card--danger .notice-card__icon {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+/* List-group card */
+body.app .card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .card-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--m-divider);
+  transition: background 120ms ease;
+}
+
+body.app .card-list > li:last-child {
+  border-bottom: 0;
+}
+
+body.app .card-list > li:hover {
+  background: var(--m-surface-2);
+}
+
+body.app .card-list__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+body.app .card-list__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+body.app .card-list__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+}
+
+body.app .card-list__sub {
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  display: block;
+  margin-top: 2px;
+}
+
+body.app .card-list__meta {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+  flex-shrink: 0;
+}
+
+/* Mini stat card with sparkline (chart preview) */
+body.app .preview-card {
+  padding: 18px 20px 0;
+}
+
+body.app .preview-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+body.app .preview-card__label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--m-text-muted);
+  margin: 0;
+}
+
+body.app .preview-card__value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 4px 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app .preview-card__chart {
+  margin: 0 -20px;
+  height: 64px;
+  position: relative;
+}
+
+/* Outline accent card (left rail in brand color) */
+body.app .accent-card {
+  border-left: 4px solid var(--m-accent) !important;
+  padding: 18px 20px 18px 18px !important;
+}
+
+body.app .accent-card--success {
+  border-left-color: var(--m-success) !important;
+}
+
+body.app .accent-card--warning {
+  border-left-color: var(--m-warning) !important;
+}
+
+body.app .accent-card--danger {
+  border-left-color: var(--m-danger) !important;
+}
+
+/* ============================================================================
+   Comprehensive mobile refinements
+   ============================================================================ */
+/* ---------- Tablet & mobile (< 992px) ---------------------------------- */
+@media (max-width: 991.98px) {
+  /* Page padding tightened on smaller viewports */
+  body.app .main-content > .section__content--p30 {
+    padding: 16px 16px 40px;
+  }
+  /* Page header — stack the title and actions vertically on narrow
+     screens; let the actions wrap to a row of their own. */
+  body.app .page-header {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  body.app .page-header h1 {
+    font-size: 20px;
+  }
+  body.app .page-header .subtitle {
+    font-size: 13px;
+  }
+  body.app .page-header__actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  body.app .page-header__actions .m-btn,
+  body.app .page-header__actions .date-chip {
+    flex: 0 1 auto;
+  }
+  /* m-card header — let the right-side actions slide below the title on
+     narrow widths instead of crowding it. */
+  body.app .m-card__header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  body.app .m-card__header > div:first-child {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+  body.app .m-card {
+    padding: 16px;
+  }
+  body.app .stat-card {
+    padding: 14px 16px 0;
+  }
+  /* KPI strip cards — bottom-spacing when stacking */
+  body.app .row.row-tight > [class*=col-] {
+    margin-bottom: 12px;
+  }
+  body.app .row.row-tight > [class*=col-]:last-child {
+    margin-bottom: 0;
+  }
+  /* Tables — every legacy / modern table inside an m-card gets a
+     horizontal-scroll wrapper automatically. */
+  body.app .m-card > .m-table,
+  body.app .m-card > .table,
+  body.app .m-card > .table-top-countries,
+  body.app .m-card > .table-top-campaign {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  body.app .m-table th,
+  body.app .m-table td {
+    white-space: nowrap;
+  }
+  /* Charts — slightly shorter to feel proportional on portrait phones */
+  body.app .m-card > div[style*="height: 280px"],
+  body.app .m-card > section > div[style*="height: 280px"] {
+    height: 220px !important;
+  }
+  /* Pricing cards — drop the elevated featured-card glow on mobile */
+  body.app .pricing-card {
+    padding: 24px 18px;
+  }
+  body.app .pricing-card--featured {
+    box-shadow: var(--m-shadow-xs);
+  }
+  /* Cover-image cards — shorter cover image on phones */
+  body.app .cover-card__image {
+    height: 140px;
+  }
+  /* Inbox — stats can wrap freely */
+  body.app .inbox-stat {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+  }
+  /* Email row — drop the bulk-checkbox column on narrow viewports */
+  body.app .email-item {
+    grid-template-columns: 24px 36px 1fr auto;
+    column-gap: 10px;
+    padding: 10px 14px;
+  }
+  body.app .email-item__check {
+    display: none;
+  }
+  body.app .email-item__preview {
+    display: none;
+  }
+  body.app .email-item__sender .email-item__label {
+    display: none;
+  }
+  /* Filter selects in card headers — full-width row on mobile */
+  body.app .m-card__header .user-data.filters,
+  body.app .m-card__header .filters {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  body.app .m-card__header .user-data.filters .select-wrapper {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+  /* Forms — Bootstrap "row mb-3" form rows: tighter stacking */
+  body.app form .row.mb-3 > [class*=col-md-3] {
+    margin-bottom: 6px;
+  }
+  /* Project list — drop the avatar stack on very narrow widths so the
+     title + bar don't get crowded. */
+  body.app .project-list > li {
+    column-gap: 12px;
+  }
+  /* Footer copyright — center + smaller on phones */
+  body.app .copyright {
+    text-align: center;
+    padding: 0 8px;
+  }
+  /* Sidebar drawer — slightly larger drag-friendly close button */
+  body.app .sidebar-close {
+    width: 36px;
+    height: 36px;
+  }
+}
+/* ---------- Small phones (< 576px) ------------------------------------- */
+@media (max-width: 575.98px) {
+  /* Topbar — drop the search field on phones (use the sidebar nav instead) */
+  body.app .form-header {
+    display: none;
+  }
+  /* Topbar — collapse account chip to avatar-only */
+  body.app .account-item {
+    padding: 4px;
+    gap: 0;
+    margin-left: 4px;
+  }
+  body.app .account-item > .content {
+    display: none;
+  }
+  /* Notification bells — hide just the messages bell on tiny phones to
+     free room (keep emails + notifications which are usually more
+     actionable). */
+  body.app .header-button .noti-wrap > .noti__item:nth-child(1) {
+    display: none;
+  }
+  /* Sidebar toggle — slightly larger tap target on phones */
+  body.app .sidebar-toggle {
+    width: 40px;
+    height: 40px;
+    margin-right: 6px;
+  }
+  body.app .header-wrap {
+    padding: 0 10px 0 6px;
+  }
+  /* Page header — even smaller title */
+  body.app .page-header h1 {
+    font-size: 18px;
+  }
+  body.app .page-header .subtitle {
+    font-size: 12.5px;
+  }
+  body.app .page-header__actions .m-btn,
+  body.app .page-header__actions .date-chip {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+  /* Stat cards — smaller numbers + tighter padding */
+  body.app .stat-card {
+    padding: 12px 14px 0;
+  }
+  body.app .stat-card__value {
+    font-size: 22px;
+  }
+  body.app .stat-card__sparkline {
+    margin: 8px -14px 0;
+  }
+  /* m-card — lighter outer padding on phones */
+  body.app .m-card {
+    padding: 14px;
+  }
+  body.app .m-card__title {
+    font-size: 13.5px;
+  }
+  /* Inbox stats — full width each */
+  body.app .inbox-stat {
+    flex: 1 1 100%;
+  }
+  /* Inbox toolbar — drop the count summary on very narrow */
+  body.app .inbox-toolbar__count {
+    display: none;
+  }
+  body.app .inbox-toolbar {
+    padding: 10px 12px;
+  }
+  /* Email row — even tighter */
+  body.app .email-item {
+    padding: 10px 12px;
+    column-gap: 8px;
+  }
+  /* Profile / pricing / cover cards — full-width */
+  body.app .profile-card {
+    padding: 20px 16px;
+  }
+  body.app .pricing-card {
+    padding: 22px 16px;
+  }
+  /* Notification cards — icon shrinks */
+  body.app .notice-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  body.app .notice-card__icon {
+    width: 32px;
+    height: 32px;
+  }
+  /* Tables in dashboards — smaller font on phones */
+  body.app .m-table th,
+  body.app .m-table td {
+    font-size: 12.5px;
+    padding: 8px 0;
+  }
+  /* Activity / deadline / team lists — tighter row padding */
+  body.app .activity-item,
+  body.app .task-item,
+  body.app .deadline-list > li,
+  body.app .team-list > li {
+    padding: 8px 0;
+  }
+  body.app .activity-item__text,
+  body.app .task-item__title,
+  body.app .deadline-list__title {
+    font-size: 13px;
+  }
+  /* Section eyebrow */
+  body.app .section-eyebrow {
+    font-size: 10.5px;
+    margin-bottom: 6px;
+  }
+  /* Calendar — FullCalendar 7 handles its own responsive toolbar collapsing.
+     The v6 .fc-toolbar / .fc-toolbar-title overrides that used to live here
+     targeted class names that no longer exist in v7. */
+}
+/* ---------- Very narrow phones (< 380px) ------------------------------- */
+@media (max-width: 379.98px) {
+  body.app .page-header__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  body.app .page-header__actions .m-btn,
+  body.app .page-header__actions .date-chip {
+    width: 100%;
+    justify-content: center;
+  }
+  body.app .stat-card__delta-period {
+    display: none;
+  }
+}
+/* ============================================================================
+   Mobile topbar — clean rebuild
+   At < 992px the header gets a deliberately minimal layout:
+     [ ☰ Hamburger ]                                          [ avatar ]
+
+   Search, notification bells, and the account-name pill are dropped.
+   Reasoning:
+     - Search-from-anywhere isn't a phone pattern (no keyboard handy by default)
+     - Notification bells turn the header into a flea market on narrow widths
+       and the dropdowns punch off-screen (legacy CSS positions them with
+       `right: 0; min-width: 305px` which on a 360px viewport extends past
+       the left edge)
+     - Avatar + nav drawer is the standard modern dashboard pattern
+   The existing dropdowns still work via the account-wrap on mobile — no
+   functionality is lost, just visual noise.
+   ============================================================================ */
+@media (max-width: 991.98px) {
+  /* Header — keep it simple: hamburger left, avatar right, nothing in between */
+  body.app .header-desktop {
+    height: 60px;
+  }
+  body.app .main-content {
+    padding-top: 60px;
+  }
+  body.app .menu-sidebar__content {
+    height: calc(100vh - 60px);
+  }
+  body.app .header-wrap {
+    height: 60px;
+    padding: 0 12px;
+    gap: 0;
+    justify-content: space-between;
+  }
+  /* Hamburger — slightly larger tap target */
+  body.app .sidebar-toggle {
+    width: 40px;
+    height: 40px;
+    margin-right: 0;
+    flex-shrink: 0;
+  }
+  /* Search — gone */
+  body.app .form-header {
+    display: none !important;
+  }
+  /* The action group is just the avatar on mobile */
+  body.app .header-button {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-left: 0;
+  }
+  /* Notification bells — gone on mobile (still accessible inside the
+     account dropdown / sidebar) */
+  body.app .header-button .noti-wrap {
+    display: none !important;
+  }
+  /* Account chip — avatar only, no name, no chevron */
+  body.app .account-wrap {
+    position: relative;
+  }
+  body.app .account-item {
+    height: 40px;
+    padding: 4px;
+    gap: 0;
+    margin: 0;
+    background: transparent;
+  }
+  body.app .account-item:hover {
+    background: var(--m-surface-2);
+  }
+  body.app .account-item .image {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px;
+    margin: 0;
+  }
+  body.app .account-item > .content {
+    display: none;
+  }
+  /* Account dropdown — anchor it to the viewport edge so it never
+     punches off-screen on narrow phones. The dropdown is `position: absolute`
+     relative to `.account-wrap`; we make `.account-wrap` align to the
+     header's right edge so the dropdown sits flush right and shrinks to
+     fit any phone width. */
+  body.app .account-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    left: auto;
+    width: min(320px, 100vw - 24px);
+    max-width: calc(100vw - 24px);
+    margin-top: 0;
+  }
+}
+/* Small phones — keep the same minimal pattern but tighten paddings */
+@media (max-width: 575.98px) {
+  body.app .header-wrap {
+    padding: 0 8px;
+  }
+  body.app .sidebar-toggle {
+    width: 38px;
+    height: 38px;
+  }
+  body.app .account-item .image {
+    width: 30px !important;
+    height: 30px !important;
+    flex: 0 0 30px;
+  }
+}
+/* ============================================================================
+   FINAL — mobile topbar lockdown (defeats every earlier media query)
+   This block sits at the end of the file and uses `!important` on all
+   layout-critical properties so the cascade can't undo it. Earlier
+   fragmented mobile rules are still present but are superseded here.
+   ============================================================================ */
+@media (max-width: 991.98px) {
+  /* ---- The outer header bar ---- */
+  body.app .header-desktop {
+    display: flex !important;
+    align-items: center !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid var(--m-border) !important;
+    box-shadow: none !important;
+    z-index: 1000 !important;
+    padding: 0 !important;
+  }
+  body.app .header-desktop > .section__content,
+  body.app .header-desktop .section__content--p30 {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  body.app .header-desktop .container-fluid {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+  /* ---- Inner row: hamburger LEFT, avatar RIGHT ---- */
+  body.app .header-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 60px !important;
+    padding: 0 12px !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+  /* ---- Hamburger ---- */
+  body.app .header-wrap .sidebar-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+    color: var(--m-text-muted) !important;
+    cursor: pointer !important;
+  }
+  body.app .header-wrap .sidebar-toggle:hover {
+    background: var(--m-surface-2) !important;
+    color: var(--m-text) !important;
+  }
+  /* ---- Hide search field entirely on mobile ---- */
+  body.app .header-wrap .form-header {
+    display: none !important;
+  }
+  /* ---- Right-side action group ---- */
+  body.app .header-wrap .header-button {
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    margin-left: auto !important;
+    gap: 0 !important;
+  }
+  /* ---- Hide notification bells on mobile (they live inside the sidebar
+          drawer if needed). Their dropdowns punch off-screen anyway. ---- */
+  body.app .header-wrap .header-button .noti-wrap {
+    display: none !important;
+  }
+  /* ---- Account chip — avatar only, no name, no chevron ---- */
+  body.app .header-wrap .account-wrap {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+  body.app .header-wrap .account-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 4px !important;
+    margin: 0 !important;
+    gap: 0 !important;
+    background: transparent !important;
+    border-radius: 999px !important;
+    cursor: pointer !important;
+  }
+  body.app .header-wrap .account-item:hover {
+    background: var(--m-surface-2) !important;
+  }
+  body.app .header-wrap .account-item .image {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+  }
+  body.app .header-wrap .account-item .image > img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    margin: 0 !important;
+  }
+  body.app .header-wrap .account-item > .content,
+  body.app .header-wrap .account-item > .content > a {
+    display: none !important;
+  }
+  /* ---- Account dropdown — anchor to viewport edge so it never overflows ---- */
+  body.app .account-dropdown {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(320px, 100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin: 0 !important;
+  }
+  /* ---- Pad main content for the 60px fixed header ---- */
+  body.app .main-content {
+    padding-top: 60px !important;
+  }
+  body.app .menu-sidebar__content {
+    height: calc(100vh - 60px) !important;
+  }
+  /* ---- Always-suppress the legacy mobile header / mobile-nav ---- */
+  body.app .header-mobile,
+  body.app .navbar-mobile {
+    display: none !important;
+  }
+}
+/* ============================================================================
+   Hamburger button — Font Awesome bars icon styling
+   The legacy CSS-drawn `<span class="sidebar-toggle__bars">` was replaced
+   with `<i class="fa-solid fa-bars">` for predictable cross-browser rendering.
+   ============================================================================ */
+body.app .sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.app .sidebar-toggle > i {
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+
+/* Mobile-specific hamburger: a touch larger so the tap target reads well */
+@media (max-width: 991.98px) {
+  body.app .header-wrap .sidebar-toggle > i {
+    font-size: 18px !important;
+    line-height: 1 !important;
+    color: var(--m-text) !important;
+  }
+}
+/* ============================================================================
+   ULTRA-FINAL header layout fix — replace flex on .header-desktop with grid
+   on .header-wrap. Eliminates the "section__content collapses to natural
+   width" issue that was making the hamburger center and the avatar drop
+   to a second row.
+   ============================================================================ */
+/* Reset .header-desktop — block-level (NOT flex), pinned to top.
+   `left` is intentionally NOT reset here because desktop needs `left: 260px`
+   (set earlier) to clear the sidebar; only mobile pulls it back to 0
+   (handled by the @media (max-width: 991.98px) rule above). */
+body.app .header-desktop {
+  display: block !important;
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 64px !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--m-border) !important;
+  box-shadow: none !important;
+  z-index: 1000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Mobile: header spans full width (no sidebar gutter). */
+@media (max-width: 991.98px) {
+  body.app .header-desktop {
+    left: 0 !important;
+  }
+}
+/* Inner wrappers — full-width, no padding so .header-wrap owns its layout */
+body.app .header-desktop > .section__content,
+body.app .header-desktop .section__content,
+body.app .header-desktop .section__content--p30 {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body.app .header-desktop .container-fluid {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* The actual layout — CSS Grid with three columns:
+     [hamburger]  [search/flex space]  [actions] */
+body.app .header-wrap {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  column-gap: 12px !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  padding: 0 16px !important;
+  margin: 0 !important;
+}
+
+/* Each direct child sits in its own column */
+body.app .header-wrap > .sidebar-toggle {
+  grid-column: 1 !important;
+  justify-self: start !important;
+}
+
+body.app .header-wrap > .form-header {
+  grid-column: 2 !important;
+  justify-self: stretch !important;
+  margin: 0 !important;
+}
+
+body.app .header-wrap > .header-button {
+  grid-column: 3 !important;
+  justify-self: end !important;
+  margin: 0 !important;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 991.98px) {
+  body.app .header-desktop {
+    height: 60px !important;
+  }
+  body.app .main-content {
+    padding-top: 60px !important;
+  }
+  body.app .menu-sidebar__content {
+    height: calc(100vh - 60px) !important;
+  }
+  body.app .header-wrap {
+    padding: 0 12px !important;
+    column-gap: 8px !important;
+  }
+  /* Form-header (search) is hidden on mobile; the 1fr middle column
+     is still there to push the right group to the right edge. */
+  body.app .header-wrap > .form-header {
+    display: none !important;
+  }
+  /* Hide notification bells inside the header-button on mobile */
+  body.app .header-wrap > .header-button .noti-wrap {
+    display: none !important;
+  }
+  /* Account chip — avatar only on mobile */
+  body.app .header-wrap > .header-button .account-item > .content {
+    display: none !important;
+  }
+}
+/* ============================================================================
+   Mobile header — restore notification cluster
+   The grid layout above keeps things deterministic; we can safely show the
+   3 bells now, just need to make sure their dropdowns don't punch off the
+   left edge of narrow phones (legacy CSS positions them with a 320px width
+   anchored to a 38px bell).
+   ============================================================================ */
+@media (max-width: 991.98px) {
+  /* Show the bells again — overrides the earlier `display: none` rules */
+  body.app .header-wrap > .header-button .noti-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+  /* Compact bell sizing on mobile so 3 bells + avatar fit alongside the
+     hamburger comfortably even on a 360px phone */
+  body.app .header-wrap .noti__item {
+    width: 36px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  body.app .header-wrap .noti__item > i {
+    font-size: 15px !important;
+  }
+  body.app .header-wrap .noti__item .quantity {
+    top: 6px !important;
+    right: 6px !important;
+  }
+  /* Account avatar — stays on the right after the bells */
+  body.app .header-wrap .header-button {
+    gap: 2px !important;
+  }
+  /* All 4 dropdown panels (messages / emails / notifications / account) —
+     on mobile, render them as a fixed sheet that sits below the header
+     at full width minus 12px gutters. This avoids the legacy
+     `position: absolute; right: 0; min-width: 320px` punching off the
+     left edge of narrow viewports. */
+  body.app .noti__item .mess-dropdown,
+  body.app .noti__item .email-dropdown,
+  body.app .noti__item .notifi-dropdown,
+  body.app .account-wrap .account-dropdown {
+    position: fixed !important;
+    top: 66px !important; /* 60px header + 6px gap */
+    left: 12px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    max-height: calc(100vh - 80px) !important;
+    overflow-y: auto !important;
+    z-index: 1100 !important;
+  }
+  /* Drop the little CSS triangle arrows entirely on mobile (they don't
+     point at anything sensible when the dropdown is full-width). */
+  body.app .mess-dropdown:before,
+  body.app .email-dropdown:before,
+  body.app .notifi-dropdown:before,
+  body.app .account-dropdown:after {
+    display: none !important;
+  }
+}
+/* Tiny phones — drop the messages bell to save space (keep emails + notifications) */
+@media (max-width: 419.98px) {
+  body.app .header-wrap .noti-wrap > .noti__item:first-child {
+    display: none !important;
+  }
+}
+/* ============================================================================
+   Toast notifications
+   API (in main-vanilla.js): toast.show({title, message, type, duration})
+   Convenience: toast.success(msg), .info(msg), .warning(msg), .error(msg)
+   ============================================================================ */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 360px;
+  max-width: 100%;
+  padding: 12px 14px 12px 14px;
+  background: var(--m-surface, #fff);
+  border: 1px solid var(--m-border, #e4e7ec);
+  border-left-width: 4px;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 200ms ease, transform 200ms ease;
+  font-family: var(--m-font, system-ui);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast.is-leaving {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.toast__icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.toast__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast__title {
+  margin: 0 0 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--m-text, #1f2937);
+  line-height: 1.3;
+}
+
+.toast__message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--m-text-muted, #475569);
+  line-height: 1.45;
+}
+
+.toast__close {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  border-radius: 4px;
+  color: var(--m-text-faint, #94a3b8);
+  cursor: pointer;
+  margin: -2px -2px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast__close:hover {
+  background: var(--m-surface-2, #f8fafc);
+  color: var(--m-text, #1f2937);
+}
+
+.toast--success {
+  border-left-color: var(--m-success, #10b981);
+}
+
+.toast--success .toast__icon {
+  background: var(--m-success-soft, #ecfdf5);
+  color: var(--m-success, #10b981);
+}
+
+.toast--info {
+  border-left-color: var(--m-accent, #4272d7);
+}
+
+.toast--info .toast__icon {
+  background: var(--m-accent-soft, #eaf0fc);
+  color: var(--m-accent, #4272d7);
+}
+
+.toast--warning {
+  border-left-color: var(--m-warning, #f59e0b);
+}
+
+.toast--warning .toast__icon {
+  background: var(--m-warning-soft, #fffbeb);
+  color: var(--m-warning, #f59e0b);
+}
+
+.toast--error {
+  border-left-color: var(--m-danger, #ef4444);
+}
+
+.toast--error .toast__icon {
+  background: var(--m-danger-soft, #fef2f2);
+  color: var(--m-danger, #ef4444);
+}
+
+@media (max-width: 575.98px) {
+  .toast-container {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .toast {
+    width: 100%;
+  }
+}
+/* ============================================================================
+   Empty states
+   ============================================================================ */
+body.app .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--m-text-muted);
+}
+
+body.app .empty-state__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+body.app .empty-state__title {
+  font-family: var(--m-font);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 4px;
+}
+
+body.app .empty-state__text {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text-muted);
+  margin: 0 0 16px;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+body.app .empty-state__actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* ============================================================================
+   Loading skeletons
+   ============================================================================ */
+body.app .skeleton {
+  background: linear-gradient(90deg, #f1f3f5 0%, #e9ecef 50%, #f1f3f5 100%);
+  background-size: 200% 100%;
+  animation: skel-pulse 1.4s ease-in-out infinite;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+@keyframes skel-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+body.app .skeleton-line {
+  height: 12px;
+  width: 100%;
+  border-radius: 4px;
+}
+
+body.app .skeleton-line--short {
+  width: 60%;
+}
+
+body.app .skeleton-line--xshort {
+  width: 40%;
+}
+
+body.app .skeleton-circle {
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+body.app .skeleton-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .skeleton-row:last-child {
+  border-bottom: 0;
+}
+
+/* ============================================================================
+   Command palette (Cmd+K)
+   ============================================================================ */
+.cmdk-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 16px 16px;
+}
+
+.cmdk-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cmdk-panel {
+  width: 100%;
+  max-width: 560px;
+  background: var(--m-surface, #fff);
+  border: 1px solid var(--m-border, #e4e7ec);
+  border-radius: 14px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+  overflow: hidden;
+  transform: translateY(-8px) scale(0.98);
+  transition: transform 160ms ease;
+  font-family: var(--m-font, system-ui);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 96px);
+}
+
+.cmdk-overlay.is-open .cmdk-panel {
+  transform: translateY(0) scale(1);
+}
+
+.cmdk-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--m-divider, #f1f3f5);
+}
+
+.cmdk-input-wrap > i {
+  color: var(--m-text-faint, #94a3b8);
+  font-size: 14px;
+}
+
+.cmdk-input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--m-text, #1f2937);
+  padding: 0;
+}
+
+.cmdk-input::placeholder {
+  color: var(--m-text-faint, #94a3b8);
+}
+
+.cmdk-hint {
+  background: var(--m-surface-2, #f8fafc);
+  border: 1px solid var(--m-border, #e4e7ec);
+  border-radius: 4px;
+  color: var(--m-text-faint, #94a3b8);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.cmdk-results {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cmdk-section {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m-text-faint, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--m-text, #1f2937);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.cmdk-item.is-active,
+.cmdk-item:hover {
+  background: var(--m-surface-2, #f8fafc);
+}
+
+.cmdk-item__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--m-accent-soft, #eaf0fc);
+  color: var(--m-accent, #4272d7);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.cmdk-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cmdk-item__title {
+  font-weight: 500;
+}
+
+.cmdk-item__sub {
+  font-size: 12px;
+  color: var(--m-text-faint, #94a3b8);
+  margin-top: 1px;
+}
+
+.cmdk-item__meta {
+  color: var(--m-text-faint, #94a3b8);
+  font-size: 11.5px;
+}
+
+.cmdk-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--m-text-faint, #94a3b8);
+  font-size: 13px;
+}
+
+.cmdk-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--m-divider, #f1f3f5);
+  color: var(--m-text-faint, #94a3b8);
+  font-size: 11.5px;
+  background: var(--m-surface-2, #f8fafc);
+}
+
+.cmdk-footer kbd {
+  background: var(--m-surface, #fff);
+  border: 1px solid var(--m-border, #e4e7ec);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 10.5px;
+  margin: 0 2px;
+}
+
+/* ============================================================================
+   Error / status pages (404, 500, maintenance)
+   ============================================================================ */
+body.app.error-page {
+  background: linear-gradient(135deg, #eaf0fc 0%, #f4f6fa 50%, #fce7f3 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+body.app .error-card {
+  width: 100%;
+  max-width: 540px;
+  background: #ffffff;
+  border: 1px solid var(--m-border);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+  padding: 40px 36px;
+  text-align: center;
+}
+
+body.app .error-card__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  margin-bottom: 24px;
+}
+
+body.app .error-card__code {
+  font-family: var(--m-font);
+  font-size: 96px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(135deg, #4272d7 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 12px;
+}
+
+body.app .error-card__icon {
+  font-size: 56px;
+  color: var(--m-accent);
+  margin-bottom: 16px;
+}
+
+body.app .error-card__title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--m-text);
+  margin: 0 0 8px;
+}
+
+body.app .error-card__text {
+  font-size: 14px;
+  color: var(--m-text-muted);
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+body.app .error-card__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+body.app .error-card__hint {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--m-divider);
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .error-card__hint a {
+  color: var(--m-accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+body.app .error-card__hint a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================================
+   Settings page — tabs + notification toggle rows
+   ============================================================================ */
+body.app .settings-tabs {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border: 0;
+}
+
+body.app .settings-tabs .nav-link {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--m-text-muted);
+  padding: 10px 16px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+
+body.app .settings-tabs .nav-link i {
+  font-size: 13px;
+  color: var(--m-text-faint);
+}
+
+body.app .settings-tabs .nav-link:hover {
+  color: var(--m-text);
+  background: var(--m-surface-2);
+}
+
+body.app .settings-tabs .nav-link.active {
+  color: var(--m-accent) !important;
+  border-bottom-color: var(--m-accent);
+  background: transparent;
+}
+
+body.app .settings-tabs .nav-link.active i {
+  color: var(--m-accent);
+}
+
+/* Notification toggle rows */
+body.app .notif-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+body.app .notif-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .notif-row:last-child {
+  border-bottom: 0;
+}
+
+body.app .notif-row__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 0 0 2px;
+}
+
+body.app .notif-row__sub {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+  margin: 0;
+}
+
+/* ============================================================================
+   Kanban board
+   ============================================================================ */
+body.app .kanban-board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 4px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.app .kanban-col {
+  flex: 0 0 320px;
+  min-width: 280px;
+  max-width: 360px;
+  background: var(--m-surface-2);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 220px);
+}
+
+body.app .kanban-col__header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--m-divider);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+body.app .kanban-col__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+body.app .kanban-col__count {
+  background: var(--m-divider);
+  color: var(--m-text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+body.app .kanban-col__rail {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+body.app .kanban-col__rail--backlog {
+  background: var(--m-text-faint);
+}
+
+body.app .kanban-col__rail--progress {
+  background: var(--m-accent);
+}
+
+body.app .kanban-col__rail--review {
+  background: var(--m-warning);
+}
+
+body.app .kanban-col__rail--done {
+  background: var(--m-success);
+}
+
+body.app .kanban-col__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body.app .kanban-col__list.is-drop-target {
+  background: rgba(var(--m-accent-rgb), 0.06);
+}
+
+body.app .kanban-col__add {
+  padding: 10px 12px;
+  border-top: 1px solid var(--m-divider);
+}
+
+body.app .kanban-col__add button {
+  width: 100%;
+  border: 1px dashed var(--m-border);
+  background: transparent;
+  color: var(--m-text-muted);
+  padding: 8px;
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+body.app .kanban-col__add button:hover {
+  border-color: var(--m-accent);
+  color: var(--m-accent);
+}
+
+body.app .kanban-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: grab;
+  box-shadow: var(--m-shadow-xs);
+  transition: box-shadow 120ms ease, transform 120ms ease;
+}
+
+body.app .kanban-card:hover {
+  box-shadow: var(--m-shadow-sm);
+}
+
+body.app .kanban-card.is-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+body.app .kanban-card__labels {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+body.app .kanban-card__label {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.app .kanban-card__label--bug {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+body.app .kanban-card__label--feature {
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+}
+
+body.app .kanban-card__label--design {
+  background: var(--m-c4-soft);
+  color: var(--m-c4);
+}
+
+body.app .kanban-card__label--docs {
+  background: var(--m-c2-soft);
+  color: var(--m-c2);
+}
+
+body.app .kanban-card__label--research {
+  background: var(--m-c3-soft);
+  color: var(--m-c3);
+}
+
+body.app .kanban-card__title {
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+body.app .kanban-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+body.app .kanban-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+}
+
+body.app .kanban-card__meta i {
+  font-size: 11px;
+  margin-right: 3px;
+}
+
+body.app .kanban-card__avatars img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--m-surface);
+  margin-left: -6px;
+  object-fit: cover;
+}
+
+body.app .kanban-card__avatars img:first-child {
+  margin-left: 0;
+}
+
+/* ============================================================================
+   Pricing page (marketing-style)
+   ============================================================================ */
+body.app .pricing-hero {
+  text-align: center;
+  padding: 24px 16px 32px;
+}
+
+body.app .pricing-hero h1 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #4272d7 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0 0 12px;
+}
+
+body.app .pricing-hero p {
+  color: var(--m-text-muted);
+  font-size: 16px;
+  max-width: 540px;
+  margin: 0 auto 24px;
+  line-height: 1.5;
+}
+
+body.app .pricing-toggle {
+  display: inline-flex;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: var(--m-shadow-xs);
+}
+
+body.app .pricing-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text-muted);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--m-font);
+}
+
+body.app .pricing-toggle button.is-active {
+  background: var(--m-accent);
+  color: #fff;
+}
+
+body.app .pricing-toggle button .save-badge {
+  background: var(--m-success-soft);
+  color: var(--m-success);
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  font-weight: 600;
+}
+
+body.app .pricing-toggle button.is-active .save-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+body.app .pricing-faq summary {
+  cursor: pointer;
+  padding: 14px 0;
+  font-weight: 500;
+  color: var(--m-text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .pricing-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+body.app .pricing-faq summary::after {
+  content: "\f078";
+  font-family: "Font Awesome 7 Free";
+  font-weight: 900;
+  font-size: 11px;
+  color: var(--m-text-faint);
+  transition: transform 200ms ease;
+}
+
+body.app .pricing-faq details[open] summary::after {
+  transform: rotate(180deg);
+}
+
+body.app .pricing-faq details[open] summary {
+  color: var(--m-accent);
+}
+
+body.app .pricing-faq p {
+  padding: 12px 0 16px;
+  margin: 0;
+  color: var(--m-text-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   Invoice page
+   ============================================================================ */
+body.app .invoice-doc {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 48px;
+  box-shadow: var(--m-shadow-xs);
+}
+
+body.app .invoice-doc__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .invoice-doc__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.app .invoice-doc__brand .logo-mark {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+body.app .invoice-doc__brand .logo-text {
+  font-size: 22px;
+}
+
+body.app .invoice-doc__title-wrap {
+  text-align: right;
+}
+
+body.app .invoice-doc__title-wrap h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--m-text);
+}
+
+body.app .invoice-doc__title-wrap p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--m-text-muted);
+}
+
+body.app .invoice-doc__parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+body.app .invoice-doc__party h6 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 8px;
+}
+
+body.app .invoice-doc__party p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--m-text);
+  line-height: 1.5;
+}
+
+body.app .invoice-doc__party strong {
+  color: var(--m-text);
+  display: block;
+  margin-bottom: 4px;
+}
+
+body.app .invoice-doc__lines {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+body.app .invoice-doc__lines thead th {
+  background: var(--m-surface-2);
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--m-border);
+}
+
+body.app .invoice-doc__lines tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--m-divider);
+  font-size: 13.5px;
+  color: var(--m-text);
+  vertical-align: top;
+}
+
+body.app .invoice-doc__lines tbody td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app .invoice-doc__totals {
+  margin-left: auto;
+  width: 320px;
+  max-width: 100%;
+}
+
+body.app .invoice-doc__totals tr td {
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .invoice-doc__totals tr td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--m-text);
+  font-weight: 500;
+}
+
+body.app .invoice-doc__totals tr.invoice-doc__grand td {
+  border-top: 1px solid var(--m-border);
+  padding-top: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--m-text);
+}
+
+body.app .invoice-doc__notes {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--m-divider);
+  color: var(--m-text-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* Print stylesheet — clean, no chrome */
+@media print {
+  body.app .menu-sidebar,
+  body.app .header-desktop,
+  body.app .page-header,
+  body.app .copyright,
+  body.app .invoice-actions {
+    display: none !important;
+  }
+  body.app .page-container {
+    padding-left: 0 !important;
+  }
+  body.app .main-content {
+    padding-top: 0 !important;
+  }
+  body.app .invoice-doc {
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
+/* ============================================================================
+   Multi-step wizard
+   ============================================================================ */
+body.app .wizard {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+body.app .wizard__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+body.app .wizard__step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+body.app .wizard__step:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--m-divider);
+  margin: 0 8px;
+}
+
+body.app .wizard__step.is-complete:not(:last-child)::after,
+body.app .wizard__step.is-active:not(:last-child)::after {
+  background: var(--m-accent);
+}
+
+body.app .wizard__circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--m-surface-2);
+  color: var(--m-text-muted);
+  border: 2px solid var(--m-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+body.app .wizard__step.is-active .wizard__circle {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(var(--m-accent-rgb), 0.15);
+}
+
+body.app .wizard__step.is-complete .wizard__circle {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+  color: #fff;
+}
+
+body.app .wizard__label {
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text-muted);
+  line-height: 1.2;
+}
+
+body.app .wizard__step.is-active .wizard__label,
+body.app .wizard__step.is-complete .wizard__label {
+  color: var(--m-text);
+}
+
+body.app .wizard__sublabel {
+  display: block;
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+body.app .wizard__panel {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 28px;
+  box-shadow: var(--m-shadow-xs);
+}
+
+body.app .wizard__nav {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+@media (max-width: 575.98px) {
+  body.app .wizard__step .wizard__label {
+    display: none;
+  }
+  body.app .wizard__step:last-child .wizard__label {
+    display: block;
+  }
+}
+/* ============================================================================
+   Working data-table demo (sort/filter/paginate)
+   ============================================================================ */
+body.app .dt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+body.app .dt-search {
+  position: relative;
+  flex: 1 1 240px;
+  max-width: 320px;
+}
+
+body.app .dt-search input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text);
+  outline: none;
+}
+
+body.app .dt-search input:focus {
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+body.app .dt-search i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--m-text-faint);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+body.app .dt-table th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+
+body.app .dt-table th[data-sort]::after {
+  content: "\f0dc";
+  font-family: "Font Awesome 7 Free";
+  font-weight: 900;
+  font-size: 9px;
+  color: var(--m-text-faint);
+  margin-left: 6px;
+  opacity: 0.5;
+}
+
+body.app .dt-table th[data-sort].dt-sort-asc::after {
+  content: "\f0d8";
+  opacity: 1;
+  color: var(--m-accent);
+}
+
+body.app .dt-table th[data-sort].dt-sort-desc::after {
+  content: "\f0d7";
+  opacity: 1;
+  color: var(--m-accent);
+}
+
+body.app .dt-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+body.app .dt-pagination__info {
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .dt-pagination__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+body.app .dt-pagination__nav button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--m-border);
+  background: var(--m-surface);
+  color: var(--m-text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--m-font);
+}
+
+body.app .dt-pagination__nav button.is-active {
+  background: var(--m-accent);
+  border-color: var(--m-accent);
+  color: #fff;
+}
+
+body.app .dt-pagination__nav button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+body.app .dt-pagination__nav button:hover:not(:disabled):not(.is-active) {
+  background: var(--m-surface-2);
+}
+
+/* ============================================================================
+   Color theme presets
+   The accent color cascade is driven by `--m-accent`, `--m-accent-rgb`,
+   `--m-accent-hover`, `--m-accent-soft`. Any element using these variables
+   reskins automatically. Apply a `theme-{name}` class on <body> to switch.
+   ============================================================================ */
+/* Blue (default — already set via the base :root tokens, but make explicit) */
+body.app.theme-blue {
+  --m-accent: #4272d7;
+  --m-accent-rgb: 66, 114, 215;
+  --m-accent-hover: #355cb8;
+  --m-accent-soft: #eaf0fc;
+}
+
+body.app.theme-purple {
+  --m-accent: #7c3aed;
+  --m-accent-rgb: 124, 58, 237;
+  --m-accent-hover: #6b2fd0;
+  --m-accent-soft: #ede9fe;
+}
+
+body.app.theme-teal {
+  --m-accent: #0d9488;
+  --m-accent-rgb: 13, 148, 136;
+  --m-accent-hover: #0a7d72;
+  --m-accent-soft: #ccfbf1;
+}
+
+body.app.theme-rose {
+  --m-accent: #e11d48;
+  --m-accent-rgb: 225, 29, 72;
+  --m-accent-hover: #be1239;
+  --m-accent-soft: #ffe4e6;
+}
+
+body.app.theme-amber {
+  --m-accent: #d97706;
+  --m-accent-rgb: 217, 119, 6;
+  --m-accent-hover: #b86204;
+  --m-accent-soft: #fef3c7;
+}
+
+body.app.theme-graphite {
+  --m-accent: #334155;
+  --m-accent-rgb: 51, 65, 85;
+  --m-accent-hover: #1f2937;
+  --m-accent-soft: #e2e8f0;
+}
+
+/* Sidebar variants — the dark navy uses brand blue accents in the active state.
+   For non-blue themes the sidebar accent border / icon should follow the new
+   brand. The :root cascade handles most of this through `var(--m-accent)`. */
+/* Logo mark — gradient based on the active accent + a softer companion */
+body.app .menu-sidebar .logo .logo-mark {
+  background: linear-gradient(135deg, var(--m-accent) 0%, var(--m-accent-hover) 100%);
+  box-shadow: 0 4px 12px rgba(var(--m-accent-rgb), 0.35);
+}
+
+body.app .auth-page .auth-brand .logo-mark,
+body.app .invoice-doc__brand .logo-mark,
+body.app .error-card .logo-mark,
+body.app .cmdk-item__icon {
+  background: linear-gradient(135deg, var(--m-accent) 0%, var(--m-accent-hover) 100%);
+  box-shadow: 0 4px 12px rgba(var(--m-accent-rgb), 0.35);
+}
+
+/* ============================================================================
+   Theme switcher (floating bottom-right widget)
+   ============================================================================ */
+.theme-switcher {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.theme-switcher__toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--m-accent, #4272d7);
+  color: #fff;
+  border: 0;
+  box-shadow: 0 8px 24px rgba(var(--m-accent-rgb, 66, 114, 215), 0.4);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.theme-switcher__toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(var(--m-accent-rgb, 66, 114, 215), 0.5);
+}
+
+.theme-switcher__toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-switcher__panel {
+  background: var(--m-surface, #fff);
+  border: 1px solid var(--m-border, #e4e7ec);
+  border-radius: 14px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+  padding: 16px;
+  width: 240px;
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+  transform-origin: bottom right;
+  font-family: var(--m-font, system-ui);
+}
+
+.theme-switcher.is-open .theme-switcher__panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.theme-switcher__title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--m-text-faint, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 12px;
+}
+
+.theme-switcher__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.theme-switcher__swatch {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 120ms ease;
+  position: relative;
+}
+
+.theme-switcher__swatch:hover {
+  transform: scale(1.06);
+}
+
+.theme-switcher__swatch-color {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.theme-switcher__swatch.is-active .theme-switcher__swatch-color {
+  border-color: var(--m-text, #1f2937);
+  box-shadow: 0 0 0 2px var(--m-surface, #fff), 0 0 0 4px var(--m-text, #1f2937);
+}
+
+.theme-switcher__swatch-label {
+  display: block;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--m-text-muted, #475569);
+  margin-top: 4px;
+  text-transform: capitalize;
+}
+
+.theme-switcher__swatch.is-active .theme-switcher__swatch-label {
+  color: var(--m-text, #1f2937);
+  font-weight: 600;
+}
+
+@media (max-width: 575.98px) {
+  .theme-switcher {
+    bottom: 12px;
+    right: 12px;
+  }
+  .theme-switcher__panel {
+    width: 220px;
+  }
+}
+/* ============================================================================
+   Docs page — sticky TOC + scrollable content
+   ============================================================================ */
+body.app .docs-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+body.app .docs-toc {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+body.app .docs-toc__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 12px;
+}
+
+body.app .docs-toc__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+body.app .docs-toc__list a {
+  display: block;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text-muted);
+  text-decoration: none;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+body.app .docs-toc__list a:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .docs-toc__list a.is-active {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  border-left-color: var(--m-accent);
+}
+
+body.app .docs-content {
+  max-width: 820px;
+  min-width: 0;
+}
+
+body.app .docs-section {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 28px;
+  margin-bottom: 16px;
+  box-shadow: var(--m-shadow-xs);
+  scroll-margin-top: 80px;
+}
+
+body.app .docs-content h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.app .docs-content h2 .anchor {
+  color: var(--m-text-faint);
+  font-size: 14px;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+body.app .docs-content h2:hover .anchor {
+  opacity: 1;
+}
+
+body.app .docs-content h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 24px 0 8px;
+}
+
+body.app .docs-content p {
+  color: var(--m-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+body.app .docs-content ul,
+body.app .docs-content ol {
+  color: var(--m-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  padding-left: 22px;
+  margin: 0 0 12px;
+}
+
+body.app .docs-content li {
+  margin-bottom: 6px;
+}
+
+body.app .docs-content li code,
+body.app .docs-content p code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  background: var(--m-surface-2);
+  color: var(--m-accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--m-border);
+}
+
+body.app .docs-content pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 16px 20px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 12px 0;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  position: relative;
+}
+
+body.app .docs-content pre code {
+  background: transparent;
+  color: inherit;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+body.app .docs-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--m-font);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+body.app .docs-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+body.app .docs-content kbd {
+  background: var(--m-surface-2);
+  border: 1px solid var(--m-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11.5px;
+  font-family: var(--m-font);
+  font-weight: 500;
+  color: var(--m-text);
+}
+
+body.app .docs-content blockquote {
+  border-left: 3px solid var(--m-accent);
+  background: var(--m-accent-soft);
+  padding: 12px 16px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 13.5px;
+  color: var(--m-text);
+}
+
+body.app .docs-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+body.app .docs-content blockquote strong {
+  color: var(--m-accent);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+body.app .docs-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13.5px;
+}
+
+body.app .docs-content table th,
+body.app .docs-content table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .docs-content table th {
+  background: var(--m-surface-2);
+  font-weight: 600;
+  color: var(--m-text);
+  font-size: 12.5px;
+}
+
+body.app .docs-content table td {
+  color: var(--m-text);
+}
+
+body.app .docs-content table td code {
+  font-size: 12px;
+}
+
+@media (max-width: 991.98px) {
+  body.app .docs-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  body.app .docs-toc {
+    position: static;
+    max-height: none;
+    order: -1;
+    background: var(--m-surface);
+    border: 1px solid var(--m-border);
+    border-radius: var(--m-radius);
+    padding: 16px;
+  }
+}
+/* ============================================================================
+   Notifications page — date-grouped activity log
+   ============================================================================ */
+body.app .notif-day {
+  margin-bottom: 24px;
+}
+
+body.app .notif-day__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 8px;
+}
+
+body.app .notif-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.app .notif-list > li {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  transition: border-color 120ms ease;
+  cursor: pointer;
+}
+
+body.app .notif-list > li:hover {
+  border-color: var(--m-accent);
+}
+
+body.app .notif-list > li.is-unread {
+  border-left: 3px solid var(--m-accent);
+  padding-left: 13px;
+}
+
+body.app .notif-list__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.app .notif-list__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+body.app .notif-list__icon--info {
+  background: var(--m-c1-soft);
+  color: var(--m-c1);
+}
+
+body.app .notif-list__icon--success {
+  background: var(--m-success-soft);
+  color: var(--m-success);
+}
+
+body.app .notif-list__icon--warning {
+  background: var(--m-warning-soft);
+  color: var(--m-warning);
+}
+
+body.app .notif-list__icon--danger {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+body.app .notif-list__body {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .notif-list__text {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--m-text);
+  line-height: 1.45;
+}
+
+body.app .notif-list__text b {
+  font-weight: 600;
+}
+
+body.app .notif-list__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--m-text-faint);
+}
+
+body.app .notif-list__chip {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.app .notif-list__chip--mention {
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+}
+
+body.app .notif-list__chip--system {
+  background: var(--m-surface-2);
+  color: var(--m-text-muted);
+}
+
+body.app .notif-list__chip--billing {
+  background: var(--m-warning-soft);
+  color: var(--m-warning);
+}
+
+body.app .notif-list__chip--security {
+  background: var(--m-danger-soft);
+  color: var(--m-danger);
+}
+
+body.app .notif-list__close {
+  background: transparent;
+  border: 0;
+  color: var(--m-text-faint);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+body.app .notif-list__close:hover {
+  background: var(--m-surface-2);
+  color: var(--m-danger);
+}
+
+body.app .notif-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+body.app .notif-filter {
+  border: 1px solid var(--m-border);
+  background: var(--m-surface);
+  color: var(--m-text-muted);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--m-font);
+}
+
+body.app .notif-filter.is-active {
+  background: var(--m-accent);
+  color: #fff;
+  border-color: var(--m-accent);
+}
+
+/* ============================================================================
+   Inbox — interactive split-pane email experience
+   Layout:
+     Desktop (>= 992px):  [list pane (5/12)] [reader pane (7/12)]
+     Mobile  (< 992px):   [list pane only — reader slides in as overlay]
+   ============================================================================ */
+body.app .inbox-split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 16px;
+  align-items: start;
+}
+
+body.app .inbox-list-pane {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  overflow: hidden;
+  min-width: 0;
+}
+
+body.app .inbox-reader-pane {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius);
+  box-shadow: var(--m-shadow-xs);
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  min-width: 0;
+}
+
+body.app .inbox-reader__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+body.app .inbox-reader__empty .empty-state__icon {
+  margin-bottom: 16px;
+}
+
+body.app .inbox-reader__header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--m-divider);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+body.app .inbox-reader__header > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+body.app .inbox-reader__subject {
+  font-family: var(--m-font);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--m-text);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+body.app .inbox-reader__labels {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+body.app .inbox-reader__actions {
+  display: inline-flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+body.app .inbox-reader__back {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--m-text-muted);
+  border-radius: 6px;
+  font-family: var(--m-font);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+body.app .inbox-reader__back:hover {
+  background: var(--m-surface-2);
+  color: var(--m-text);
+}
+
+body.app .inbox-reader__sender {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--m-divider);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.app .inbox-reader__sender-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+body.app .inbox-reader__sender-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.app .inbox-reader__sender-info {
+  flex: 1;
+  min-width: 0;
+}
+
+body.app .inbox-reader__sender-name {
+  margin: 0;
+  font-family: var(--m-font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--m-text);
+}
+
+body.app .inbox-reader__sender-meta {
+  margin: 2px 0 0;
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-muted);
+}
+
+body.app .inbox-reader__sender-meta strong {
+  color: var(--m-text);
+  font-weight: 500;
+}
+
+body.app .inbox-reader__date {
+  font-family: var(--m-font);
+  font-size: 12.5px;
+  color: var(--m-text-faint);
+  flex-shrink: 0;
+}
+
+body.app .inbox-reader__body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  color: var(--m-text);
+  font-family: var(--m-font);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+body.app .inbox-reader__body p {
+  margin: 0 0 14px;
+}
+
+body.app .inbox-reader__body p:last-child {
+  margin-bottom: 0;
+}
+
+body.app .inbox-reader__body strong {
+  color: var(--m-text);
+  font-weight: 600;
+}
+
+body.app .inbox-reader__body a {
+  color: var(--m-accent);
+  text-decoration: none;
+}
+
+body.app .inbox-reader__body a:hover {
+  text-decoration: underline;
+}
+
+body.app .inbox-reader__body ul,
+body.app .inbox-reader__body ol {
+  margin: 0 0 14px;
+  padding-left: 22px;
+}
+
+body.app .inbox-reader__body li {
+  margin-bottom: 4px;
+}
+
+body.app .inbox-reader__body blockquote {
+  margin: 14px 0;
+  padding: 8px 16px;
+  border-left: 3px solid var(--m-divider);
+  color: var(--m-text-muted);
+  font-style: italic;
+}
+
+body.app .inbox-reader__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 24px 0;
+  border-top: 1px solid var(--m-divider);
+}
+
+body.app .inbox-reader__attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--m-surface-2);
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+body.app .inbox-reader__attachment:hover {
+  border-color: var(--m-accent);
+}
+
+body.app .inbox-reader__attachment-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--m-accent-soft);
+  color: var(--m-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+body.app .inbox-reader__attachment-info {
+  min-width: 0;
+}
+
+body.app .inbox-reader__attachment-name {
+  font-family: var(--m-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--m-text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+body.app .inbox-reader__attachment-size {
+  font-family: var(--m-font);
+  font-size: 11.5px;
+  color: var(--m-text-faint);
+  margin: 2px 0 0;
+}
+
+body.app .inbox-reader__quick-reply {
+  padding: 14px 24px 18px;
+  border-top: 1px solid var(--m-divider);
+  background: var(--m-surface-2);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-radius: 0 0 var(--m-radius) var(--m-radius);
+}
+
+body.app .inbox-reader__quick-reply input {
+  flex: 1;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: 999px;
+  font-family: var(--m-font);
+  font-size: 13.5px;
+  color: var(--m-text);
+  outline: none;
+}
+
+body.app .inbox-reader__quick-reply input:focus {
+  border-color: var(--m-accent);
+  box-shadow: 0 0 0 3px rgba(var(--m-accent-rgb), 0.15);
+}
+
+body.app .inbox-reader__quick-reply button {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--m-accent);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.app .inbox-reader__quick-reply button:hover {
+  background: var(--m-accent-hover);
+}
+
+/* Active email row in the list */
+body.app .email-list .email-item.is-active {
+  background: var(--m-accent-soft);
+}
+
+body.app .email-list .email-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--m-accent);
+}
+
+body.app .email-list .email-item.is-active.is-unread::before {
+  /* Keep the rail (unread also has a rail) */
+  top: 0;
+  bottom: 0;
+}
+
+/* List pane chrome — wrap the toolbar/list/pagination already inside an m-card-equivalent */
+body.app .inbox-list-pane .inbox-toolbar {
+  border-bottom: 1px solid var(--m-divider);
+}
+
+body.app .inbox-list-pane .email-list {
+  max-height: calc(100vh - 320px);
+  overflow-y: auto;
+}
+
+/* MOBILE — reader slides in as full-screen overlay */
+@media (max-width: 991.98px) {
+  body.app .inbox-split {
+    grid-template-columns: 1fr;
+  }
+  body.app .inbox-reader-pane {
+    position: fixed;
+    inset: 60px 0 0 0;
+    margin: 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    z-index: 800;
+    transform: translateX(100%);
+    transition: transform 220ms ease;
+    max-height: none;
+    background: var(--m-bg);
+  }
+  body.app.inbox-reader-open .inbox-reader-pane {
+    transform: translateX(0);
+  }
+  body.app.inbox-reader-open .inbox-reader__back {
+    display: inline-flex;
+  }
+  /* When reader is open on mobile, prevent body scroll */
+  body.app.inbox-reader-open {
+    overflow: hidden;
+  }
+}
+/* ============================================================
+   Component-page extras
+   - .btn-spinner: tiny in-button spinner for loading states
+   - .circular-progress: SVG progress ring with center label
+   - .skeleton-* helpers: dashboard loading skeletons
+   ============================================================ */
+body.app .btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -2px;
+  margin-right: 6px;
+  animation: m-spin 0.7s linear infinite;
+}
+
+@keyframes m-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+body.app .circular-progress {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: inline-block;
+}
+
+body.app .circular-progress svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+body.app .circular-progress circle {
+  fill: none;
+  stroke-width: 2.6;
+}
+
+body.app .circular-progress circle.bg {
+  stroke: var(--m-surface-2);
+}
+
+body.app .circular-progress circle.fg {
+  stroke: var(--color, var(--m-c1));
+  stroke-linecap: round;
+  stroke-dasharray: 100, 100;
+  stroke-dashoffset: calc(100 - var(--pct, 0));
+  transition: stroke-dashoffset 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.app .circular-progress__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+}
+
+body.app .circular-progress__label strong {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--m-text);
+  letter-spacing: -0.01em;
+}
+
+body.app .circular-progress__label span {
+  font-size: 11px;
+  color: var(--m-text-muted);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Dashboard loading skeletons --------------------------------- */
+body.app .skeleton-stat-card {
+  background: var(--m-surface);
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius-lg);
+  padding: 18px 20px;
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+body.app .skeleton-line {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--m-surface-2) 0%, var(--m-border) 50%, var(--m-surface-2) 100%);
+  background-size: 200% 100%;
+  animation: m-shimmer 1.4s linear infinite;
+}
+
+body.app .skeleton-line--sm {
+  height: 8px;
+  width: 40%;
+}
+
+body.app .skeleton-line--md {
+  height: 14px;
+  width: 70%;
+}
+
+body.app .skeleton-line--lg {
+  height: 22px;
+  width: 55%;
+}
+
+body.app .skeleton-block {
+  border-radius: var(--m-radius-lg);
+  background: linear-gradient(90deg, var(--m-surface-2) 0%, var(--m-border) 50%, var(--m-surface-2) 100%);
+  background-size: 200% 100%;
+  animation: m-shimmer 1.4s linear infinite;
+}
+
+body.app .skeleton-circle {
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--m-surface-2) 0%, var(--m-border) 50%, var(--m-surface-2) 100%);
+  background-size: 200% 100%;
+  animation: m-shimmer 1.4s linear infinite;
+}
+
+@keyframes m-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+/* Component-showcase typography helpers ----------------------- */
+body.app .demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+body.app .demo-tile {
+  border: 1px solid var(--m-border);
+  border-radius: var(--m-radius-md);
+  padding: 14px 16px;
+  background: var(--m-surface);
+}
+
+body.app .demo-tile + .demo-tile {
+  margin: 0;
+}
+
+body.app .demo-label {
+  font-size: 11px;
+  color: var(--m-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}

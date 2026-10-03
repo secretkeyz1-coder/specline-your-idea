@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script nonce="%sveltekit.nonce%">
+      // A theme picked in the header wins over the system setting; applied
+      // before first paint so the page never flashes the other theme.
+      // The nonce lets it run under the page's CSP (kit.csp, no 'unsafe-inline').
+      try {
+        // Older builds stored "light"/"dark", then "fantasy"/"abyss".
+        const stored = localStorage.getItem("sdd-theme");
+        const t = { light: "forest-light", fantasy: "forest-light", dark: "forest", abyss: "forest" }[stored] ?? stored;
+        if (t === "forest" || t === "forest-light") document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+    %sveltekit.head%
+  </head>
+  <!-- Hover preloads a link's code and data, so a click usually finds the page ready.
+       Every page load is read-only (no AI call, no write), which makes this safe. -->
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>

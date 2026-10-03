@@ -1,0 +1,101 @@
+# Reference production deployment (T206).
+#   cp .env.example deploy/.env  && edit values
+#   docker compose -f deploy/docker-compose.production.yml --env-file deploy/.env up -d
+#   docker compose -f deploy/docker-compose.production.yml --env-file deploy/.env run --rm migrate
+# With a DNS name pointing at the host, set SITE_ADDRESS=https://… in deploy/.env
+# and Caddy serves TLS automatically.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sdd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-sdd}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sdd}"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+    profiles: ["tools"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-sdd}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sdd}
+      SDD_MASTER_KEY: ${SDD_MASTER_KEY:?set SDD_MASTER_KEY}
+      SDD_SESSION_SECRET: ${SDD_SESSION_SECRET:?set SDD_SESSION_SECRET}
+    command: ["bun", "packages/db/scripts/migrate.ts"]
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-sdd}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sdd}
+      SDD_MASTER_KEY: ${SDD_MASTER_KEY:?set SDD_MASTER_KEY}
+      SDD_SESSION_SECRET: ${SDD_SESSION_SECRET:?set SDD_SESSION_SECRET}
+      API_PORT: 4000
+      API_PUBLIC_URL: ${PUBLIC_WEB_URL:-http://localhost}
+      WEB_PUBLIC_URL: ${PUBLIC_WEB_URL:-http://localhost}
+      LOG_LEVEL: info
+      SDD_TRUST_PROXY: "true"
+      ALLOW_PRIVATE_AI_EGRESS: "false"
+      # Sign-up is closed in production unless enabled; teammates join via the allowlist.
+      ALLOW_SELF_REGISTRATION: ${ALLOW_SELF_REGISTRATION:-false}
+      REGISTRATION_ALLOWLIST: ${REGISTRATION_ALLOWLIST:-}
+    expose:
+      - "4000"
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: production
+      PORT: 5173
+      API_PUBLIC_URL: http://api:4000
+      ORIGIN: ${PUBLIC_WEB_URL:-http://localhost}
+      # Resolve the real browser IP from Caddy's X-Forwarded-For so the web tier
+      # can forward it to the API's per-IP auth rate limit.
+      ADDRESS_HEADER: X-Forwarded-For
+      XFF_DEPTH: "1"
+    expose:
+      - "5173"
+
+  # Default entrypoint on :80; set SITE_ADDRESS (and open :443) for TLS.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+
+volumes:
+  pgdata:
+  caddydata:

@@ -1,0 +1,46 @@
+# Development infrastructure only (docs/07_TECH_STACK.md §16).
+# Application processes run directly with Bun: `bun install && bun run dev`.
+#
+# No `container_name` is pinned: compose derives a project-scoped name, so this
+# stack never collides with another project's container. Host ports are
+# overridable because 5432 is frequently already taken by a native PostgreSQL
+# install — set SDD_PG_PORT (and matching DATABASE_URL) in that case.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sdd
+      POSTGRES_PASSWORD: sdd
+      POSTGRES_DB: sdd
+    ports:
+      # Loopback only: the dev password is "sdd", so the database must not be
+      # reachable from the rest of the network.
+      - "127.0.0.1:${SDD_PG_PORT:-5432}:5432"
+    volumes:
+      - sdd_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdd -d sdd"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Optional S3-compatible object storage for large logs/archived diffs.
+  # Start with: docker compose --profile storage up -d minio
+  minio:
+    image: minio/minio:latest
+    profiles: ["storage"]
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: sdd
+      MINIO_ROOT_PASSWORD: sdd-minio-secret
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - sdd_miniodata:/data
+
+volumes:
+  sdd_pgdata:
+  sdd_miniodata:

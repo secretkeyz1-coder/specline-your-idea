@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788627619320,
+      "tag": "0000_init_domain",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788656468108,
+      "tag": "0001_fix_requirement_links",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788687060878,
+      "tag": "0002_role_bindings_nulls_not_distinct",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788689342942,
+      "tag": "0003_requirement_links_nullable_ac",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788691000000,
+      "tag": "0004_rate_limit_buckets",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790527212934,
+      "tag": "0005_audit_hardening",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790712114046,
+      "tag": "0006_one_active_discovery_session",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790732634503,
+      "tag": "0007_project_archive",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790900000000,
+      "tag": "0008_delivery_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791000000000,
+      "tag": "0009_pipeline_quality",
+      "breakpoints": true
+    }
+  ]
+}

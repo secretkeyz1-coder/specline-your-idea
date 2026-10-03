@@ -1,0 +1,15 @@
+{
+  "name": "@sdd/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@sdd/shared": "workspace:*",
+    "zod": "^4.5.4",
+    "@sdd/contracts": "workspace:*"
+  }
+}

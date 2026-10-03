@@ -1,0 +1,18 @@
+{
+  "name": "@sdd/ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@sdd/agent-cli": "workspace:*",
+    "@sdd/config": "workspace:*",
+    "@sdd/contracts": "workspace:*",
+    "@sdd/db": "workspace:*",
+    "@sdd/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.5.4"
+  }
+}

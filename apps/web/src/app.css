@@ -1,0 +1,451 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: false;
+}
+
+/* Dark: "forest". The brand's home and the default theme. */
+@plugin "daisyui/theme" {
+  name: "forest";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(20.84% 0.008 17.911);
+  --color-base-200: oklch(18.522% 0.007 17.911);
+  --color-base-300: oklch(16.203% 0.007 17.911);
+  --color-base-content: oklch(83.768% 0.001 17.911);
+  --color-primary: oklch(68.628% 0.185 148.958);
+  --color-primary-content: oklch(0% 0 0);
+  --color-secondary: oklch(69.776% 0.135 168.327);
+  --color-secondary-content: oklch(13.955% 0.027 168.327);
+  --color-accent: oklch(70.628% 0.119 185.713);
+  --color-accent-content: oklch(14.125% 0.023 185.713);
+  --color-neutral: oklch(30.698% 0.039 171.364);
+  --color-neutral-content: oklch(86.139% 0.007 171.364);
+  --color-info: oklch(72.06% 0.191 231.6);
+  --color-info-content: oklch(0% 0 0);
+  --color-success: oklch(64.8% 0.15 160);
+  --color-success-content: oklch(0% 0 0);
+  --color-warning: oklch(84.71% 0.199 83.87);
+  --color-warning-content: oklch(0% 0 0);
+  --color-error: oklch(71.76% 0.221 22.18);
+  --color-error-content: oklch(0% 0 0);
+  --radius-selector: 1rem;
+  --radius-field: 2rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Light: "forest-light". Same green, same shapes, warm paper instead of charcoal. */
+@plugin "daisyui/theme" {
+  name: "forest-light";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(99.2% 0.002 60);
+  --color-base-200: oklch(96.6% 0.004 60);
+  --color-base-300: oklch(92.8% 0.006 60);
+  --color-base-content: oklch(24% 0.008 17.911);
+  --color-primary: oklch(68.628% 0.185 148.958);
+  --color-primary-content: oklch(0% 0 0);
+  --color-secondary: oklch(69.776% 0.135 168.327);
+  --color-secondary-content: oklch(13.955% 0.027 168.327);
+  --color-accent: oklch(70.628% 0.119 185.713);
+  --color-accent-content: oklch(14.125% 0.023 185.713);
+  --color-neutral: oklch(30.698% 0.039 171.364);
+  --color-neutral-content: oklch(86.139% 0.007 171.364);
+  --color-info: oklch(72.06% 0.191 231.6);
+  --color-info-content: oklch(0% 0 0);
+  --color-success: oklch(64.8% 0.15 160);
+  --color-success-content: oklch(0% 0 0);
+  --color-warning: oklch(84.71% 0.199 83.87);
+  --color-warning-content: oklch(0% 0 0);
+  --color-error: oklch(71.76% 0.221 22.18);
+  --color-error-content: oklch(0% 0 0);
+  --radius-selector: 1rem;
+  --radius-field: 2rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/*
+  speclineyouridea — daisyUI 5 with the "forest" (dark, default) and
+  "forest-light" themes. Source of truth for the look: the speclineyouridea
+  design system. Everything on screen is daisyUI plus the brand tokens below.
+
+  - The header's theme button pins either theme on <html data-theme>
+    (remembered per browser; app.html applies it before first paint).
+  - Hairlines use `line`, not base-300: in both themes base-300 is a WELL
+    (darker than the surfaces), so a base-300 border disappears.
+  - Controls whose only edge is a line (inputs, outline buttons) use
+    `line-control`, which clears 3:1.
+  - Green as TEXT is `primary-ink`: identical to primary in forest, a deep
+    green in forest-light (the bright green is 2.6:1 on paper).
+  - Status text tokens (mint, sky, warn, violet, danger) pass 4.5:1 on
+    base-100, base-200 and their own -soft tint in both themes.
+*/
+:root,
+[data-theme="forest"] {
+  --sl-line: #302c2c;
+  --sl-line-control: #676363;
+  --sl-primary-ink: oklch(68.628% 0.185 148.958);
+  --sl-primary-soft: #232a1f;
+  --sl-mint: oklch(64.8% 0.15 160);
+  --sl-mint-soft: #222922;
+  --sl-sky: oklch(72.06% 0.191 231.6);
+  --sl-sky-soft: #202a33;
+  --sl-warn: oklch(84.71% 0.199 83.87);
+  --sl-warn-soft: #372b1c;
+  --sl-violet: oklch(70% 0.15 300);
+  --sl-violet-soft: #2d2530;
+  --sl-danger: oklch(71.76% 0.221 22.18);
+  --sl-danger-soft: #392120;
+}
+[data-theme="forest-light"] {
+  --sl-line: #dedbdb;
+  --sl-line-control: #959191;
+  --sl-primary-ink: #066e2e;
+  --sl-primary-soft: #e4f3e4;
+  --sl-mint: #006d45;
+  --sl-mint-soft: #e2f1e6;
+  --sl-sky: #0067a7;
+  --sl-sky-soft: #e0f3fe;
+  --sl-warn: #975d00;
+  --sl-warn-soft: #fff4e0;
+  --sl-violet: #7444b4;
+  --sl-violet-soft: #f2ecfa;
+  --sl-danger: #be222a;
+  --sl-danger-soft: #ffe8e5;
+}
+
+@theme inline {
+  --color-line: var(--sl-line);
+  --color-line-control: var(--sl-line-control);
+  --color-primary-ink: var(--sl-primary-ink);
+  --color-primary-soft: var(--sl-primary-soft);
+  --color-mint: var(--sl-mint);
+  --color-mint-soft: var(--sl-mint-soft);
+  --color-sky: var(--sl-sky);
+  --color-sky-soft: var(--sl-sky-soft);
+  --color-warn: var(--sl-warn);
+  --color-warn-soft: var(--sl-warn-soft);
+  --color-violet: var(--sl-violet);
+  --color-violet-soft: var(--sl-violet-soft);
+  --color-danger: var(--sl-danger);
+  --color-danger-soft: var(--sl-danger-soft);
+
+  /* Typography — role scale: 12 label/meta · 13 secondary · 14 body ·
+     16 card title · 20 page title · 24 section display · 28/32 first-run display.
+     Nothing renders below 12px. */
+  --font-display: "Geist Variable", Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Geist Variable", Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Fira Code Variable", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+html {
+  background: var(--color-base-200);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-base-200);
+  color: var(--color-base-content);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Browser selection & scrollbar styling */
+::selection {
+  background: color-mix(in oklab, var(--color-primary) 22%, transparent);
+  color: var(--color-base-content);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--color-base-content) 22%, transparent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-base-content) 22%, transparent);
+  border-radius: 6px;
+  border: 2px solid var(--color-base-200);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--color-base-content) 35%, transparent);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Focus ring — visible on keyboard only. primary-ink clears 3:1 on both
+   themes' surfaces. */
+:focus-visible {
+  outline: 2px solid var(--color-primary-ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* In the base layer so daisyUI's control sizes (btn-sm, input-sm …) and text
+   utilities still apply; unlayered, this reset overrode every one of them. */
+@layer base {
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    caret-color: var(--color-primary);
+  }
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in oklab, var(--color-base-content) 75%, var(--color-base-100));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* Keep the one piece of motion that carries meaning: a busy spinner is the
+     only in-button loading cue, so it keeps turning — slowly, no easing. */
+  .animate-spin {
+    animation-duration: 1.6s !important;
+    animation-timing-function: linear !important;
+  }
+}
+
+/* Phones: 16px form text stops iOS Safari from zooming on focus. Unlayered, so
+   it outranks the compact text-xs/text-[13px] utilities used on desktop. */
+@media (max-width: 639px) {
+  .input,
+  .textarea,
+  .select {
+    font-size: 16px;
+  }
+}
+
+/* Touch devices: compact buttons still get a finger-sized hit area. */
+@media (pointer: coarse) {
+  /* Fingers: every compact control reaches a 44px target on touch screens. */
+  .btn,
+  .btn-sm {
+    min-height: 44px;
+  }
+  .btn-sm {
+    min-width: 44px;
+  }
+  button.badge,
+  a.badge,
+  [role="radio"],
+  [data-select-trigger] {
+    min-height: 40px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.011em;
+  color: var(--color-base-content);
+}
+
+/* Segmented choices (a join of buttons): daisyUI's btn-active is only ~5%
+   darker, which disappears in the dark theme. The chosen segment gets a
+   primary tint and border instead, in both themes. */
+.join > .btn.btn-active {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary-ink);
+  color: var(--color-base-content);
+}
+
+/* Markdown document prose */
+.prose-doc {
+  color: color-mix(in oklab, var(--color-base-content) 80%, var(--color-base-100));
+  line-height: 1.65;
+}
+.prose-doc h1,
+.prose-doc .doc-h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.6rem 0 0.8rem;
+  color: var(--color-base-content);
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: 0.4rem;
+}
+.prose-doc h2:not([class^="doc-h"]),
+.prose-doc .doc-h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.4rem 0 0.6rem;
+  color: var(--color-base-content);
+}
+.prose-doc h3:not([class^="doc-h"]),
+.prose-doc .doc-h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.1rem 0 0.4rem;
+  color: var(--color-base-content);
+}
+.prose-doc p {
+  margin: 0.75rem 0;
+}
+/* Folded requirement sections: the heading is the row; its body opens on demand. */
+.prose-doc .doc-fold {
+  border-top: 1px solid var(--color-line);
+  scroll-margin-top: 7rem;
+}
+.prose-doc .doc-fold:last-of-type {
+  border-bottom: 1px solid var(--color-line);
+}
+.prose-doc .doc-fold > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  padding: 0.55rem 0;
+}
+.prose-doc .doc-fold > summary::-webkit-details-marker {
+  display: none;
+}
+.prose-doc .doc-fold > summary::before {
+  content: "";
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-0.15rem) rotate(-45deg);
+  transition: transform 150ms ease;
+}
+.prose-doc .doc-fold[open] > summary::before {
+  transform: translateY(-0.3rem) rotate(45deg);
+}
+.prose-doc .doc-fold > summary .doc-h3 {
+  margin: 0;
+}
+.prose-doc .doc-fold > summary:hover .doc-h3 {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-doc .doc-prio {
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  vertical-align: 0.1em;
+  color: color-mix(in oklab, var(--color-base-content) 80%, var(--color-base-100));
+}
+.prose-doc .doc-fold[open] {
+  padding-bottom: 0.6rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prose-doc .doc-fold > summary::before {
+    transition: none;
+  }
+}
+/* Reading measure: spec paragraphs ran ~105 characters wide on desktop. */
+.prose-doc p,
+.prose-doc li,
+.prose-doc blockquote {
+  max-width: 72ch;
+}
+.prose-doc ul,
+.prose-doc ol {
+  margin: 0.6rem 0;
+  padding-left: 1.4rem;
+}
+.prose-doc li {
+  margin: 0.25rem 0;
+}
+.prose-doc pre {
+  background: var(--color-base-200);
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  margin: 0.9rem 0;
+}
+.prose-doc code {
+  font-family: var(--font-mono);
+  /* Never below the 12px floor, even inside compact text. */
+  font-size: max(12px, 0.85em);
+  background: var(--color-base-200);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: var(--color-base-content);
+}
+.prose-doc pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+.prose-doc table {
+  /* Wide spec tables (the stack's rationale column) scroll inside themselves
+     on phones instead of widening the whole page. */
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.8125rem;
+}
+.prose-doc th {
+  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+  border: 1px solid var(--color-line);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-base-content);
+}
+.prose-doc td {
+  border: 1px solid var(--color-line);
+  padding: 0.45rem 0.75rem;
+}
+.prose-doc tr:nth-child(even) {
+  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+}
+.prose-doc blockquote {
+  border-left: 3px solid color-mix(in oklab, var(--color-base-content) 25%, var(--color-base-100));
+  margin: 0.9rem 0;
+  padding: 0.4rem 1rem;
+  background: color-mix(in oklab, var(--color-base-200) 55%, var(--color-base-100));
+  border-radius: 0 4px 4px 0;
+}
+
+/* The one closing transition: a feature completed in this visit settles into
+   place. Reduced motion collapses it with every other animation. */
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.settle {
+  animation: settle 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}

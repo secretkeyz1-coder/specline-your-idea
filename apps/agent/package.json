@@ -1,0 +1,21 @@
+{
+  "name": "@sdd/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "sdd-agent \u2014 optional local daemon for remote task dispatch (MVP.2)",
+  "bin": {
+    "sdd-agent": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "start": "bun src/index.ts connect",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sdd/agent-cli": "workspace:*",
+    "@sdd/cli": "workspace:*",
+    "commander": "^14.0.3",
+    "@sdd/contracts": "workspace:*"
+  }
+}
