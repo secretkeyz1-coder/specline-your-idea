@@ -9,6 +9,7 @@ Use the task-oriented guides below. The last column links to existing references
 | Category | Guide | Available now |
 |---|---|---|
 | Getting started | [Getting Started](guides/getting-started.md) | [Repository quickstart](../README.md), [deployment guide](../DEPLOY.md) |
+| Illustrated walkthrough (Indonesian) | [Tutorial bergambar](guides/tutorial-bergambar.md) | 16 genuine screenshots; verified login/prototype navigation, imported demo artifacts, explicit untested actions and mobile layout finding |
 | First project | [First Project](guides/first-project.md) | [Planning workflow](04_PLANNING_WORKFLOW.md), [product overview](../PRODUCT.md) |
 | AI providers | [Ai Providers](guides/ai-providers.md) | [Provider model](00_README.md#ai-provider-model), [provider setup](../DEPLOY.md) |
 | CLI and agents | [Cli And Agents](guides/cli-and-agents.md) | [Protocol reference](10_MCP_CLI_PROTOCOL.md), [agent instructions](16_AGENTS.md) |

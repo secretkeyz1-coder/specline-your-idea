@@ -18,7 +18,7 @@ Idea → Discovery → Requirements → Stack → Technical design → Tasks
 
 - Keep requirements, acceptance criteria, scope, and verification commands together instead of scattering them across chat sessions.
 - Approve planning artifacts before implementation; give agents bounded work orders and explicit stop conditions.
-- Bring your own AI provider, or author planning artifacts and tasks manually. AI generation requires a configured provider; discovery has a deterministic question-bank path.
+- Bring your own AI provider, or author planning artifacts and tasks manually. AI generation requires a configured provider; current interactive discovery asks AI-generated questions rather than using the retired built-in question bank.
 - Record execution evidence, review runs, track bugs as entities, and use convergence checks before release approval. A successful task is not by itself a verified release.
 
 This is a coordination layer, not a replacement coding agent, model subscription, or guarantee that generated code is safe or correct.
@@ -47,7 +47,7 @@ Edit `.env` before starting anything:
 
 - Put the first generated value in `SDD_MASTER_KEY` and the second in `SDD_SESSION_SECRET`. Use different values; do not leave `changeme` placeholders. The master key must decode to 32 bytes. Keep it safe: encrypted provider credentials depend on it.
 - Set `BOOTSTRAP_ADMIN_EMAIL` and a strong `BOOTSTRAP_ADMIN_PASSWORD`; optionally set `BOOTSTRAP_WORKSPACE`. Bootstrap only creates an account when there are no users.
-- Keep `DATABASE_URL=postgres://sdd:sdd@localhost:5432/sdd`, `API_PUBLIC_URL=http://localhost:4000`, and `WEB_PUBLIC_URL=http://localhost:5173` for the default local setup. The example database password is for loopback development only.
+- Keep `DATABASE_URL=postgres://sdd:sdd@localhost:5432/sdd`, `API_PUBLIC_URL=http://localhost:4000`, and `WEB_PUBLIC_URL=http://localhost:5173` for the default local setup. The example database password is for loopback development only. `WEB_PUBLIC_URL` is application configuration, not adapter-node's `ORIGIN`: for a built/production web server, set `ORIGIN` to the actual web origin and keep the URLs aligned. Production Compose sets both from `PUBLIC_WEB_URL`.
 - Keep `.env`, tokens, and provider keys out of Git. Leave private AI egress and server-side Local CLI disabled unless you deliberately need them.
 
 ```bash
@@ -78,6 +78,18 @@ curl -fsS http://localhost:4000/readyz
 7. Run actual checks, submit evidence, review changes, resolve bugs, and run feature convergence before release approval.
 
 Follow the [first-project walkthrough](docs/guides/first-project.md). For generated planning, configure a connection, model/profile, and role routing under **Settings → AI**; see [AI providers](docs/guides/ai-providers.md).
+
+## Illustrated walkthrough (Bahasa Indonesia)
+
+Follow the [tutorial bergambar](docs/guides/tutorial-bergambar.md) for local setup, login, Settings AI, planning, UI reference, Play, and work orders, with **16 genuine UI screenshots** and explicit verification limits.
+
+![SpecLine UI reference canvas](docs/images/onboarding/09-ui-canvas.png)
+
+*The canvas shows saved demo UI references imported into an isolated database, not generation performed during this walkthrough.*
+
+![Ticket Detail in prototype Play](docs/images/onboarding/12-prototype-detail.png)
+
+*Queue “View” was verified to navigate to Ticket Detail in Play. This is simulated prototype navigation, not an implemented target app. Mobile review found the Mini Helpdesk header wrapping/overlapping Queue; seven demo tasks are Ready, zero are done, and work-order checks were not run. Provider setup/generation and new-project submission were not tested.*
 
 ## Execution choices
 
