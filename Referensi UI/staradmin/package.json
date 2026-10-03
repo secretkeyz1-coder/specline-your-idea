@@ -6,7 +6,7 @@
   "dependencies": {
     "@mdi/font": "3.3.92",
     "bootstrap": "^4.4.1",
-    "chart.js": "2.7.2",
+    "chart.js": "4.5.1",
     "feather-icons": "^4.21.0",
     "flag-icon-css": "2.9.0",
     "font-awesome": "4.7.0",
@@ -41,7 +41,7 @@
     "gulp-util": "^3.0.8",
     "merge-stream": "^1.0.1",
     "minimatch": "^3.0.4",
-    "node-sass": "^4.5.3",
+    "node-sass": "^9.0.0",
     "require-dir": "^1.0.0",
     "run-sequence": "^1.2.2"
   },
