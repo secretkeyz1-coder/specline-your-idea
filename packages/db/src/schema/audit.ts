@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid, jsonb, index } from "drizzle-orm/pg-core";
+import { jsonbObject } from "../jsonb.js";
+import { pgTable, text, timestamp, uuid, index } from "drizzle-orm/pg-core";
 import type { ActorType } from "@sdd/contracts";
 import { workspaces, users } from "./identity.js";
 import { projects } from "./projects.js";
@@ -20,7 +21,7 @@ export const auditEvents = pgTable(
     action: text("action").notNull(),
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
-    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    metadata: jsonbObject("metadata").$type<Record<string, unknown>>().notNull().default({}),
     traceId: text("trace_id"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
   },

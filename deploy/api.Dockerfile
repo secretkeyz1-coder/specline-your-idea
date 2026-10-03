@@ -9,6 +9,7 @@ COPY packages/shared/package.json packages/shared/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/db/package.json packages/db/
 COPY packages/ai/package.json packages/ai/
+COPY packages/agent-cli/package.json packages/agent-cli/
 COPY packages/auth/package.json packages/auth/
 COPY packages/mcp/package.json packages/mcp/
 COPY apps/api/package.json apps/api/

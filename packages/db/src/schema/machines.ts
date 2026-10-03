@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid, jsonb, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { jsonbObject } from "../jsonb.js";
+import { pgTable, text, timestamp, uuid, uniqueIndex, index } from "drizzle-orm/pg-core";
 import type { MachineStatus } from "@sdd/contracts";
 import { users } from "./identity.js";
 import { projects } from "./projects.js";
@@ -16,7 +17,7 @@ export const localMachines = pgTable(
     name: text("name").notNull(),
     fingerprint: text("fingerprint").notNull(),
     platform: text("platform").notNull().default(""),
-    capabilities: jsonb("capabilities").$type<Record<string, unknown>>().notNull().default({}),
+    capabilities: jsonbObject("capabilities").$type<Record<string, unknown>>().notNull().default({}),
     status: text("status").$type<MachineStatus>().notNull().default("OFFLINE"),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -61,8 +62,8 @@ export const executionAgentProfiles = pgTable(
       .$type<"generic_shell" | "claude" | "codex" | "kiro" | "gemini" | "custom">()
       .notNull()
       .default("generic_shell"),
-    capabilities: jsonb("capabilities").$type<Record<string, unknown>>().notNull().default({}),
-    defaultConfig: jsonb("default_config").$type<Record<string, unknown>>().notNull().default({}),
+    capabilities: jsonbObject("capabilities").$type<Record<string, unknown>>().notNull().default({}),
+    defaultConfig: jsonbObject("default_config").$type<Record<string, unknown>>().notNull().default({}),
     status: text("status").$type<"ACTIVE" | "DISABLED">().notNull().default("ACTIVE"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },

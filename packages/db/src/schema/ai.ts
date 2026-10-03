@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid, integer, jsonb, bigint, index, unique, check } from "drizzle-orm/pg-core";
+import { jsonbArray, jsonbObject } from "../jsonb.js";
+import { pgTable, text, timestamp, uuid, integer, bigint, index, unique, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import type {
   AiRunStatus,
@@ -42,17 +43,17 @@ export const aiProviderConnections = pgTable(
     /** Encrypted envelope from @sdd/shared SecretBox — never a plaintext secret. */
     encryptedCredentialRef: text("encrypted_credential_ref"),
     /** {type: BEARER|HEADER, header_name?, key_version} metadata only. */
-    credentialMeta: jsonb("credential_meta").$type<Record<string, unknown>>().notNull().default({}),
-    publicHeaders: jsonb("public_headers").$type<Record<string, string>>().notNull().default({}),
+    credentialMeta: jsonbObject("credential_meta").$type<Record<string, unknown>>().notNull().default({}),
+    publicHeaders: jsonbObject("public_headers").$type<Record<string, string>>().notNull().default({}),
     encryptedSecretHeadersRef: text("encrypted_secret_headers_ref"),
     timeoutMs: integer("timeout_ms").notNull().default(120_000),
-    capabilities: jsonb("capabilities").$type<ProviderCapabilities>().notNull().default({
+    capabilities: jsonbObject("capabilities").$type<ProviderCapabilities>().notNull().default({
       structured_output: true,
       tool_calling: false,
       vision: false,
       streaming: false,
     }),
-    customHttpMapping: jsonb("custom_http_mapping").$type<CustomHttpMapping | null>(),
+    customHttpMapping: jsonbObject("custom_http_mapping").$type<CustomHttpMapping | null>(),
     status: text("status").$type<"ACTIVE" | "DISABLED">().notNull().default("ACTIVE"),
     lastTestStatus: text("last_test_status").$type<"OK" | "FAILED" | null>(),
     lastTestedAt: timestamp("last_tested_at", { withTimezone: true }),
@@ -79,8 +80,8 @@ export const aiProfiles = pgTable(
       .notNull()
       .references(() => aiProviderConnections.id, { onDelete: "cascade" }),
     modelId: text("model_id").notNull(),
-    parameters: jsonb("parameters").$type<Record<string, unknown>>().notNull().default({}),
-    requiredCapabilities: jsonb("required_capabilities").$type<string[]>().notNull().default([]),
+    parameters: jsonbObject("parameters").$type<Record<string, unknown>>().notNull().default({}),
+    requiredCapabilities: jsonbArray("required_capabilities").$type<string[]>().notNull().default([]),
     status: text("status").$type<"ACTIVE" | "DISABLED">().notNull().default("ACTIVE"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -136,8 +137,8 @@ export const aiGenerationRuns = pgTable(
     outputUnits: bigint("output_units", { mode: "number" }),
     errorCode: text("error_code"),
     traceId: text("trace_id"),
-    requestMetadata: jsonb("request_metadata").$type<Record<string, unknown>>().notNull().default({}),
-    responseMetadata: jsonb("response_metadata").$type<Record<string, unknown>>().notNull().default({}),
+    requestMetadata: jsonbObject("request_metadata").$type<Record<string, unknown>>().notNull().default({}),
+    responseMetadata: jsonbObject("response_metadata").$type<Record<string, unknown>>().notNull().default({}),
   },
   (t) => [index("ai_generation_runs_workspace_idx").on(t.workspaceId), index("ai_generation_runs_project_idx").on(t.projectId)],
 );

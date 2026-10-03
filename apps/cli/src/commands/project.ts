@@ -2,14 +2,12 @@ import { basename } from "node:path";
 import { findRepoRoot, machineFingerprint, machineName, readConfig, readRepoLink, writeConfig, writeRepoLink } from "../lib/config.js";
 import { api, CliError, fail, output, printTable } from "../lib/api.js";
 import { deviceLogin, serverOption } from "./auth.js";
-import { program } from "./program.js";
+import type { Command } from "commander";
 import { rmSync } from "node:fs";
 
 /** sddctl project … and sddctl connect: linking a repository to a project, pairing codes, self-connect. */
 
 /* ── project ── */
-
-const project = program.command("project").description("Project linking");
 
 /** A saved login that still works on `server`, or null (none, other server, expired/revoked). */
 async function usableSavedToken(server: string): Promise<string | null> {
@@ -136,125 +134,128 @@ async function connectWithPairingCode(code: string, opts: { server?: string; mod
     }
 }
 
-project
-  .command("connect <pairing-code>")
-  .description("One-command onboarding: sign in (if needed) + register this machine + link the current repository to a project")
-  .option("--server <url>", "control plane URL (default: the configured server)")
-  .option("--mode <mode>", "request a MORE restrictive permission mode than the pairing code grants: MANUAL | ASSISTED")
-  .action((code: string, opts: { server?: string; mode?: string }) => connectWithPairingCode(code, opts));
+export function registerProject(program: Command): void {
+  const project = program.command("project").description("Project linking");
+  project
+    .command("connect <pairing-code>")
+    .description("One-command onboarding: sign in (if needed) + register this machine + link the current repository to a project")
+    .option("--server <url>", "control plane URL (default: the configured server)")
+    .option("--mode <mode>", "request a MORE restrictive permission mode than the pairing code grants: MANUAL | ASSISTED")
+    .action((code: string, opts: { server?: string; mode?: string }) => connectWithPairingCode(code, opts));
 
-// `sddctl connect <code>` is what the web pairing dialog tells users to run.
-program
-  .command("connect <pairing-code>")
-  .description("Alias of `project connect`: pair this machine and link the current repository")
-  .option("--server <url>", "control plane URL (default: the configured server)")
-  .option("--mode <mode>", "request a MORE restrictive permission mode than the pairing code grants: MANUAL | ASSISTED")
-  .action((code: string, opts: { server?: string; mode?: string }) => connectWithPairingCode(code, opts));
+  // `sddctl connect <code>` is what the web pairing dialog tells users to run.
+  program
+    .command("connect <pairing-code>")
+    .description("Alias of `project connect`: pair this machine and link the current repository")
+    .option("--server <url>", "control plane URL (default: the configured server)")
+    .option("--mode <mode>", "request a MORE restrictive permission mode than the pairing code grants: MANUAL | ASSISTED")
+    .action((code: string, opts: { server?: string; mode?: string }) => connectWithPairingCode(code, opts));
 
-project
-  .command("list")
-  .description("List projects in your workspace")
-  .action(async () => {
-    try {
-      const { projects } = await api<{ projects: Array<{ id: string; key: string; name: string; lifecycleStatus: string }> }>("GET", "/api/v1/projects");
-      printTable(
-        projects.map((p) => ({ key: p.key, name: p.name, lifecycle: p.lifecycleStatus, id: p.id })),
-        ["key", "name", "lifecycle", "id"],
-      );
-    } catch (e) {
-      fail(e);
-    }
-  });
-
-project
-  .command("link <project-key>")
-  .description("Link the current repository to a project (writes .sdd/local.json, no secrets)")
-  .option(
-    "--mode <mode>",
-    "manual | assisted (default: keep the link's current mode). Auto-approve is switched on in the web app, not here",
-  )
-  .action(async (projectKey: string, opts: { mode?: string }) => {
-    try {
-      const repoRoot = findRepoRoot();
-      if (!repoRoot) throw new CliError("NO_REPO", "Not inside a git repository (no .git found)");
-      const modes = { manual: "MANUAL", assisted: "ASSISTED" } as const;
-      const requestedMode = opts.mode?.toLowerCase();
-      // Auto-approve removes the human reviewer, so a project admin chooses it
-      // in the browser; a CLI token cannot turn it on (the server refuses).
-      const wantsAuto = requestedMode === "auto" || requestedMode === "auto_run";
-      const permissionMode = requestedMode && !wantsAuto ? modes[requestedMode as keyof typeof modes] : undefined;
-      if (requestedMode && !wantsAuto && !permissionMode) throw new CliError("VALIDATION_ERROR", "--mode must be manual or assisted");
-      const me = await api<{ workspaces: Array<{ id: string }> }>("GET", "/api/v1/auth/me");
-      const { projects } = await api<{ projects: Array<{ id: string; key: string; name: string }> }>("GET", "/api/v1/projects");
-      const target = projects.find((p) => p.key.toUpperCase() === projectKey.toUpperCase());
-      if (!target) throw new CliError("PROJECT_NOT_FOUND", `Project ${projectKey} not found in your workspace`);
-      void me;
-
-      // Register (or reuse) this machine, then create the server-verified link (T122).
-      const { machine } = await api<{ machine: { id: string } }>("POST", "/api/v1/agents/machines/register", {
-        body: { name: machineName(), fingerprint: machineFingerprint(), platform: `${process.platform}-${process.arch}` },
-      });
-      const repoFingerprint = `${machineFingerprint()}:${target.id}`;
-      const { link } = await api<{ link: { id: string; permissionMode: "MANUAL" | "ASSISTED" | "AUTO_RUN" } }>("POST", "/api/v1/agents/repo-links", {
-        body: {
-          machine_id: machine.id,
-          project_id: target.id,
-          repo_fingerprint: repoFingerprint,
-          display_path: repoRoot.split("/").pop() ?? repoRoot,
-          ...(permissionMode ? { permission_mode: permissionMode } : {}),
-        },
-      });
-      writeRepoLink(repoRoot, {
-        project_key: target.key,
-        project_id: target.id,
-        repository_id: link.id,
-        machine_id: machine.id,
-        permission_mode: link.permissionMode,
-      });
-      const autoApprove = link.permissionMode === "AUTO_RUN";
-      console.log(`✓ Linked ${repoRoot} to ${target.key} (${target.name}) · ${autoApprove ? "auto-approve" : "human review"}`);
-      if (autoApprove) {
-        console.log("  Tasks whose required checks all pass are approved automatically; high-risk tasks still wait for a human.");
-      } else if (wantsAuto) {
-        console.log(
-          "  Auto-approve is not set from the CLI. A project admin switches it on for this repository on the Machines page of the web app\n" +
-            "  (\"Auto-approve runs whose required checks pass\"). Until then every submission waits for a reviewer.",
+  project
+    .command("list")
+    .description("List projects in your workspace")
+    .action(async () => {
+      try {
+        const { projects } = await api<{ projects: Array<{ id: string; key: string; name: string; lifecycleStatus: string }> }>("GET", "/api/v1/projects");
+        printTable(
+          projects.map((p) => ({ key: p.key, name: p.name, lifecycle: p.lifecycleStatus, id: p.id })),
+          ["key", "name", "lifecycle", "id"],
         );
+      } catch (e) {
+        fail(e);
       }
-      console.log("Add `.sdd/` to .gitignore — link metadata should not be committed by default.");
-    } catch (e) {
-      fail(e);
-    }
-  });
+    });
 
-project
-  .command("status")
-  .description("Show the repository link status")
-  .action(async () => {
-    try {
+  project
+    .command("link <project-key>")
+    .description("Link the current repository to a project (writes .sdd/local.json, no secrets)")
+    .option(
+      "--mode <mode>",
+      "manual | assisted (default: keep the link's current mode). Auto-approve is switched on in the web app, not here",
+    )
+    .action(async (projectKey: string, opts: { mode?: string }) => {
+      try {
+        const repoRoot = findRepoRoot();
+        if (!repoRoot) throw new CliError("NO_REPO", "Not inside a git repository (no .git found)");
+        const modes = { manual: "MANUAL", assisted: "ASSISTED" } as const;
+        const requestedMode = opts.mode?.toLowerCase();
+        // Auto-approve removes the human reviewer, so a project admin chooses it
+        // in the browser; a CLI token cannot turn it on (the server refuses).
+        const wantsAuto = requestedMode === "auto" || requestedMode === "auto_run";
+        const permissionMode = requestedMode && !wantsAuto ? modes[requestedMode as keyof typeof modes] : undefined;
+        if (requestedMode && !wantsAuto && !permissionMode) throw new CliError("VALIDATION_ERROR", "--mode must be manual or assisted");
+        const me = await api<{ workspaces: Array<{ id: string }> }>("GET", "/api/v1/auth/me");
+        const { projects } = await api<{ projects: Array<{ id: string; key: string; name: string }> }>("GET", "/api/v1/projects");
+        const target = projects.find((p) => p.key.toUpperCase() === projectKey.toUpperCase());
+        if (!target) throw new CliError("PROJECT_NOT_FOUND", `Project ${projectKey} not found in your workspace`);
+        void me;
+
+        // Register (or reuse) this machine, then create the server-verified link (T122).
+        const { machine } = await api<{ machine: { id: string } }>("POST", "/api/v1/agents/machines/register", {
+          body: { name: machineName(), fingerprint: machineFingerprint(), platform: `${process.platform}-${process.arch}` },
+        });
+        const repoFingerprint = `${machineFingerprint()}:${target.id}`;
+        const { link } = await api<{ link: { id: string; permissionMode: "MANUAL" | "ASSISTED" | "AUTO_RUN" } }>("POST", "/api/v1/agents/repo-links", {
+          body: {
+            machine_id: machine.id,
+            project_id: target.id,
+            repo_fingerprint: repoFingerprint,
+            display_path: repoRoot.split("/").pop() ?? repoRoot,
+            ...(permissionMode ? { permission_mode: permissionMode } : {}),
+          },
+        });
+        writeRepoLink(repoRoot, {
+          project_key: target.key,
+          project_id: target.id,
+          repository_id: link.id,
+          machine_id: machine.id,
+          permission_mode: link.permissionMode,
+        });
+        const autoApprove = link.permissionMode === "AUTO_RUN";
+        console.log(`✓ Linked ${repoRoot} to ${target.key} (${target.name}) · ${autoApprove ? "auto-approve" : "human review"}`);
+        if (autoApprove) {
+          console.log("  Tasks whose required checks all pass are approved automatically; high-risk tasks still wait for a human.");
+        } else if (wantsAuto) {
+          console.log(
+            "  Auto-approve is not set from the CLI. A project admin switches it on for this repository on the Machines page of the web app\n" +
+              "  (\"Auto-approve runs whose required checks pass\"). Until then every submission waits for a reviewer.",
+          );
+        }
+        console.log("Add `.sdd/` to .gitignore — link metadata should not be committed by default.");
+      } catch (e) {
+        fail(e);
+      }
+    });
+
+  project
+    .command("status")
+    .description("Show the repository link status")
+    .action(async () => {
+      try {
+        const repoRoot = findRepoRoot();
+        if (!repoRoot) throw new CliError("NO_REPO", "Not inside a git repository");
+        const link = readRepoLink(repoRoot);
+        if (!link) throw new CliError("NOT_LINKED", "No .sdd/local.json in this repository — run `sddctl project link <key>`");
+        const { project: full } = await api<{ project: { name: string; lifecycleStatus: string; key: string } }>(
+          "GET",
+          `/api/v1/projects/${link.project_id}`,
+        );
+        output({ repository: repoRoot, project: full.key, name: full.name, lifecycle: full.lifecycleStatus, repository_id: link.repository_id });
+      } catch (e) {
+        fail(e);
+      }
+    });
+
+  project
+    .command("unlink")
+    .description("Remove the repository link")
+    .action(() => {
       const repoRoot = findRepoRoot();
       if (!repoRoot) throw new CliError("NO_REPO", "Not inside a git repository");
       const link = readRepoLink(repoRoot);
-      if (!link) throw new CliError("NOT_LINKED", "No .sdd/local.json in this repository — run `sddctl project link <key>`");
-      const { project: full } = await api<{ project: { name: string; lifecycleStatus: string; key: string } }>(
-        "GET",
-        `/api/v1/projects/${link.project_id}`,
-      );
-      output({ repository: repoRoot, project: full.key, name: full.name, lifecycle: full.lifecycleStatus, repository_id: link.repository_id });
-    } catch (e) {
-      fail(e);
-    }
-  });
-
-project
-  .command("unlink")
-  .description("Remove the repository link")
-  .action(() => {
-    const repoRoot = findRepoRoot();
-    if (!repoRoot) throw new CliError("NO_REPO", "Not inside a git repository");
-    const link = readRepoLink(repoRoot);
-    if (!link) throw new CliError("NOT_LINKED", "No link present");
-    void link;
-    rmSync(`${repoRoot}/.sdd/local.json`);
-    console.log("Repository unlinked.");
-  });
+      if (!link) throw new CliError("NOT_LINKED", "No link present");
+      void link;
+      rmSync(`${repoRoot}/.sdd/local.json`);
+      console.log("Repository unlinked.");
+    });
+}

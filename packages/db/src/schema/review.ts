@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid, jsonb, index } from "drizzle-orm/pg-core";
+import { jsonbArray } from "../jsonb.js";
+import { pgTable, text, timestamp, uuid, index } from "drizzle-orm/pg-core";
 import type { ReviewDecision } from "@sdd/contracts";
 import { tasks, taskRuns } from "./tasks.js";
 
@@ -16,7 +17,7 @@ export const reviews = pgTable(
     reviewerType: text("reviewer_type").$type<"USER" | "AI" | "SYSTEM">().notNull().default("USER"),
     reviewerId: text("reviewer_id").notNull(),
     decision: text("decision").$type<ReviewDecision>().notNull(),
-    findings: jsonb("findings")
+    findings: jsonbArray("findings")
       .$type<Array<{ severity: "BLOCKING" | "HIGH" | "MEDIUM" | "LOW" | "INFO"; message: string }>>()
       .notNull()
       .default([]),

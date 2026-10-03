@@ -71,6 +71,13 @@
       "when": 1791000000000,
       "tag": "0009_pipeline_quality",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791100000000,
+      "tag": "0010_jsonb_transport",
+      "breakpoints": true
     }
   ]
 }

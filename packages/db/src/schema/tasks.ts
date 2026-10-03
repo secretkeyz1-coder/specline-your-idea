@@ -1,3 +1,4 @@
+import { jsonbArray, jsonbObject } from "../jsonb.js";
 import {
   pgTable,
   text,
@@ -5,7 +6,6 @@ import {
   uuid,
   integer,
   boolean,
-  jsonb,
   smallint,
   bigint,
   primaryKey,
@@ -55,8 +55,8 @@ export const tasks = pgTable(
     riskLevel: text("risk_level").$type<RiskLevel>().notNull().default("LOW"),
     objective: text("objective").notNull().default(""),
     /** The full atomic task contract (docs/11 §4). */
-    contract: jsonb("contract").$type<TaskContract>().notNull(),
-    riskFactors: jsonb("risk_factors")
+    contract: jsonbObject("contract").$type<TaskContract>().notNull(),
+    riskFactors: jsonbObject("risk_factors")
       .$type<RiskFactors>()
       .notNull()
       .default({
@@ -72,12 +72,12 @@ export const tasks = pgTable(
       }),
     parallelSafe: boolean("parallel_safe").notNull().default(false),
     /** Lineage to source artifact revisions: [{artifact_id, version}]. */
-    createdFromRevisionIds: jsonb("created_from_revision_ids")
+    createdFromRevisionIds: jsonbArray("created_from_revision_ids")
       .$type<Array<{ artifact_id: string; version: number }>>()
       .notNull()
       .default([]),
     readinessStatus: text("readiness_status").$type<"NOT_READY" | "READY">().notNull().default("NOT_READY"),
-    readinessReport: jsonb("readiness_report")
+    readinessReport: jsonbObject("readiness_report")
       .$type<{
         ok: boolean;
         checks: Array<{ id: string; label: string; ok: boolean; detail?: string }>;
@@ -87,7 +87,7 @@ export const tasks = pgTable(
       .notNull()
       .default({ ok: false, checks: [] }),
     reviewPolicy: text("review_policy").$type<ReviewPolicy>().notNull().default("HUMAN_OR_APPROVED_REVIEWER"),
-    lintFindings: jsonb("lint_findings")
+    lintFindings: jsonbArray("lint_findings")
       .$type<Array<{ id: string; severity: "BLOCKING" | "HIGH" | "MEDIUM" | "LOW" | "INFO"; message: string }>>()
       .notNull()
       .default([]),
@@ -196,7 +196,7 @@ export const taskRuns = pgTable(
     summary: text("summary"),
     commitSha: text("commit_sha"),
     filesChanged: text("files_changed").array().notNull().default([]),
-    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    metadata: jsonbObject("metadata").$type<Record<string, unknown>>().notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("task_runs_attempt_unique").on(t.taskId, t.attempt)],
@@ -214,7 +214,7 @@ export const taskEvents = pgTable(
     eventType: text("event_type").$type<TaskEventType>().notNull(),
     actorType: text("actor_type").$type<"USER" | "LOCAL_AGENT" | "MCP" | "DAEMON" | "AI" | "SYSTEM" | "CLI">().notNull(),
     actorId: text("actor_id").notNull(),
-    payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+    payload: jsonbObject("payload").$type<Record<string, unknown>>().notNull().default({}),
     idempotencyKey: text("idempotency_key"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
   },

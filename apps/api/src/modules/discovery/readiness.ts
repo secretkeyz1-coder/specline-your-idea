@@ -55,7 +55,6 @@ export function uncoveredTopicAssumption(topic: string): string {
 export function discoveryAllowsRequirements(
   session: Pick<DiscoverySession, "status">,
   readiness: DiscoveryReadiness,
-  assumptions: Array<Pick<typeof schema.discoveryAssumptions.$inferSelect, "status">>,
 ): boolean {
   return session.status === "COMPLETED" || readiness !== "INCOMPLETE";
 }
@@ -78,13 +77,16 @@ export async function acceptAssumptions(db: DbExecutor, input: { sessionId: stri
       .update(schema.discoveryAssumptions)
       .set({ status: "ACCEPTED", acceptedBy: input.userId, acceptedAt: new Date() })
       .where(and(eq(schema.discoveryAssumptions.sessionId, session.id), eq(schema.discoveryAssumptions.status, "PROPOSED")));
+    const { buildSessionState } = await import("./batch.js");
+    const state = await buildSessionState(tx, session);
+    const readiness = computeReadiness(state.session, state.facts, state.assumptions, state.answers);
     const [updated] = await tx
       .update(schema.discoverySessions)
-      .set({ readiness: "READY_WITH_ASSUMPTIONS" })
+      .set({ readiness })
       .where(eq(schema.discoverySessions.id, session.id))
       .returning();
     const project = await getProject(tx, session.projectId);
-    await updateLifecycle(tx, session.projectId, "DISCOVERY_READY");
+    if (readiness !== "INCOMPLETE") await updateLifecycle(tx, session.projectId, "DISCOVERY_READY");
     await audit(tx, {
       workspaceId: project.workspaceId,
       projectId: session.projectId,

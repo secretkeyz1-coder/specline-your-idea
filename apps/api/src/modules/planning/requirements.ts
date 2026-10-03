@@ -26,7 +26,7 @@ export async function generateRequirements(
   const { facts, assumptions, answers } = await buildTranscript(db, session, project);
   const readiness = computeReadiness(session, facts, assumptions, answers);
   const acceptedAssumptions = assumptions.filter((a) => a.status === "ACCEPTED");
-  if (!discoveryAllowsRequirements(session, readiness, assumptions)) {
+  if (!discoveryAllowsRequirements(session, readiness)) {
     throw errors.conflict(
       "DISCOVERY_INCOMPLETE",
       "Discovery is incomplete — answer blocking questions or explicitly accept assumptions first (C7)",

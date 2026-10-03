@@ -44,3 +44,5 @@ export function createDb(url: string) {
 }
 
 export type SddDatabase = ReturnType<typeof createDb>;
+
+export { jsonbValue, decodeJsonb, JSONB_DECODE_LIMIT } from "./jsonb.js";

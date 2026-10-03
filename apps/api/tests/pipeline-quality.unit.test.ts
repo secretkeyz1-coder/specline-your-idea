@@ -28,7 +28,7 @@ test("15 answers and one accepted assumption cannot waive remaining blocking dec
   const session = { status: "ACTIVE", coverage: { roles_permissions: { status: "PARTIAL", blocking: true } } };
   const answers = Array.from({ length: 15 }, () => ({ question: { status: "ANSWERED", blocking: false }, answer: "yes" }));
   expect(computeReadiness(session as any, [], [], answers as any)).toBe("INCOMPLETE");
-  expect(discoveryAllowsRequirements(session as any, "INCOMPLETE", [{ status: "ACCEPTED" }] as any)).toBe(false);
+  expect(discoveryAllowsRequirements(session as any, "INCOMPLETE")).toBe(false);
 });
 
 test("legacy NFRs require evidence and structured NFRs preserve load parameters", () => {

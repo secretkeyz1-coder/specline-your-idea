@@ -1,3 +1,5 @@
+import { normalizeDescription, recordAssumption } from "./dedupe.js";
+import { assertSessionActive } from "./session.js";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { schema, type DbExecutor } from "@sdd/db";
 import { DiscoveryResponseSchema, COVERAGE_TOPICS, type CoverageStatus, type DiscoveryReadiness } from "@sdd/contracts";
@@ -65,7 +67,7 @@ export async function nextBatch(
   // Hard cap at 15 answered questions (Capped Discovery): transition to completion
   const answeredCount = state0.answers.filter((a) => a.question.status === "ANSWERED").length;
   if (!input.deepen && answeredCount >= 15) {
-    const finalReadiness = readiness === "INCOMPLETE" ? "READY_WITH_ASSUMPTIONS" : readiness;
+    const finalReadiness = readiness;
     await db.update(schema.discoverySessions).set({ readiness: finalReadiness }).where(eq(schema.discoverySessions.id, session.id));
     return assemble(session, [], state0.facts, state0.assumptions, finalReadiness, "COMPLETE", true);
   }
@@ -100,13 +102,22 @@ export async function nextBatch(
     );
   }
 
-  await applyDiscoveryResponse(db, session, response.data);
-  const inserted = await persistBatch(db, session, response.data.questions, state0.answers.length + 1);
-  const state = await buildSessionState(db, session);
-  const newReadiness = computeReadiness(state.session, state.facts, state.assumptions, state.answers);
+  const inserted = await db.transaction(async tx => {
+    const [locked] = await tx.select().from(schema.discoverySessions).where(eq(schema.discoverySessions.id, session.id)).for("update").limit(1);
+    if (!locked) throw errors.notFound("Discovery session", session.id);
+    assertSessionActive(locked);
+    await applyDiscoveryResponse(tx, locked, response.data);
+    const inserted = await persistBatch(tx, locked, response.data.questions, state0.answers.length + 1);
+    const state = await buildSessionState(tx, locked);
+    const readiness = computeReadiness(state.session, state.facts, state.assumptions, state.answers);
+    await tx.update(schema.discoverySessions).set({ readiness }).where(eq(schema.discoverySessions.id, session.id));
+    return { inserted, state, readiness };
+  });
+  const { state, readiness: newReadiness } = inserted;
+  const questions = inserted.inserted;
   // The model asked nothing new: it has what it needs, so discovery can be finished.
-  if (inserted.length === 0) return assemble(session, [], state.facts, state.assumptions, newReadiness, "COMPLETE", true);
-  return assemble(session, inserted, state.facts, state.assumptions, newReadiness, "AI", false);
+  if (questions.length === 0) return assemble(state.session, [], state.facts, state.assumptions, newReadiness, "COMPLETE", true);
+  return assemble(state.session, questions, state.facts, state.assumptions, newReadiness, "AI", false);
 }
 
 function nl(): string {
@@ -131,7 +142,7 @@ function assemble(
     facts,
     assumptions,
     coverage: session.coverage,
-    session,
+    session: { ...session, readiness },
   };
 }
 
@@ -250,23 +261,16 @@ async function applyDiscoveryResponse(
       });
   }
   for (const assumption of data.assumptions) {
-    const existing = await db
-      .select({ id: schema.discoveryAssumptions.id })
-      .from(schema.discoveryAssumptions)
-      .where(and(eq(schema.discoveryAssumptions.sessionId, session.id), eq(schema.discoveryAssumptions.description, assumption.description)))
-      .limit(1);
-    if (existing.length === 0) {
-      await db.insert(schema.discoveryAssumptions).values({
-        sessionId: session.id,
-        description: assumption.description,
-        impact: assumption.impact,
-      });
-    }
+    await recordAssumption(db, { sessionId: session.id, description: assumption.description, impact: assumption.impact });
   }
+  const contradictions = await db.select().from(schema.discoveryContradictions).where(eq(schema.discoveryContradictions.sessionId, session.id));
   for (const contradiction of data.contradictions) {
+    const description = normalizeDescription(contradiction.description);
+    if (contradictions.some(row => normalizeDescription(row.description) === description && JSON.stringify([...row.relatedKeys].sort()) === JSON.stringify([...contradiction.related_keys].sort()))) continue;
+    contradictions.push({ description, relatedKeys: contradiction.related_keys } as typeof contradictions[number]);
     await db.insert(schema.discoveryContradictions).values({
       sessionId: session.id,
-      description: contradiction.description,
+      description,
       relatedKeys: contradiction.related_keys,
     });
   }

@@ -1,3 +1,4 @@
+import { jsonbArray, jsonbObject } from "../jsonb.js";
 import {
   pgTable,
   text,
@@ -5,7 +6,6 @@ import {
   uuid,
   integer,
   boolean,
-  jsonb,
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
@@ -31,7 +31,7 @@ export const discoverySessions = pgTable(
     status: text("status").$type<DiscoverySessionStatus>().notNull().default("ACTIVE"),
     readiness: text("readiness").$type<DiscoveryReadiness>().notNull().default("INCOMPLETE"),
     /** Coverage topic → {status, blocking} map (docs/04 §4.1). */
-    coverage: jsonb("coverage")
+    coverage: jsonbObject("coverage")
       .$type<Record<string, { status: CoverageStatus; blocking: boolean }>>()
       .notNull()
       .default({}),
@@ -60,7 +60,7 @@ export const discoveryQuestions = pgTable(
     questionText: text("question_text").notNull(),
     reason: text("reason").notNull().default(""),
     answerType: text("answer_type").$type<AnswerType>().notNull().default("TEXT"),
-    options: jsonb("options").$type<string[]>().notNull().default([]),
+    options: jsonbArray("options").$type<string[]>().notNull().default([]),
     impact: text("impact").$type<"high" | "medium" | "low">().notNull().default("high"),
     blocking: boolean("blocking").notNull().default(false),
     status: text("status").$type<"PENDING" | "ANSWERED" | "SKIPPED">().notNull().default("PENDING"),
@@ -82,7 +82,7 @@ export const discoveryAnswers = pgTable(
       .references(() => discoveryQuestions.id, { onDelete: "cascade" }),
     answeredBy: uuid("answered_by").references(() => users.id, { onDelete: "set null" }),
     /** { text, selected_options } — answer_type determines shape (FR-013). */
-    answer: jsonb("answer").$type<{ text: string; selected_options?: string[] }>().notNull(),
+    answer: jsonbObject("answer").$type<{ text: string; selected_options?: string[] }>().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   // One final answer per question (answers are replaced, never appended).

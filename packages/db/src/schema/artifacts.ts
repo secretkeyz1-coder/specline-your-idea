@@ -1,10 +1,10 @@
+import { jsonb, jsonbArray, jsonbObject } from "../jsonb.js";
 import {
   pgTable,
   text,
   timestamp,
   uuid,
   integer,
-  jsonb,
   boolean,
   uniqueIndex,
   index,
@@ -57,7 +57,7 @@ export const artifactRevisions = pgTable(
     structuredContent: jsonb("structured_content"),
     status: text("status").$type<ArtifactStatus>().notNull().default("DRAFT"),
     /** Lineage: [{artifact_id, version}] (T050). */
-    derivedFrom: jsonb("derived_from").$type<Array<{ artifact_id: string; version: number }>>().notNull().default([]),
+    derivedFrom: jsonbArray("derived_from").$type<Array<{ artifact_id: string; version: number }>>().notNull().default([]),
     aiGenerationRunId: uuid("ai_generation_run_id"),
     checksum: text("checksum").notNull(),
     createdByActorType: text("created_by_actor_type").$type<"USER" | "AI" | "SYSTEM">().notNull().default("AI"),
@@ -95,7 +95,7 @@ export const requirements = pgTable(
     statement: text("statement").notNull(),
     priority: text("priority").$type<Priority>().notNull().default("P1"),
     status: text("status").$type<"ACTIVE" | "SUPERSEDED" | "REMOVED">().notNull().default("ACTIVE"),
-    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    metadata: jsonbObject("metadata").$type<Record<string, unknown>>().notNull().default({}),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("requirements_revision_key_unique").on(t.artifactRevisionId, t.key)],
@@ -111,7 +111,7 @@ export const acceptanceCriteria = pgTable(
     key: text("key").notNull(),
     statement: text("statement").notNull(),
     verificationType: text("verification_type").$type<"TEST" | "MANUAL" | "REVIEW" | "METRIC">().notNull().default("TEST"),
-    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    metadata: jsonbObject("metadata").$type<Record<string, unknown>>().notNull().default({}),
   },
   (t) => [uniqueIndex("acceptance_criteria_requirement_key_unique").on(t.requirementId, t.key)],
 );

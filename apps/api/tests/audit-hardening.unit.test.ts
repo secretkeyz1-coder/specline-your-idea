@@ -31,23 +31,23 @@ describe("discovery completion vs the requirements gate", () => {
     const readiness = computeReadiness(s, [], [], []);
     expect(readiness).toBe("INCOMPLETE");
     // Before the fix: nothing to accept → the gate stayed shut forever.
-    expect(discoveryAllowsRequirements(s, readiness, [])).toBe(false);
+    expect(discoveryAllowsRequirements(s, readiness)).toBe(false);
     // Completion records each open required topic as an ACCEPTED assumption.
     const recorded = uncoveredRequiredTopics(s.coverage, []).map((t) => assumption(uncoveredTopicAssumption(t), "ACCEPTED"));
     expect(recorded).toHaveLength(4);
-    expect(discoveryAllowsRequirements(s, computeReadiness(s, [], recorded, []), recorded)).toBe(false);
-    expect(discoveryAllowsRequirements({ ...s, status: "COMPLETED" }, computeReadiness(s, [], recorded, []), recorded)).toBe(true);
+    expect(discoveryAllowsRequirements(s, computeReadiness(s, [], recorded, []))).toBe(false);
+    expect(discoveryAllowsRequirements({ ...s, status: "COMPLETED" }, computeReadiness(s, [], recorded, []))).toBe(true);
   });
 
   test("a COMPLETED session passes the gate even without accepted assumptions (legacy data)", () => {
     const s = session({}, "COMPLETED");
-    expect(discoveryAllowsRequirements(s, computeReadiness(s, [], [], []), [])).toBe(true);
+    expect(discoveryAllowsRequirements(s, computeReadiness(s, [], [], []))).toBe(true);
   });
 
   test("an ACTIVE incomplete session with only PROPOSED assumptions stays gated", () => {
     const s = session({});
-    expect(discoveryAllowsRequirements(s, "INCOMPLETE", [assumption("x", "PROPOSED")])).toBe(false);
-    expect(discoveryAllowsRequirements(s, "READY_WITH_ASSUMPTIONS", [])).toBe(true);
+    expect(discoveryAllowsRequirements(s, "INCOMPLETE")).toBe(false);
+    expect(discoveryAllowsRequirements(s, "READY_WITH_ASSUMPTIONS")).toBe(true);
   });
 });
 

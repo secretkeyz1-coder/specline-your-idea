@@ -1,3 +1,4 @@
+import { recordAssumption } from "./dedupe.js";
 import { and, eq } from "drizzle-orm";
 import { schema, type DbExecutor } from "@sdd/db";
 import type { CoverageStatus } from "@sdd/contracts";
@@ -26,9 +27,10 @@ export async function deferQuestion(
   db: DbExecutor,
   input: { questionId: string; userId: string; recommendation?: string | null },
 ) {
+  return db.transaction(async (db) => {
   const [question] = await db.select().from(schema.discoveryQuestions).where(eq(schema.discoveryQuestions.id, input.questionId)).limit(1);
   if (!question) throw errors.notFound("Discovery question", input.questionId);
-  const [session] = await db.select().from(schema.discoverySessions).where(eq(schema.discoverySessions.id, question.sessionId)).limit(1);
+  const [session] = await db.select().from(schema.discoverySessions).where(eq(schema.discoverySessions.id, question.sessionId)).for("update").limit(1);
   if (!session) throw errors.notFound("Discovery session");
   assertSessionActive(session);
 
@@ -37,18 +39,7 @@ export async function deferQuestion(
     ? `${question.topic.replaceAll("_", " ")}: not specified by the user — recommended default: ${input.recommendation.trim()}`
     : `${question.topic.replaceAll("_", " ")}: deferred by the user — no answer yet, treat as an open assumption.`;
 
-  const existing = await db
-    .select({ id: schema.discoveryAssumptions.id })
-    .from(schema.discoveryAssumptions)
-    .where(and(eq(schema.discoveryAssumptions.sessionId, session.id), eq(schema.discoveryAssumptions.description, description)))
-    .limit(1);
-  if (existing.length === 0) {
-    await db.insert(schema.discoveryAssumptions).values({
-      sessionId: session.id,
-      description,
-      impact: question.impact === "high" ? "high" : "medium",
-    });
-  }
+  await recordAssumption(db, { sessionId: session.id, description, impact: question.impact === "high" ? "high" : "medium" });
 
   await db.update(schema.discoveryQuestions).set({ status: "SKIPPED" }).where(eq(schema.discoveryQuestions.id, question.id));
 
@@ -79,7 +70,9 @@ export async function deferQuestion(
     assumptions,
     allQuestions.map((q) => ({ question: q, answer: null })),
   );
-  return { session: updatedSession!, facts, assumptions, readiness, assumption: description };
+  await db.update(schema.discoverySessions).set({ readiness }).where(eq(schema.discoverySessions.id, session.id));
+  return { session: { ...updatedSession!, readiness }, facts, assumptions, readiness, assumption: description };
+  });
 }
 
 /** Mark discovery complete (readiness READY or accepted assumptions). */
@@ -121,7 +114,7 @@ export async function completeDiscovery(
       for (const topic of new Set([...uncoveredRequiredTopics(state.session.coverage, state.facts), ...skippedBlocking, ...blockingCoverage])) {
         const description = uncoveredTopicAssumption(topic);
         if (state.assumptions.some((a) => a.description === description)) continue;
-        await tx.insert(schema.discoveryAssumptions).values({ sessionId: session.id, description, impact: "high" });
+        await recordAssumption(tx, { sessionId: session.id, description, impact: "high" });
         openTopics.push(topic);
       }
     }
@@ -131,9 +124,13 @@ export async function completeDiscovery(
       .update(schema.discoveryQuestions)
       .set({ status: "SKIPPED" })
       .where(and(eq(schema.discoveryQuestions.sessionId, session.id), eq(schema.discoveryQuestions.status, "PENDING")));
+    const finalState = await buildSessionState(tx, session);
+    const computedReadiness = computeReadiness(finalState.session, finalState.facts, finalState.assumptions, finalState.answers);
+    // Explicit completion can waive documented gaps; accepting assumptions alone cannot.
+    const finalReadiness = computedReadiness === "INCOMPLETE" ? "READY_WITH_ASSUMPTIONS" : computedReadiness;
     await tx
       .update(schema.discoverySessions)
-      .set({ status: "COMPLETED", completedAt: new Date() })
+      .set({ status: "COMPLETED", readiness: finalReadiness, completedAt: new Date() })
       .where(eq(schema.discoverySessions.id, session.id));
     await updateLifecycle(tx, session.projectId, "DISCOVERY_READY");
     await audit(tx, {
@@ -145,7 +142,7 @@ export async function completeDiscovery(
       action: "discovery.completed",
       entityType: "DISCOVERY_SESSION",
       entityId: session.id,
-      metadata: { readiness, accepted_assumptions: Boolean(input.acceptAssumptions), open_topics: openTopics, proposed_assumptions: input.acceptAssumptions ? [] : state.assumptions.filter(a => a.status === "PROPOSED").map(a => a.description) },
+      metadata: { readiness: finalReadiness, accepted_assumptions: Boolean(input.acceptAssumptions), open_topics: openTopics, proposed_assumptions: input.acceptAssumptions ? [] : state.assumptions.filter(a => a.status === "PROPOSED").map(a => a.description) },
     });
     const [updated] = await tx.select().from(schema.discoverySessions).where(eq(schema.discoverySessions.id, session.id)).limit(1);
     return { session: updated!, completed: true };

@@ -115,10 +115,10 @@ async function createDraftRevisionTx(
       version,
       contentFormat: input.contentFormat ?? "json",
       content,
-      // Force text transport before the JSONB cast: Bun SQL otherwise encodes
-      // Drizzle's already-serialized JSON as a JSON string. Scope to design.
+      // The schema's shared transport covers every artifact kind. Keep design's
+      // existing input normalization and the original checksum calculation.
       structuredContent: artifact.artifactType === "design" && input.structuredContent != null
-        ? sql`cast(cast(${JSON.stringify(decodeDesignContent(input.structuredContent))} as text) as jsonb)`
+        ? decodeDesignContent(input.structuredContent)
         : (input.structuredContent ?? null) as ArtifactRevision["structuredContent"],
       status: "DRAFT",
       derivedFrom: input.derivedFrom ?? [],

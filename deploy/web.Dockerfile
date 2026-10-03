@@ -6,7 +6,9 @@ COPY packages/config/package.json packages/config/
 COPY packages/shared/package.json packages/shared/
 COPY packages/contracts/package.json packages/contracts/
 COPY apps/web/package.json apps/web/
-RUN bun install --frozen-lockfile
+# Runtime relocates the adapter output and copies only root node_modules.
+# Isolated workspace dependencies would otherwise remain under apps/web.
+RUN bun install --frozen-lockfile --linker=hoisted
 COPY tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/web ./apps/web

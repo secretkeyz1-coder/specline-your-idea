@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { clearToken, findRepoRoot, machineName, readConfig, readRepoLink, writeConfig } from "../lib/config.js";
 import { api, CliError, fail, output } from "../lib/api.js";
-import { program } from "./program.js";
+import type { Command } from "commander";
 
 /** sddctl login / logout / whoami / status: device-flow sign-in and the saved identity. */
 
@@ -51,105 +51,107 @@ export function serverOption(opts: { server?: string }): string {
   return (opts.server ?? readConfig().server_url).replace(/\/+$/, "");
 }
 
-program
-  .command("login")
-  .description("Authenticate via the browser/device flow")
-  .option("--server <url>", "control plane URL (default: the configured server)")
-  .action(async (opts: { server?: string }) => {
-    try {
-      const server = serverOption(opts);
-      const token = await deviceLogin(server);
-      writeConfig({ server_url: server, token, profile: "default" });
-      const me = await api<{ user: { email: string } }>("GET", "/api/v1/auth/me");
-      console.log(`✓ Logged in as ${me.user.email}`);
-    } catch (e) {
-      fail(e);
-    }
-  });
-
-program
-  .command("logout")
-  .description("Revoke this CLI token on the server and clear stored credentials")
-  .action(async () => {
-    const config = readConfig();
-    if (config.token) {
-      // Server-side revocation first: deleting only the local copy would leave
-      // a valid 30/90-day credential behind (e.g. in backups or shell history).
+export function registerAuth(program: Command): void {
+  program
+    .command("login")
+    .description("Authenticate via the browser/device flow")
+    .option("--server <url>", "control plane URL (default: the configured server)")
+    .action(async (opts: { server?: string }) => {
       try {
-        const me = await api<{ user: { token_id?: string | null } }>("GET", "/api/v1/auth/me");
-        if (me.user.token_id) await api("POST", `/api/v1/auth/tokens/${me.user.token_id}/revoke`, { body: {} });
+        const server = serverOption(opts);
+        const token = await deviceLogin(server);
+        writeConfig({ server_url: server, token, profile: "default" });
+        const me = await api<{ user: { email: string } }>("GET", "/api/v1/auth/me");
+        console.log(`✓ Logged in as ${me.user.email}`);
       } catch (e) {
-        console.warn(`Warning: could not revoke the token on the server (${e instanceof Error ? e.message : String(e)}); clearing it locally.`);
+        fail(e);
       }
-    }
-    clearToken();
-    console.log("Logged out.");
-  });
+    });
 
-program
-  .command("whoami")
-  .description("Show the authenticated account and server (T120)")
-  .action(async () => {
-    try {
+  program
+    .command("logout")
+    .description("Revoke this CLI token on the server and clear stored credentials")
+    .action(async () => {
       const config = readConfig();
-      const me = await api<{ user: { email: string; display_name: string }; workspaces: Array<{ name: string; role: string }> }>("GET", "/api/v1/auth/me");
-      output({ server: config.server_url, user: me.user.email, display_name: me.user.display_name, workspaces: me.workspaces });
-    } catch (e) {
-      fail(e);
-    }
-  });
+      if (config.token) {
+        // Server-side revocation first: deleting only the local copy would leave
+        // a valid 30/90-day credential behind (e.g. in backups or shell history).
+        try {
+          const me = await api<{ user: { token_id?: string | null } }>("GET", "/api/v1/auth/me");
+          if (me.user.token_id) await api("POST", `/api/v1/auth/tokens/${me.user.token_id}/revoke`, { body: {} });
+        } catch (e) {
+          console.warn(`Warning: could not revoke the token on the server (${e instanceof Error ? e.message : String(e)}); clearing it locally.`);
+        }
+      }
+      clearToken();
+      console.log("Logged out.");
+    });
 
-program
-  .command("status")
-  .description("Show machine, repository binding and execution summary (connection manager)")
-  .action(async () => {
-    try {
-      const config = readConfig();
-      const repoRoot = findRepoRoot();
-      const link = repoRoot ? readRepoLink(repoRoot) : null;
-      const me = config.token
-        ? await api<{ user: { email: string; display_name: string }; workspaces: Array<{ id: string; name: string; role: string }> }>("GET", "/api/v1/auth/me").catch(() => null)
-        : null;
-
-      let machine: Record<string, unknown> | null = null;
+  program
+    .command("whoami")
+    .description("Show the authenticated account and server (T120)")
+    .action(async () => {
       try {
-        const machines = await api<{ machines: Array<Record<string, unknown>> }>("GET", "/api/v1/agents/machines");
-        machine = machines.machines.find((m) => m.name === machineName()) ?? null;
-      } catch {
-        /* fleet view is best-effort */
+        const config = readConfig();
+        const me = await api<{ user: { email: string; display_name: string }; workspaces: Array<{ name: string; role: string }> }>("GET", "/api/v1/auth/me");
+        output({ server: config.server_url, user: me.user.email, display_name: me.user.display_name, workspaces: me.workspaces });
+      } catch (e) {
+        fail(e);
       }
+    });
 
-      let branch: string | null = null;
-      if (repoRoot) {
+  program
+    .command("status")
+    .description("Show machine, repository binding and execution summary (connection manager)")
+    .action(async () => {
+      try {
+        const config = readConfig();
+        const repoRoot = findRepoRoot();
+        const link = repoRoot ? readRepoLink(repoRoot) : null;
+        const me = config.token
+          ? await api<{ user: { email: string; display_name: string }; workspaces: Array<{ id: string; name: string; role: string }> }>("GET", "/api/v1/auth/me").catch(() => null)
+          : null;
+
+        let machine: Record<string, unknown> | null = null;
         try {
-          branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
+          const machines = await api<{ machines: Array<Record<string, unknown>> }>("GET", "/api/v1/agents/machines");
+          machine = machines.machines.find((m) => m.name === machineName()) ?? null;
         } catch {
-          branch = null;
+          /* fleet view is best-effort */
         }
-      }
 
-      let execution: Record<string, unknown> | null = null;
-      if (link) {
-        try {
-          const s = await api<{ summary: Record<string, unknown>; next: { key: string; title: string } | null }>(
-            "GET",
-            `/api/v1/projects/${link.project_id}/scheduler/summary`,
-          );
-          execution = { ...s.summary, next: s.next ? `${s.next.key} — ${s.next.title}` : null };
-        } catch {
-          /* scheduler summary is best-effort */
+        let branch: string | null = null;
+        if (repoRoot) {
+          try {
+            branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
+          } catch {
+            branch = null;
+          }
         }
-      }
 
-      output({
-        server: config.server_url,
-        user: me?.user.email ?? null,
-        machine: machine ? { name: machineName(), status: machine.status, platform: machine.platform, last_seen: machine.lastSeenAt } : null,
-        repository: link ? { path: repoRoot, project_id: link.project_id, project_key: link.project_key } : null,
-        branch: branch ? branch.trim() : null,
-        execution,
-      });
-    } catch (e) {
-      fail(e);
-    }
-  });
+        let execution: Record<string, unknown> | null = null;
+        if (link) {
+          try {
+            const s = await api<{ summary: Record<string, unknown>; next: { key: string; title: string } | null }>(
+              "GET",
+              `/api/v1/projects/${link.project_id}/scheduler/summary`,
+            );
+            execution = { ...s.summary, next: s.next ? `${s.next.key} — ${s.next.title}` : null };
+          } catch {
+            /* scheduler summary is best-effort */
+          }
+        }
+
+        output({
+          server: config.server_url,
+          user: me?.user.email ?? null,
+          machine: machine ? { name: machineName(), status: machine.status, platform: machine.platform, last_seen: machine.lastSeenAt } : null,
+          repository: link ? { path: repoRoot, project_id: link.project_id, project_key: link.project_key } : null,
+          branch: branch ? branch.trim() : null,
+          execution,
+        });
+      } catch (e) {
+        fail(e);
+      }
+    });
+}

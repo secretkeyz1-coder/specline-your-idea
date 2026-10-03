@@ -104,6 +104,7 @@ test("approval rejection keeps actionable issues and UI renders truthful readine
   expect(editor).not.toContain("requirement_coverage: []");
   const artifact = readFileSync(new URL("../../api/src/modules/artifact/service.ts", import.meta.url), "utf8");
   expect(artifact).toContain('artifact.artifactType === "design" && input.structuredContent != null');
-  expect(artifact).toContain('cast(cast(${JSON.stringify(decodeDesignContent(input.structuredContent))} as text) as jsonb)');
+  const transport = readFileSync(new URL("../../../packages/db/src/jsonb.ts", import.meta.url), "utf8");
+  expect(transport).toContain('cast(cast(${encoded} as text) as jsonb)');
   expect(artifact).toContain('designReadinessIssues(fresh!.structuredContent, reqs.map(r => r.key))');
 });

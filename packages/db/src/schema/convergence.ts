@@ -1,3 +1,4 @@
+import { jsonbArray, jsonbObject } from "../jsonb.js";
 import { pgTable, text, timestamp, uuid, index, jsonb } from "drizzle-orm/pg-core";
 import type { FindingType, Severity } from "@sdd/contracts";
 import type { ConvergenceOutput } from "@sdd/contracts";
@@ -21,7 +22,7 @@ export const convergenceRuns = pgTable(
     status: text("status").$type<"RUNNING" | "COMPLETED" | "FAILED">().notNull().default("RUNNING"),
     summary: text("summary").notNull().default(""),
     completionRecommended: text("completion_recommended").$type<"YES" | "NO">().notNull().default("NO"),
-    coverage: jsonb("coverage").$type<ConvergenceOutput["coverage"]>().notNull().default([]),
+    coverage: jsonbArray("coverage").$type<ConvergenceOutput["coverage"]>().notNull().default([]),
     aiGenerationRunId: uuid("ai_generation_run_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
@@ -41,7 +42,7 @@ export const convergenceFindings = pgTable(
     sourceRef: text("source_ref").notNull().default(""),
     description: text("description").notNull(),
     evidence: text("evidence").notNull().default(""),
-    suggestedTask: jsonb("suggested_task").$type<NonNullable<ConvergenceOutput["findings"][number]["suggested_task"]> | null>(),
+    suggestedTask: jsonbObject("suggested_task").$type<NonNullable<ConvergenceOutput["findings"][number]["suggested_task"]> | null>(),
     requirementKey: text("requirement_key"),
     acceptanceCriterionKey: text("acceptance_criterion_key"),
     resolutionStatus: text("resolution_status")

@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uuid, jsonb, uniqueIndex, index, primaryKey } from "drizzle-orm/pg-core";
+import { jsonbArray } from "../jsonb.js";
+import { pgTable, text, timestamp, uuid, uniqueIndex, index, primaryKey } from "drizzle-orm/pg-core";
 import type { BugStatus } from "@sdd/contracts";
 import { projects, features } from "./projects.js";
 
@@ -24,7 +25,7 @@ export const bugs = pgTable(
     /** Fix-work linkage once a fix task/run exists (T158). */
     fixTaskId: uuid("fix_task_id"),
     blockedConvergence: text("blocked_convergence").array().notNull().default([]),
-    notes: jsonb("notes")
+    notes: jsonbArray("notes")
       .$type<Array<{ status: string; note: string; actor_id: string; occurred_at: string }>>()
       .notNull()
       .default([]),
