@@ -326,10 +326,14 @@ async function exec(
     throw new CliRunError(code === "ENOENT" ? "NOT_INSTALLED" : "SPAWN_FAILED", `The CLI could not be started${code ? ` (${code})` : ""}`);
   }
   let timedOut = false;
-  const timer = setTimeout(() => {
+  const deadline = performance.now() + timeoutMs;
+  // One short watchdog per process; a monotonic deadline bounds its lifetime.
+  const timer = setInterval(() => {
+    if (timedOut || performance.now() < deadline) return;
     timedOut = true;
+    clearInterval(timer);
     void killTree(proc);
-  }, timeoutMs);
+  }, 100);
   const cap = opts.maxOutputBytes ?? 4_000_000;
   const read = async (stream: ReadableStream<Uint8Array>) => {
     const chunks: Uint8Array[] = [];
@@ -353,7 +357,7 @@ async function exec(
     const code = await proc.exited;
     return { code, stdout, stderr, timedOut };
   } finally {
-    clearTimeout(timer);
+    if (!timedOut) clearInterval(timer);
   }
 }
 

@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -61,6 +61,128 @@ afterAll(() => {
   if (saved.db === undefined) delete process.env.DATABASE_URL;
   else process.env.DATABASE_URL = saved.db;
   rmSync(dir, { recursive: true, force: true });
+});
+
+describe("bounded CLI watchdog", () => {
+  async function withProcess(check: (state: {
+    tick: (elapsed: number) => void;
+    finish: () => void;
+    failRead: () => void;
+    succeed: () => void;
+    overflow: () => void;
+    run: (timeoutMs: number, maxOutputBytes?: number) => Promise<unknown>;
+    killed: () => number;
+    scheduled: () => number[];
+    cleared: () => number;
+    spawned: () => number;
+  }) => Promise<void>) {
+    let now = 100;
+    let callback: (() => void) | undefined;
+    const delays: number[] = [];
+    let clears = 0;
+    let kills = 0;
+    let spawns = 0;
+    let resolveExit!: (code: number) => void;
+    let stdout!: ReadableStreamDefaultController<Uint8Array>;
+    let stderr!: ReadableStreamDefaultController<Uint8Array>;
+    const exited = new Promise<number>(resolve => { resolveExit = resolve; });
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      try { stdout.close(); } catch { /* stream already failed */ }
+      try { stderr.close(); } catch { /* stream already closed */ }
+      resolveExit(0);
+    };
+    const proc = {
+      pid: 99999999,
+      stdout: new ReadableStream<Uint8Array>({ start(controller) { stdout = controller; } }),
+      stderr: new ReadableStream<Uint8Array>({ start(controller) { stderr = controller; } }),
+      exited,
+      kill() { kills++; finish(); },
+    };
+    const clock = spyOn(performance, "now").mockImplementation(() => now);
+    const interval = spyOn(globalThis, "setInterval").mockImplementation(((fn: () => void, delay: number) => {
+      callback = fn;
+      delays.push(delay);
+      return 123;
+    }) as never);
+    const clear = spyOn(globalThis, "clearInterval").mockImplementation(() => { clears++; });
+    const spawn = spyOn(Bun, "spawn").mockImplementation(((cmd: string[]) => {
+      if (cmd[0] === "taskkill") return { exited: Promise.resolve(0) };
+      spawns++;
+      return proc;
+    }) as never);
+    try {
+      await check({
+        tick(elapsed) { now = 100 + elapsed; callback?.(); },
+        finish,
+        failRead() { stdout.error(new Error("read failed")); finish(); },
+        succeed() { stdout.enqueue(new TextEncoder().encode(JSON.stringify({ result: "ok" }))); finish(); },
+        overflow() { stdout.enqueue(new Uint8Array(5)); },
+        run: (timeoutMs, maxOutputBytes = 4) => runCli("claude", { system: "", prompt: "hello", timeoutMs, maxOutputBytes }).catch(error => error),
+        killed: () => kills,
+        scheduled: () => delays,
+        cleared: () => clears,
+        spawned: () => spawns,
+      });
+    } finally {
+      finish();
+      spawn.mockRestore();
+      clear.mockRestore();
+      interval.mockRestore();
+      clock.mockRestore();
+    }
+  }
+
+  test.each([-1, 0, 999, 1000, 1500, 1_800_000, Number.MAX_SAFE_INTEGER])("timeout %s uses one fixed timer and expires at its clamped deadline", async timeoutMs => {
+    await withProcess(async state => {
+      const result = state.run(timeoutMs);
+      expect(state.scheduled()).toEqual([100]);
+      const deadline = Math.max(1000, Math.min(1_800_000, timeoutMs));
+      state.tick(deadline - 1);
+      expect(state.killed()).toBe(0);
+      state.tick(deadline);
+      const error = await result as CliRunError;
+      expect(error.code).toBe("TIMEOUT");
+      expect(state.killed()).toBe(1);
+      expect(state.cleared()).toBe(1);
+      state.tick(deadline + 100);
+      expect(state.killed()).toBe(1);
+      expect(state.scheduled()).toEqual([100]);
+    });
+  });
+
+  test.each([NaN, Infinity, -Infinity, 1000.5])("invalid timeout %s starts neither process nor watchdog", async timeoutMs => {
+    await withProcess(async state => {
+      expect((await state.run(timeoutMs) as CliRunError).code).toBe("SPAWN_FAILED");
+      expect(state.spawned()).toBe(0);
+      expect(state.scheduled()).toEqual([]);
+    });
+  });
+
+  test("successful completion clears the watchdog", async () => {
+    await withProcess(async state => {
+      const result = state.run(20_000, 100);
+      state.succeed();
+      expect((await result as { text: string }).text).toBe("ok");
+      expect(state.cleared()).toBe(1);
+      expect(state.killed()).toBe(0);
+    });
+  });
+
+  test.each(["exit", "read error", "output cap"])("clears the watchdog on %s", async mode => {
+    await withProcess(async state => {
+      const result = state.run(20_000);
+      if (mode === "read error") state.failRead();
+      else if (mode === "output cap") state.overflow();
+      else state.finish();
+      const error = await result as Error & { code?: string };
+      expect(mode === "read error" ? error.message : error.code).toBe(mode === "read error" ? "read failed" : mode === "output cap" ? "OUTPUT_TOO_LARGE" : "FAILED");
+      expect(state.cleared()).toBe(1);
+      expect(state.killed()).toBe(mode === "output cap" ? 1 : 0);
+    });
+  });
 });
 
 describe("local CLI runner", () => {
