@@ -27,7 +27,7 @@ const ANTI_SLOP = [
   "More than two visible uses of the accent on one screen.",
 ];
 
-const md = (v: string) => v.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
+const md = (v: string) => v.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\r\n|[\r\n\u2028\u2029]/g, " ");
 const code = (v: string) => `\`${md(v)}\``;
 
 /** Weight per role (open-design's three-weight ladder: 400 body, ~510–550 labels, ~590–650 headings). */

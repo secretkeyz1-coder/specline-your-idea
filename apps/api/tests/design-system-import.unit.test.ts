@@ -54,6 +54,13 @@ describe("colour parsing", () => {
 });
 
 describe("reading tokens", () => {
+  test("bounded repeated token selectors and invalid suffixes preserve extracted tokens", () => {
+    const colors = "--background:#ffffff;--foreground:#111111;--primary:#2456aa;";
+    expect(readTokens(`${":root ".repeat(512)}{${colors}}`).light.bg).toBe("#ffffff");
+    expect(readTokens(`${" ".repeat(8192)}:root{${colors}}`).light.accent).toBe("#2456aa");
+    expect(() => readTokens(`${":root ".repeat(512)}!{${colors}}`)).not.toThrow();
+    expect(readTokens(`[data-theme=light]{${colors}}`).light.bg).toBe("#ffffff");
+  });
   test("shadcn/ui variables, light and dark", async () => {
     const css = `
       @layer base {

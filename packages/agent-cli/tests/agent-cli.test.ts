@@ -64,6 +64,23 @@ afterAll(() => {
 });
 
 describe("local CLI runner", () => {
+  test("direct package callers cannot bypass finite integer timeout validation", async () => {
+    for (const timeoutMs of [NaN, Infinity, -Infinity, 1000.5]) {
+      const error = await runCli("claude", { system: "", prompt: "hello", timeoutMs }).catch(e => e);
+      expect(error).toBeInstanceOf(CliRunError);
+      expect(error.message).toContain("finite integer");
+    }
+  });
+
+  test("out-of-range integer timeouts clamp to the bounded package range", async () => {
+    const result = await runCli("claude", { system: "", prompt: "hello", timeoutMs: Number.MAX_SAFE_INTEGER });
+    expect(JSON.parse(result.text).stdin).toBe("hello");
+    const start = Date.now();
+    const error = await runCli("claude", { system: "", prompt: "SLEEP", timeoutMs: -1 }).catch(e => e);
+    expect(error.code).toBe("TIMEOUT");
+    expect(Date.now() - start).toBeGreaterThanOrEqual(900);
+    expect(Date.now() - start).toBeLessThan(8000);
+  });
   test("runs with no tools, the prompt on stdin and the system prompt from a file", async () => {
     const res = await runCli("claude", { system: "Return JSON.", prompt: "hello there", model: "haiku", timeoutMs: 20_000 });
     const seen = JSON.parse(res.text);

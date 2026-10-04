@@ -4,6 +4,7 @@ import { toJsonSchema } from "@sdd/contracts";
 import { DomainError } from "@sdd/shared";
 import { assertCliTargetAllowed, originChanged, testFailureSummary, type ResolvedConnection } from "../src/index.js";
 import { openAiRequestBody, providerError } from "../src/adapters/openai.js";
+import { customHttpAdapter } from "../src/adapters/customHttp.js";
 
 /** Pure rules behind the provider-connection hardening (no network, no database). */
 
@@ -91,6 +92,36 @@ describe("OpenAI request body", () => {
     expect(openAiRequestBody(conn("OPENAI", false), "gpt", {}, structured)).not.toHaveProperty("response_format");
     expect(openAiRequestBody(conn("OPENAI_COMPATIBLE"), "m", {}, structured)).not.toHaveProperty("response_format");
     expect(openAiRequestBody(conn("OPENAI_COMPATIBLE"), "m", { json_mode: true }, structured).response_format).toEqual({ type: "json_object" });
+  });
+});
+
+describe("custom HTTP own-property JSON construction", () => {
+  const request = { system: "system", messages: [{ role: "user" as const, content: "hello" }] };
+  const connection = (template: Record<string, string>, baseUrl: string): ResolvedConnection => ({
+    id: "custom", providerType: "CUSTOM_HTTP", baseUrl, headers: {}, timeoutMs: 1000,
+    capabilities: { structured_output: false, tool_calling: false, vision: false, streaming: false },
+    customHttpMapping: { method: "POST", path: "/", headers: {}, request_json_template: template, text_response_pointer: "/text" },
+    allowPrivateEgress: true, maxResponseBytes: 4096, cli: { serverEnabled: false },
+  });
+  test("rejects every prototype segment before any network request", async () => {
+    for (const path of ["model.__proto__.polluted", "model.prototype.polluted", "model.constructor.prototype.polluted", "model.x.__proto__"]) {
+      await expect(customHttpAdapter.generateText(connection({ [path]: "{{model}}" }, "http://127.0.0.1:1"), "value", {}, request)).rejects.toMatchObject({ code: "PROVIDER_MISCONFIGURED" });
+    }
+    expect(Object.hasOwn(Object.prototype, "polluted")).toBe(false);
+  });
+  test("inherited-looking names are ordinary own JSON fields, including nested values", async () => {
+    let received: unknown;
+    const server = Bun.serve({ port: 0, hostname: "127.0.0.1", async fetch(req) {
+      received = await req.json();
+      return Response.json({ text: "ok" });
+    } });
+    try {
+      const template = { "model.toString.value": "{{model}}", "system.hasOwnProperty": "{{system}}", "messages.0.content": "hello" };
+      const result = await customHttpAdapter.generateText(connection(template, `http://127.0.0.1:${server.port}`), "m", {}, request);
+      expect(result.text).toBe("ok");
+      expect(received).toEqual({ model: { toString: { value: "m" } }, system: { hasOwnProperty: "system" }, messages: { "0": { content: "hello" } } });
+      expect(Object.hasOwn(Object.prototype, "value")).toBe(false);
+    } finally { server.stop(true); }
   });
 });
 

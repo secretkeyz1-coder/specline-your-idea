@@ -4,9 +4,12 @@ import { parseVerificationCommand } from "./verification.js";
 export function designPathExists(design: DesignArtifact, section: string): boolean {
   // A qualified component reference must resolve that component, not merely
   // the populated components section (or a different component named in it).
-  const componentReference = /^components?\s*[:/.]\s*(.*)$/i.exec(section.trim());
-  if (componentReference) {
-    const name = componentReference[1]!.trim().toLowerCase();
+  const reference = section.trim();
+  const prefix = /^components?/i.exec(reference)?.[0];
+  let separator = prefix?.length ?? 0;
+  if (prefix) while (separator < reference.length && /\s/.test(reference[separator]!)) separator++;
+  if (prefix && [":", "/", "."].includes(reference[separator] ?? "") && !/[\r\n\u2028\u2029]/.test(reference.slice(separator + 1).trimStart())) {
+    const name = reference.slice(separator + 1).trim().toLowerCase();
     return Boolean(name) && design.components.some(c => c.name.trim().toLowerCase() === name && Boolean(c.responsibility.trim()));
   }
   const label = section.toLowerCase().replace(/[ -]+/g, "_");

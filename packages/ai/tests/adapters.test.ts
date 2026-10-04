@@ -90,6 +90,10 @@ describe("egress ranges added by the audit", () => {
 });
 
 describe("provider endpoints", () => {
+  test("trailing slashes normalize linearly while internal paths stay intact", () => {
+    expect(modelsUrl("OPENAI", ` https://api.example.com/a//b${"/".repeat(8192)} `)).toBe("https://api.example.com/a//b/models");
+    expect(anthropicMessagesUrl("https://api.example.com/v1///")).toBe("https://api.example.com/v1/messages");
+  });
   test("Anthropic works with or without the /v1 segment", () => {
     expect(anthropicMessagesUrl(null)).toBe("https://api.anthropic.com/v1/messages");
     expect(anthropicMessagesUrl("https://api.anthropic.com/v1/")).toBe("https://api.anthropic.com/v1/messages");

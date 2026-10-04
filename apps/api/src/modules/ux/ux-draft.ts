@@ -20,6 +20,7 @@ import { listStackComponents } from "../planning/stack.js";
 import { getProject } from "../project/service.js";
 import { approvedDesignSystem } from "../design-system/service.js";
 import { sanitizeHtml } from "./ux-sanitize.js";
+import { separateStyles } from "./ux-html-parser.js";
 import { NEUTRAL_SPEC, assembleScreen, nodeTexts, screenContent } from "./ux-shell.js";
 import { lintOptionsFor, lintScreenHtml } from "./ux-lint.js";
 import { renderDigest, renderLint, renderUnchecked } from "./ux-render.js";
@@ -150,7 +151,7 @@ export async function requirementTitles(db: DbExecutor, projectId: string): Prom
 
 /** Remove an injected design-system stylesheet (it is re-added after each draw). */
 export function stripDesignSystem(html: string): string {
-  return html.replace(/<style\b[^>]*data-design-system[^>]*>[\s\S]*?<\/style\s*>/gi, "");
+  return separateStyles(html, attrs => Object.hasOwn(attrs, "data-design-system")).html;
 }
 
 /** Keep only the HTML document, whatever the model wrapped around it. */

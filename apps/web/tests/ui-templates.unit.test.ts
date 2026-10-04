@@ -1,4 +1,6 @@
 import { expect, test } from "bun:test";
+import { parseDocument, DomUtils } from "htmlparser2";
+import { cssEvidenceRules } from "../src/lib/server/template-parser.js";
 import { UI_TEMPLATES, UI_TEMPLATE_CATEGORIES, isExcludedUiTemplatePath } from "../src/lib/ui-templates.js";
 import { getUiTemplates, readUiTemplate, templateHtmlForAnalysis, templateHtmlForAdaptation } from "../src/lib/server/ui-templates.js";
 import { mkdtemp, mkdir, writeFile, unlink, rm, utimes } from "node:fs/promises";
@@ -35,7 +37,10 @@ test("attribution preservation cannot reintroduce markup through browser comment
   expect(notice).toContain("Copyright MIT");
   expect(notice).toContain("&lt;img");
   expect(notice).not.toMatch(/[<>-]/);
-  expect(nested.replace(/<!--[\s\S]*?-->/g, "")).not.toMatch(/<script|<img|bad\(\)/i);
+  const doc = parseDocument(nested);
+  expect(DomUtils.getElementsByTagName("script", doc, true)).toHaveLength(0);
+  expect(DomUtils.getElementsByTagName("img", doc, true)).toHaveLength(0);
+  expect(DomUtils.textContent(doc)).not.toContain("bad()");
 });
 
 test("published inventory is hash-valid, script-free, and keeps all catalogue roots", async () => {
@@ -127,6 +132,24 @@ test("adaptation does not read excluded vendor stylesheets through cross-source 
     const entry = (await getUiTemplates(root))[0]!;
     expect(await templateHtmlForAdaptation(entry.id, root)).not.toContain("ExcludedVendor");
   } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("analysis structurally removes malformed comments and scripts while retaining attributes", () => {
+  const html = templateHtmlForAnalysis(Buffer.from('<html><body><main class="card" data-note="a > b">Data</main><svg viewBox="0 0 10 10"><path d="x"/></svg><!-- note --!><script>demo()</script></body></html>'));
+  expect(html).not.toContain("demo()");
+  expect(html).not.toContain("<script");
+  expect(html).toContain('viewBox="0 0 10 10"');
+  expect(html).toContain('data-note="a &gt; b"');
+});
+
+test("CSS evidence preserves valid declarations and cannot close its HTML style context", () => {
+  const rules = cssEvidenceRules('/* note */.card{display:grid;content:"</style><img src=x>";background:url(https://example.invalid/a)}');
+  expect(rules).toHaveLength(1);
+  expect(rules[0]!.css).toContain("display:grid");
+  expect(rules[0]!.css).not.toContain("<");
+  expect(rules[0]!.css).not.toContain("url(");
+  expect(rules[0]!.css).not.toContain("/*");
+  expect(cssEvidenceRules('.card{display:grid}/* unclosed')).toEqual([]);
 });
 
 test("large icon and demo-script payloads do not cut off the actual page", () => {

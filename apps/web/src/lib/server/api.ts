@@ -83,10 +83,46 @@ export function throwLoadError(e: unknown): never {
  * message reaches the page. The error code itself is kept on ApiError.
  */
 export function userFacingMessage(message: string): string {
-  return message
-    .replace(/\s*\((?:[A-Z]{1,3}-?\d+[a-z]?|docs\/[^)]*)(?:\s*[\/,]\s*(?:[A-Z]{1,3}-?\d+[a-z]?|docs\/[^)]*))*\)/g, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
+  const pieces: string[] = [];
+  let copied = 0;
+  let search = 0;
+  while (search < message.length) {
+    const open = message.indexOf("(", search);
+    if (open < 0) break;
+    // A failed reference stops before a nested opening parenthesis. Successful
+    // docs/ references consume to the next closing parenthesis exactly once.
+    let offset = open + 1;
+    let valid = false;
+    for (;;) {
+      if (message.startsWith("docs/", offset)) {
+        const close = message.indexOf(")", offset + 5);
+        if (close < 0) { search = message.length; break; }
+        offset = close;
+        valid = true;
+        break;
+      }
+      const reference = /[A-Z]{1,3}-?\d+[a-z]?/y;
+      reference.lastIndex = offset;
+      if (!reference.exec(message)) break;
+      offset = reference.lastIndex;
+      if (message[offset] === ")") { valid = true; break; }
+      while (offset < message.length && /\s/.test(message[offset]!)) offset++;
+      if (message[offset] !== "/" && message[offset] !== ",") break;
+      offset++;
+      while (offset < message.length && /\s/.test(message[offset]!)) offset++;
+    }
+    if (valid) {
+      let start = open;
+      while (start > copied && /\s/.test(message[start - 1]!)) start--;
+      pieces.push(message.slice(copied, start));
+      copied = offset + 1;
+      search = copied;
+    } else {
+      search = Math.max(search, offset, open + 1);
+    }
+  }
+  pieces.push(message.slice(copied));
+  return pieces.join("").replace(/\s{2,}/g, " ").trim();
 }
 
 type Fetch = typeof fetch;

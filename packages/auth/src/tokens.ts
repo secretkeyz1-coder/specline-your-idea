@@ -20,9 +20,18 @@ export function hashDeviceCode(deviceCode: string): string {
 /** Human-approvable code shown in the browser during CLI login (docs/10 §11). */
 export function createUserCode(): string {
   const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  // Only complete alphabet-sized ranges are accepted, so every symbol has
+  // exactly the same number of preimages in a cryptographically random byte.
+  const limit = 256 - (256 % alphabet.length);
   let out = "";
-  for (const b of bytes) out += alphabet[b % alphabet.length]!;
+  while (out.length < 8) {
+    const bytes = crypto.getRandomValues(new Uint8Array(8));
+    for (const b of bytes) {
+      if (b >= limit) continue;
+      out += alphabet[b % alphabet.length]!;
+      if (out.length === 8) break;
+    }
+  }
   return `${out.slice(0, 4)}-${out.slice(4)}`;
 }
 

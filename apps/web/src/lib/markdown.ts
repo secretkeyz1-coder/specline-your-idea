@@ -1,5 +1,6 @@
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
+import { parseDocument, DomUtils } from "htmlparser2";
 
 /** Escape text destined for raw HTML embedding (error fallbacks). */
 function escapeHtml(text: string): string {
@@ -72,7 +73,7 @@ export function foldRequirementSections(html: string): string {
   const heading = /<h4 class="doc-h3">((?:[A-Z]+-\d+)[\s\S]*?)<\/h4>/g;
   const starts: Array<{ index: number; end: number; key: string; inner: string }> = [];
   for (const m of html.matchAll(heading)) {
-    const key = /^([A-Z]+-\d+)/.exec(m[1]!.replace(/<[^>]+>/g, ""))?.[1];
+    const key = /^([A-Z]+-\d+)/.exec(DomUtils.textContent(parseDocument(m[1]!)))?.[1];
     if (key) starts.push({ index: m.index!, end: m.index! + m[0].length, key, inner: m[1]! });
   }
   if (starts.length === 0) return html;

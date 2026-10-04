@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { Parser } from "htmlparser2";
+import { separateStyles } from "./ux-html-parser.js";
 import type { DbExecutor } from "@sdd/db";
 import { LayoutBriefSchema, DesignSystemSpecSchema, type DesignSystemSpec, type LayoutReference, type UxReference, type UxScreen } from "@sdd/contracts";
 import { DomainError, errors } from "@sdd/shared";
@@ -270,9 +271,10 @@ export async function analyseLayoutReference(gateway: GatewayDeps, db: DbExecuto
   };
   if (input.mode === "adapt") {
     // Keep the complete structural example instead of a prose-only summary. CSS is read separately for tokens.
-    const structure = cleanLayoutHtml(input.html.replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ""));
+    const separated = separateStyles(input.html);
+    const structure = cleanLayoutHtml(separated.html);
     if (structure.includes("[the rest of the page was cut]")) throw errors.validation("This template is too large to adapt faithfully. Supply a focused page or component example.");
-    const css = [...input.html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi)].map(m => m[1]).join("\n");
+    const css = separated.css;
     const ds = await approvedDesignSystem(db, input.projectId);
     // Keep prose separate from CSS: otherwise the importer treats the whole
     // mixed HTML/prose input as CSS and can lose its first block and body font.

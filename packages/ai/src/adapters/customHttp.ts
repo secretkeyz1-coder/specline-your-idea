@@ -86,7 +86,7 @@ function substituteTemplate(
   template: Record<string, string>,
   variables: Record<string, unknown>,
 ): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
+  const out: Record<string, unknown> = Object.create(null);
   for (const [path, rawExpression] of Object.entries(template)) {
     const { key, remainder } = splitPath(path);
     if (!ALLOWED_VARIABLES.has(key)) {
@@ -121,21 +121,23 @@ function splitPath(path: string): { key: string; remainder: string } {
   return { key: path.slice(0, dot), remainder: path.slice(dot + 1) };
 }
 
-const RESERVED_SEGMENTS: Record<string, boolean> = { "__proto__": true, prototype: true, constructor: true };
+const RESERVED_SEGMENTS = new Set(["__proto__", "prototype", "constructor"]);
 
 function assignPath(target: Record<string, unknown>, path: string, value: unknown): void {
   const segments = path.split(".");
-  if (segments.some((s) => RESERVED_SEGMENTS[s])) {
+  if (segments.some((s) => RESERVED_SEGMENTS.has(s))) {
     // Defense in depth: the contract schema already rejects these paths.
     throw new DomainError("PROVIDER_MISCONFIGURED", `Template path "${path}" targets a reserved property`, 400);
   }
   let node: Record<string, unknown> = target;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i]!;
-    if (typeof node[seg] !== "object" || node[seg] === null) node[seg] = {};
+    if (!Object.hasOwn(node, seg) || typeof node[seg] !== "object" || node[seg] === null) {
+      Object.defineProperty(node, seg, { value: Object.create(null), enumerable: true, writable: true, configurable: true });
+    }
     node = node[seg] as Record<string, unknown>;
   }
-  node[segments[segments.length - 1]!] = value;
+  Object.defineProperty(node, segments[segments.length - 1]!, { value, enumerable: true, writable: true, configurable: true });
 }
 
 /** RFC 6901 JSON pointer, e.g. "/result/answer" or "/choices/0/message/content". */

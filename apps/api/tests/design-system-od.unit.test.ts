@@ -100,6 +100,13 @@ describe("DESIGN.md and USAGE.md (open-design shape)", () => {
     for (const [, token, v] of spacing) expect({ token, v }).toEqual({ token: token!, v: tokens.get(token!)! });
   });
 
+  test("markdown table values escape existing backslashes before pipes and line boundaries", () => {
+    const hostile = { ...spec, component_library: "unknown\\|cell\r\nnext\rrow\u2028line" } as unknown as DesignSystemSpec;
+    const document = designSystemFiles(hostile, 3).find(f => f.path.endsWith("DESIGN.md"))!.content;
+    expect(document).toContain("unknown\\\\\\|cell next row line");
+    expect(document).not.toContain("cell\r");
+  });
+
   test("USAGE.md carries open-design's four headings verbatim", () => {
     for (const heading of ["## Read Order", "## Design Highlights", "## Do", "## Avoid"]) expect(usage).toContain(heading);
     expect(usage).toContain("Paste the `:root { ... }` block of `tokens.css`");

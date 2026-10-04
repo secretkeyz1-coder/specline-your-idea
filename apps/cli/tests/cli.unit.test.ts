@@ -20,6 +20,13 @@ describe("resolveRequestToken", () => {
   });
 });
 
+test("server normalization handles bounded long slash runs without changing bearer scope", () => {
+  const base = "https://sdd.example.com";
+  const saved = { token: "sdd_saved", server_url: `  ${base}${"/".repeat(8192)}  ` };
+  expect(resolveRequestToken(undefined, saved, `${base}/`)).toBe("sdd_saved");
+  expect(resolveRequestToken(undefined, saved, `${base}/other`)).toBeNull();
+});
+
 describe("runTaskMismatch", () => {
   test("the run file must belong to the task named on the command line", () => {
     expect(runTaskMismatch("TASK-001", "task-001")).toBeNull();

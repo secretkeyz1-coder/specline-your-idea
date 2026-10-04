@@ -171,7 +171,19 @@ interface Extracted {
 
 const DARK_CONTEXT = /\.dark\b|dark-theme|theme-dark|\[data-(?:theme|mode|color-scheme|bs-theme)=["']?[\w-]*dark|prefers-color-scheme:\s*dark|:root\.dark|html\.dark/i;
 /** Selectors that just hold the tokens (every other selector with declarations is a component rule). */
-const TOKEN_CONTEXT = /^(?::root|html|body|:host|\*|@theme(?:\s+\w+)?|@layer\s+base|@plugin\s+["']daisyui\/theme["']|\.dark|\.light|\[data-[\w-]+(?:=[^\]]*)?\]|@media[^{]*|,|\s)+$/i;
+function isTokenContext(context: string): boolean {
+  // Consume each token once. There is no repeated ambiguous alternation to
+  // repartition a long selector when its final character is not supported.
+  const token = /:root|html|body|:host|\*|@theme(?:\s+\w+)?|@layer\s+base|@plugin\s+["']daisyui\/theme["']|\.dark|\.light|\[data-[\w-]+(?:=[^\]]*)?\]|@media[^{]*|,|\s+/iy;
+  let offset = 0;
+  while (offset < context.length) {
+    token.lastIndex = offset;
+    const match = token.exec(context);
+    if (!match) return false;
+    offset = token.lastIndex;
+  }
+  return true;
+}
 
 /** A CSS scan that tracks nesting (@media, @layer, @theme, @plugin) and keeps each block's own declarations. */
 function scanCss(css: string): { blocks: Array<{ context: string; decls: Array<[string, string]> }>; statements: string[] } {
@@ -244,7 +256,7 @@ function extractCss(css: string, out: Extracted) {
     }
     if (/daisyui\/theme/i.test(b.context)) out.formats.add("daisyUI theme");
     if (/@theme/i.test(b.context)) out.formats.add("Tailwind v4 @theme");
-    const tokenContext = TOKEN_CONTEXT.test(b.context) || b.context === "";
+    const tokenContext = isTokenContext(b.context);
     for (const [prop, value] of b.decls) {
       if (prop.startsWith("--")) {
         out.tokens.push({ name: normName(prop), value, mode });

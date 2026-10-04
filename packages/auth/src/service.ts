@@ -71,11 +71,12 @@ export async function createWorkspaceWithOwner(
   input: { name: string; ownerUserId: string; role?: MemberRole },
 ) {
   return db.transaction(async (tx) => {
-    const baseSlug = input.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || "workspace";
+    const normalized = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    let start = 0;
+    let end = normalized.length;
+    while (start < end && normalized[start] === "-") start++;
+    while (end > start && normalized[end - 1] === "-") end--;
+    const baseSlug = normalized.slice(start, Math.min(end, start + 40)) || "workspace";
     // ON CONFLICT instead of check-then-insert: two creates with the same name
     // at once used to hit workspaces_slug_unique and fail with a 500.
     let workspace: typeof schema.workspaces.$inferSelect | undefined;

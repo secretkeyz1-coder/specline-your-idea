@@ -13,7 +13,9 @@ const DEFAULT_BASE: Record<string, string> = {
 };
 
 function trimSlashes(url: string): string {
-  return url.replace(/\/+$/, "");
+  let end = url.length;
+  while (end > 0 && url[end - 1] === "/") end--;
+  return url.slice(0, end);
 }
 
 /** Provider origin without a trailing API-version segment (native providers). */

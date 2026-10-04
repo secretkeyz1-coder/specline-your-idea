@@ -4,6 +4,8 @@ import { resolve, relative, isAbsolute, dirname } from "node:path";
 import { createHash } from "node:crypto";
 import { UI_TEMPLATES, isExcludedUiTemplatePath, type UiTemplate, type UiTemplateCategory } from "../ui-templates.js";
 import { sanitizeReferenceHtml } from "./ui-reference-policy.js";
+import { DomUtils, parseDocument } from "htmlparser2";
+import { analysisDocument, cssEvidenceRules } from "./template-parser.js";
 
 export function templateRoot(): string {
   const candidates = [
@@ -66,11 +68,7 @@ export async function getUiTemplates(root = templateRoot()): Promise<UiTemplate[
  * Remove those before the API's input bound so the actual page is retained.
  * The API still performs its normal untrusted-layout sanitization. */
 export function templateHtmlForAnalysis(content: Buffer): string {
-  const html = content.toString("utf8")
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
-    .replace(/(<svg\b[^>]*>)[\s\S]*?<\/svg\s*>/gi, "$1</svg>")
-    .replace(/>\s+</g, "><");
+  const html = DomUtils.getOuterHTML(analysisDocument(content.toString("utf8")), { selfClosingTags: false }).replace(/>\s+</g, "><");
   if (html.length > 200_000) throw new Error("This template needs a smaller layout sample.");
   return html;
 }
@@ -91,42 +89,44 @@ export async function readUiTemplate(id: string, kind: "html" | "preview" = "htm
 export async function templateHtmlForAdaptation(id: string, collectionRoot = templateRoot()): Promise<string> {
   const selected = await readUiTemplate(id, "html", collectionRoot);
   const root = await realpath(collectionRoot);
-  let html = templateHtmlForAnalysis(selected.content);
-  const inlineCss = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi)].map(m => m[1]!).join("\n");
+  const doc = parseDocument(templateHtmlForAnalysis(selected.content), { lowerCaseTags: false, lowerCaseAttributeNames: false });
+  const elements = DomUtils.findAll(() => true, doc.children);
+  const attrsOf = (attrs: Record<string, string>) => Object.fromEntries(Object.entries(attrs).map(([key, value]) => [key.toLowerCase(), value]));
+  const styles = elements.filter(node => node.name.toLowerCase() === "style");
+  const inlineCss = styles.map(node => DomUtils.textContent(node)).join("\n");
   // Scraped plugin CSS can precede the theme and consume the evidence budget.
-  html = html.replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, "");
-  const classes = new Set([...html.matchAll(/\bclass\s*=\s*["']([^"']*)["']/gi)].flatMap(m => m[1]!.split(/\s+/).filter(Boolean)));
+  styles.forEach(style => DomUtils.removeElement(style));
+  const classes = new Set(elements.flatMap(node => (attrsOf(node.attribs).class ?? "").split(/\s+/).filter(Boolean)));
   let css = "";
-  for (const link of html.matchAll(/<link\b[^>]*>/gi)) {
-    if (!/\brel\s*=\s*["']stylesheet["']/i.test(link[0])) continue;
-    const href = /\bhref\s*=\s*["']([^"']+)["']/i.exec(link[0])?.[1];
+  for (const link of elements.filter(node => node.name.toLowerCase() === "link")) {
+    const attrs = attrsOf(link.attribs);
+    if (!(attrs.rel ?? "").toLowerCase().split(/\s+/).includes("stylesheet")) continue;
+    const href = attrs.href;
     if (!href || /^(?:[a-z]+:|\/\/)/i.test(href)) continue;
     try {
       const path = await realpath(resolve(dirname(resolve(root, selected.template.file)), href.split(/[?#]/)[0]!));
       const within = relative(root, path);
       if (within.startsWith("..") || isAbsolute(within) || isExcludedUiTemplatePath(within) || !path.endsWith(".css") || statSync(path).size > 2_000_000) continue;
-      const content = (await readFile(path, "utf8")).replace(/\/\*[\s\S]*?\*\//g, "");
-      // ponytail: bounded CSS evidence, not a CSS bundler; complex selectors can be approximated by the model.
-      const rules = [...content.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
-      const global = (r: RegExpMatchArray) => /:root|:host|--(?:color|font|radius|spacing)[\w-]*\s*:/.test(r[0]) || /(?:^|,)\s*(?:body|html|h[1-6])(?:\s|,|$)/.test(r[1]!);
+      const rules = cssEvidenceRules(await readFile(path, "utf8"));
+      // Bounded CSS evidence, not a CSS bundler; complex selectors can be approximated by the model.
+      const global = (r: (typeof rules)[number]) => /:root|:host|--(?:color|font|radius|spacing)[\w-]*\s*:/.test(r.css) || /(?:^|,)\s*(?:body|html|h[1-6])(?:\s|,|$)/.test(r.selector);
       for (const rule of [...rules.filter(global), ...rules.filter(r => !global(r))]) {
-        const selectors = rule[1]!.replace(/\\/g, "");
+        const selectors = rule.selector.replace(/\\/g, "");
         if (!global(rule) && ![...classes].some(c => selectors.includes(`.${c}`))) continue;
-        const safe = rule[0].replace(/url\([^)]*\)/gi, "none").replace(/<\/?style/gi, "");
-        if (css.length + safe.length > 20_000) break;
-        css += safe;
+        if (css.length + rule.css.length > 20_000) break;
+        css += rule.css;
       }
-      html = html.replace(link[0], "");
+      DomUtils.removeElement(link);
     } catch { /* Missing/external stylesheet stays visible as an adaptation limitation. */ }
   }
   // Embedded styles are essential for HTML-only templates. Keep them after
   // linked theme evidence so their source cascade wins in the visual import.
   const remaining = Math.max(0, 20_000 - css.length);
-  const inlineRules = [...inlineCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => m[0]);
+  const inlineRules = cssEvidenceRules(inlineCss);
   let embedded = "";
   for (const rule of inlineRules) {
-    if (embedded.length + rule.length > remaining) break;
-    embedded += rule.replace(/url\([^)]*\)/gi, "none").replace(/<\/?style/gi, "");
+    if (embedded.length + rule.css.length > remaining) break;
+    embedded += rule.css;
   }
-  return `${html}\n<style>${css}${embedded}</style>`;
+  return `${DomUtils.getOuterHTML(doc)}\n<style>${css}${embedded}</style>`;
 }

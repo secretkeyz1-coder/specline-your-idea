@@ -25,11 +25,17 @@ export function isJsonMode(): boolean {
 /** Process-wide server override (e.g. `sdd-agent connect --server`), so REST
  * calls go to the same control plane as the WebSocket. */
 let serverOverride: string | null = null;
-export function setServerOverride(url: string | null): void {
-  serverOverride = url ? url.replace(/\/+$/, "") : null;
+function trimTrailingSlashes(url: string): string {
+  let end = url.length;
+  while (end > 0 && url[end - 1] === "/") end--;
+  return url.slice(0, end);
 }
 
-const normalizeServer = (url: string) => url.trim().replace(/\/+$/, "").toLowerCase();
+export function setServerOverride(url: string | null): void {
+  serverOverride = url ? trimTrailingSlashes(url) : null;
+}
+
+const normalizeServer = (url: string) => trimTrailingSlashes(url.trim()).toLowerCase();
 
 /**
  * Which bearer to send. An explicit `token` wins — including `null`, which
@@ -59,7 +65,7 @@ export async function api<T = unknown>(
   } = {},
 ): Promise<T> {
   const config = readConfig();
-  const base = (options.baseUrl ?? serverOverride ?? config.server_url).replace(/\/+$/, "");
+  const base = trimTrailingSlashes(options.baseUrl ?? serverOverride ?? config.server_url);
   const token = resolveRequestToken(options.token, config, base);
   const timeoutMs = method === "POST" && /\/(request-review|orchestrate)$/.test(path) ? 3 * 60 * 60_000 : 30_000;
   let response: Response;

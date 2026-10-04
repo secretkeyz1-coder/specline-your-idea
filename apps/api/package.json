@@ -24,6 +24,7 @@
     "elysia": "^1.4.30",
     "htmlparser2": "^10.1.0",
     "lucide": "^1.48.0",
-    "playwright-core": "1.63.0"
+    "playwright-core": "1.63.0",
+    "postcss": "8.5.28"
   }
 }

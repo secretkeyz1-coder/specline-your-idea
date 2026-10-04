@@ -303,6 +303,10 @@ async function exec(
   args: string[],
   opts: { cwd: string; stdin?: string; timeoutMs: number; maxOutputBytes?: number },
 ): Promise<{ code: number; stdout: string; stderr: string; timedOut: boolean }> {
+  if (!Number.isFinite(opts.timeoutMs) || !Number.isInteger(opts.timeoutMs)) {
+    throw new CliRunError("SPAWN_FAILED", "CLI timeout must be a finite integer in milliseconds");
+  }
+  const timeoutMs = Math.max(1_000, Math.min(1_800_000, opts.timeoutMs));
   let proc: ReturnType<typeof Bun.spawn>;
   try {
     proc = trackTree(
@@ -325,7 +329,7 @@ async function exec(
   const timer = setTimeout(() => {
     timedOut = true;
     void killTree(proc);
-  }, opts.timeoutMs);
+  }, timeoutMs);
   const cap = opts.maxOutputBytes ?? 4_000_000;
   const read = async (stream: ReadableStream<Uint8Array>) => {
     const chunks: Uint8Array[] = [];

@@ -1,4 +1,5 @@
 import { UX_BUDGETS } from "@sdd/contracts";
+import postcss from "postcss";
 
 /**
  * Composition CSS in UI-reference screens. When the kit's layout classes cannot
@@ -162,7 +163,17 @@ function cleanRules(css: string, dropped: string[], counter: { rules: number }, 
 /** Composition CSS as the platform keeps it: scoped to the page, within the design system. */
 export function cleanComposeCss(css: string): CleanedCss {
   const dropped: string[] = [];
-  let source = css.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/<!--|-->/g, " ");
+  // Reject HTML raw-text delimiters rather than removing substrings that can recombine.
+  // CSS comments are parsed in their own grammar, never as HTML.
+  if (css.includes("<")) return { css: "", dropped: ["HTML delimiters in CSS"] };
+  let source: string;
+  try {
+    const root = postcss.parse(css, { map: false });
+    root.walkComments(comment => { comment.remove(); });
+    source = root.toString();
+  } catch {
+    return { css: "", dropped: ["Malformed CSS"] };
+  }
   if (source.length > MAX_CSS_CHARS) {
     dropped.push(`everything after ${MAX_CSS_CHARS} characters`);
     source = source.slice(0, MAX_CSS_CHARS);

@@ -1,5 +1,6 @@
 import { UX_BUDGETS, type DesignSystemSpec, type UxGenerator, type UxPlatform, type UxReference, type UxShell } from "@sdd/contracts";
 import { Parser } from "htmlparser2";
+import { transformStartTag, transformTables } from "./ux-html-parser.js";
 import { screenStyleBlock } from "../design-system/render.js";
 import { composeStylesOf, scopeComposeStyles } from "./ux-compose.js";
 import { expandIcons, iconSvg, navIcon } from "./ux-icons.js";
@@ -370,10 +371,11 @@ const escAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").
 function phoneTableTag(open: string, mode: PhoneMode): string {
   const want = mode === "card" ? "ds-table-cards" : `ds-table-${mode}`;
   const drop = ["ds-table-cards", "ds-table-priority", "ds-table-expand", "ds-table-scroll"].filter((c) => c !== want);
-  const m = /\sclass\s*=\s*"([^"]*)"/i.exec(open);
-  const classes = (m?.[1] ?? "").split(/\s+/).filter((c) => c && !drop.includes(c));
-  if (!classes.includes(want)) classes.push(want);
-  return m ? open.replace(m[0], ` class="${classes.join(" ")}"`) : open.replace(/^<table\b/i, `<table class="${classes.join(" ")}"`);
+  return transformStartTag(open, attrs => {
+    const classes = (attrs.class ?? "").split(/\s+/).filter(c => c && !drop.includes(c));
+    if (!classes.includes(want)) classes.push(want);
+    attrs.class = classes.join(" ");
+  });
 }
 
 /**
@@ -390,7 +392,7 @@ function phoneTableTag(open: string, mode: PhoneMode): string {
  * asked for it, trimmed by trimPhoneCards).
  */
 export function phoneTables(html: string): string {
-  return html.replace(/<table\b[^>]*>[\s\S]*?<\/table\s*>/gi, (table) => {
+  return transformTables(html, (table) => {
     const open = /^<table\b[^>]*>/i.exec(table)![0];
     const mode = /\sdata-phone\s*=\s*["']?([a-z]+)/i.exec(open)?.[1]?.toLowerCase() as PhoneMode | undefined;
     if (!mode || !PHONE_MODES.includes(mode)) return table;
