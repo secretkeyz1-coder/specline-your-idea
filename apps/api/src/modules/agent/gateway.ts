@@ -6,6 +6,7 @@ import { authorizeProjectAccess } from "../../context.js";
 import { authPlugin, ensurePrincipal } from "../../plugins.js";
 import type { Infra } from "../../infra.js";
 import { audit } from "../audit/service.js";
+import { isDaemonRun } from "../execution/events.js";
 import { findNextClaimable } from "../execution/scheduler.js";
 import { DomainError } from "@sdd/shared";
 import type { CliMachineJob } from "@sdd/ai";
@@ -228,8 +229,8 @@ export function stopRunsOnMachines(runs: Array<{ id: string; taskId: string; mac
  * online and still hold an ACTIVE AUTO_RUN link to the project (remote
  * dispatch requires AUTO_RUN, docs/13 §10). Null = resumable.
  */
-export async function daemonResumeBlocker(db: DbExecutor, run: { machineId: string | null }, projectId: string): Promise<string | null> {
-  if (!run.machineId) return null;
+export async function daemonResumeBlocker(db: DbExecutor, run: { machineId: string | null; metadata?: Record<string, unknown> | null }, projectId: string): Promise<string | null> {
+  if (!run.machineId || !isDaemonRun(run)) return null;
   const [link] = await db
     .select()
     .from(schema.repositoryLinks)
@@ -247,10 +248,10 @@ export async function daemonResumeBlocker(db: DbExecutor, run: { machineId: stri
 /** Hand a resumed (IN_PROGRESS, fresh lease) daemon run back to its machine. */
 export async function dispatchResume(
   db: DbExecutor,
-  run: { id: string; machineId: string | null },
+  run: { id: string; machineId: string | null; metadata?: Record<string, unknown> | null },
   task: { id: string; key: string; projectId: string },
 ): Promise<{ acked: boolean; reason?: string }> {
-  if (!run.machineId) return { acked: false, reason: "NOT_A_DAEMON_RUN" };
+  if (!run.machineId || !isDaemonRun(run)) return { acked: false, reason: "NOT_A_DAEMON_RUN" };
   const [link] = await db
     .select({ id: schema.repositoryLinks.id })
     .from(schema.repositoryLinks)

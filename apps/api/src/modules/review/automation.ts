@@ -8,6 +8,7 @@ import { createReview, requeueTask } from "./service.js";
 import { approvedUxReference, uxFilePath } from "../ux/ux.js";
 import { screenFilesOf, SHELL_TITLE } from "../task/lint.js";
 import { isAuthScreen } from "../ux/ux-od-seeds.js";
+import { autoApproveWithheld } from "../task/screen-review.js";
 
 export async function autoReviewAllowed(db: DbExecutor, projectId: string, userId: string, machineId: string | null, tokenMachineId?: string | null) {
   if (!machineId || (tokenMachineId && tokenMachineId !== machineId)) return false;
@@ -15,6 +16,11 @@ export async function autoReviewAllowed(db: DbExecutor, projectId: string, userI
     .innerJoin(schema.localMachines, eq(schema.localMachines.id, schema.repositoryLinks.machineId))
     .where(and(eq(schema.repositoryLinks.projectId, projectId), eq(schema.localMachines.id, machineId), eq(schema.localMachines.userId, userId), ne(schema.localMachines.status, "REVOKED"), eq(schema.repositoryLinks.status, "ACTIVE"), eq(schema.repositoryLinks.permissionMode, "AUTO_RUN"))).limit(1);
   return Boolean(link);
+}
+
+/** Submission credentials cannot lend machine attribution to an unbound run. */
+export async function runAutoReviewAllowed(db: DbExecutor, projectId: string, userId: string, run: { machineId: string | null }, tokenMachineId?: string | null) {
+  return autoReviewAllowed(db, projectId, userId, run.machineId, tokenMachineId);
 }
 
 export function reviewApprovalIssues(contract: TaskContract, result: { acceptance_coverage: Array<{ criterion_index: number; status: string; evidence: string }>; findings: Array<{ severity: string }>; source_consistency?: Array<{ requirement_key: string; status: string; evidence: string }> }, sourceKeys: string[] = []): string[] {
@@ -78,6 +84,9 @@ async function reviewSubmittedRunLocked(gateway: GatewayDeps, db: DbExecutor, ru
     });
     await db.update(schema.taskRuns).set({ metadata: { ...run.metadata, ai_review: { ...result.data, generation_run_id: result.generationRunId } } }).where(eq(schema.taskRuns.id, runId));
     if (!autonomous || !task.contract.verification.required.length || task.reviewPolicy === "HUMAN_REQUIRED" || task.contract.verification.required.some(c => c.type === "manual")) return { task, ai_review: result.data, auto_approve_withheld: "Human decision required" };
+    const withheld = autoApproveWithheld(task.contract, ux);
+    if (withheld) return { task, ai_review: result.data, auto_approve_withheld: withheld };
+    if (!await autoReviewAllowed(db, task.projectId, userId, run.machineId)) return { task, ai_review: result.data, auto_approve_withheld: "Repository auto-approve is no longer enabled" };
     const issues = reviewApprovalIssues(task.contract, result.data, pack.requirements.map(r => r.key));
     const approved = result.data.recommended_decision === "APPROVED" && !issues.length;
     const review = await createReview(db, {

@@ -9,6 +9,11 @@ import type { ActorType } from "@sdd/contracts";
 
 /** The task event log (append-only, idempotent) and the table-driven task transition that writes to it. */
 
+/** Legacy machine-bound runs were daemon-only; new claims explicitly separate provenance. */
+export function isDaemonRun(run: { machineId: string | null; metadata?: Record<string, unknown> | null }): boolean {
+  return Boolean(run.machineId) && run.metadata?.daemon_execution !== false;
+}
+
 export type ActorInput = { type: ActorType; id: string; source: AuditSource };
 
 /* ── Event log (T113) — append-only, idempotent ── */

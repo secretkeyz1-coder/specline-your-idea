@@ -78,7 +78,7 @@ function parseEvidenceSubmission(value: SubmitRunInput) {
 
 export async function submitRunForReview(
   db: DbExecutor,
-  input: { runId: string; body: SubmitRunInput; actor: ActorInput },
+  input: { runId: string; body: SubmitRunInput; actor: ActorInput; deferReviewNotification?: boolean },
 ) {
   input.body = parseEvidenceSubmission(input.body);
   const { run, task } = await requireRunForTask(db, input.runId);
@@ -143,18 +143,23 @@ export async function submitRunForReview(
     entityType: "RUN",
     entityId: run.id,
   });
+  if (!input.deferReviewNotification) await notifyPendingReview(db, updatedTask, run.id, input.body.summary);
+  return { task: updatedTask };
+}
+
+export async function notifyPendingReview(db: DbExecutor, task: TaskRow, runId: string, summary: string) {
+  if (task.workflowStatus !== "NEEDS_REVIEW") return;
   const project = await getProject(db, task.projectId);
   await notifyWorkspaceMembers(db, {
     workspaceId: project.workspaceId,
     projectId: task.projectId,
     type: "review_requested",
     title: `${task.key} needs review`,
-    body: input.body.summary.slice(0, 200),
+    body: summary.slice(0, 200),
     entityType: "TASK",
     entityId: task.id,
-    dedupeKey: `review:${run.id}`,
+    dedupeKey: `review:${runId}`,
   });
-  return { task: updatedTask };
 }
 
 /** Manual fallback (C17): record an externally-executed run with pasted evidence. */

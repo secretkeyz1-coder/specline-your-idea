@@ -4,24 +4,43 @@ import { api, ApiError, rethrowKitError, sessionFrom, throwLoadError } from "$li
 import type { TaskSummary } from "$lib/types.js";
 import { BAD_ID, formUuid } from "$lib/server/ids.js";
 import { splitPartsFromForm } from "$lib/server/split-parts.js";
+import type { MachineRepoLink } from "../../../machines/links.js";
 
 export const load: PageServerLoad = async ({ fetch, cookies, params }) => {
   const session = sessionFrom(cookies);
   try {
-    const [{ tasks }, graph, promptOptions] = await Promise.all([
+    const [{ tasks }, graph, promptOptions, { links }] = await Promise.all([
       api<{ tasks: TaskSummary[] }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/tasks?limit=200`),
       api<{ acyclic: boolean; cycle?: string[] }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/task-graph/validate`),
       api<{ self_connect: boolean; auto_approve: boolean }>(fetch, session, "GET", `/api/v1/projects/${params.projectId}/execution-prompt/options`).catch(
         () => ({ self_connect: false, auto_approve: false }),
       ),
+      api<{ links: MachineRepoLink[] }>(fetch, session, "GET", "/api/v1/agents/repo-links"),
     ]);
-    return { tasks, graph, promptOptions };
+    return { tasks, graph, promptOptions, repositoryLinks: links.filter(row => row.link.projectId === params.projectId && row.link.status === "ACTIVE") };
   } catch (e) {
     throwLoadError(e);
   }
 };
 
 export const actions: Actions = {
+  approvalMode: async ({ request, fetch, cookies, params }) => {
+    const session = sessionFrom(cookies);
+    const form = await request.formData();
+    const linkId = formUuid(form, "linkId");
+    const mode = form.get("mode");
+    if (!linkId || (mode !== "AUTO_RUN" && mode !== "MANUAL")) return fail(400, { message: BAD_ID });
+    try {
+      const { links } = await api<{ links: MachineRepoLink[] }>(fetch, session, "GET", "/api/v1/agents/repo-links");
+      const selected = links.find(row => row.link.id === linkId && row.link.projectId === params.projectId && row.link.status === "ACTIVE");
+      if (!selected?.can_change_mode) return fail(403, { message: "Only an admin can change this repository connection." });
+      await api(fetch, session, "PATCH", `/api/v1/agents/repo-links/${linkId}`, { body: { permission_mode: mode } });
+      return { saved: true };
+    } catch (error) {
+      rethrowKitError(error);
+      return fail(error instanceof ApiError ? error.status : 500, { message: error instanceof ApiError ? error.message : "Could not save approval mode." });
+    }
+  },
   generate: async ({ fetch, cookies, params }) => {
     const session = sessionFrom(cookies);
     try {
@@ -81,14 +100,13 @@ export const actions: Actions = {
    *  single-use connect code, so the agent needs no separate sign-in. */
   executionPrompt: async ({ request, fetch, cookies, params }) => {
     const session = sessionFrom(cookies);
-    const form = await request.formData();
-    const autoApprove = form.get("auto_approve") === "on";
+    // Copying a prompt is not a permission change.
     try {
       const result = await api<{ prompt: string }>(
         fetch,
         session,
         "GET",
-        `/api/v1/projects/${params.projectId}/execution-prompt?auto_approve=${autoApprove}`,
+        `/api/v1/projects/${params.projectId}/execution-prompt`,
       );
       return { prompt: result.prompt };
     } catch (error) {

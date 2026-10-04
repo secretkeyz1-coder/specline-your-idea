@@ -5,10 +5,10 @@ import { authorizeProjectAccess } from "../../context.js";
 import { authPlugin, ensurePrincipal, rateLimit } from "../../plugins.js";
 import type { Infra } from "../../infra.js";
 import { subscribe } from "../../events/bus.js";
-import { cancelTask, claimTask, heartbeatRun, listTaskEvents, openMachineRuns, recordManualRun, blockRun, reportProgress, reportTestResult, startRun, submitRunForReview, unblockTask, type ActorInput } from "./service.js";
+import { isDaemonRun, notifyPendingReview, cancelTask, claimTask, heartbeatRun, listTaskEvents, openMachineRuns, recordManualRun, blockRun, reportProgress, reportTestResult, startRun, submitRunForReview, unblockTask, type ActorInput } from "./service.js";
 import { daemonResumeBlocker, dispatchResume, nudgeAutoRunMachinesSoon, stopRunsOnMachines } from "../agent/gateway.js";
 import { executionSummary, findNextClaimable } from "./scheduler.js";
-import { autoReviewAllowed, reviewSubmittedRun } from "../review/automation.js";
+import { runAutoReviewAllowed, reviewSubmittedRun } from "../review/automation.js";
 import { createReview, listReviewsForTask, requeueTask } from "../review/service.js";
 import { getTask } from "../task/repo.js";
 import { renderCheckCommand, screenFilesOf } from "../task/lint.js";
@@ -70,7 +70,7 @@ export function executionRoutes(infra: Infra) {
         await rateLimit(ctx.infra, "MCP", `claim:${principal.userId}`);
         // An sdd-agent names its machine so cancel/requeue/resume can reach the
         // process running the work. It must be the caller's own live machine.
-        const machineId = ctx.body.machine_id ?? null;
+        const machineId = ctx.body.machine_id ?? principal.tokenMachineId ?? null;
         if (machineId) {
           const [machine] = await ctx.infra.db
             .select({ id: schema.localMachines.id })
@@ -81,6 +81,7 @@ export function executionRoutes(infra: Infra) {
         }
         return claimTask(ctx.infra.db, {
           machineId,
+          daemonExecution: ctx.body.machine_id !== undefined,
           taskId: task.id,
           body: {
             executor: {
@@ -230,8 +231,10 @@ export function executionRoutes(infra: Infra) {
         const principal = ensurePrincipal(ctx);
         const { run, task } = await runForPrincipal(ctx.infra.db, ctx.params.runId, principal.userId);
         await authorizeProjectAccess(ctx.infra.db, principal, task.projectId, { scope: "run:submit" });
+        if (principal.tokenMachineId && run.machineId && principal.tokenMachineId !== run.machineId) throw errors.forbidden("Run belongs to a different machine");
         const submitted = await submitRunForReview(ctx.infra.db, {
           runId: run.id,
+          deferReviewNotification: true,
           body: {
             summary: ctx.body.summary,
             commit_sha: ctx.body.commit_sha,
@@ -249,9 +252,8 @@ export function executionRoutes(infra: Infra) {
         // never the implementer — closes the task. C15 is preserved: the
         // decision is made by the SYSTEM actor under an explicit policy, and
         // the review record stays auditable.
-        // The body's machine_id (sddctl from .sdd/local.json), else the machine a
-        // pairing token is bound to, else the machine whose sdd-agent claimed the run.
-        const machineId = ctx.body.machine_id ?? principal.tokenMachineId ?? run.machineId ?? null;
+        // Only the run's persisted claim-time machine attribution can authorize
+        // automation. Submission credentials or body cannot bind a legacy unbound run.
         // Auto-approve fires ONLY for AUTO_RUN machines AND non-HUMAN_REQUIRED
         // tasks. HUMAN_REQUIRED (high-risk: security/encryption, docs/11 §8)
         // always parks at NEEDS_REVIEW for a human reviewer — the policy
@@ -261,15 +263,19 @@ export function executionRoutes(infra: Infra) {
         // submitRunForReview; a contract with no required verification has
         // nothing machine-checkable, so it always goes to a human.
         const hasRequiredEvidence = (task.contract.verification?.required ?? []).length > 0;
-        const autoMode = !humanRequired && hasRequiredEvidence && await autoReviewAllowed(ctx.infra.db, task.projectId, principal.userId, machineId, principal.tokenMachineId);
+        const autoMode = !humanRequired && hasRequiredEvidence && await runAutoReviewAllowed(ctx.infra.db, task.projectId, principal.userId, run, principal.tokenMachineId);
         // A screen is approved by policy only once its render check passed: a
         // web screen task without one has shown nobody the screen (docs/28 R7).
         const ux = autoMode && screenFilesOf(task.contract).length ? await approvedUxReference(ctx.infra.db, task.projectId) : null;
         const withheld = autoMode ? autoApproveWithheld(task.contract, ux) : null;
-        if (withheld) return { ...submitted, auto_approve_withheld: withheld };
+        if (withheld) {
+          await notifyPendingReview(ctx.infra.db, submitted.task, run.id, ctx.body.summary);
+          return { ...submitted, auto_approve_withheld: withheld };
+        }
         ctx.server?.timeout(ctx.request, 0);
         const reviewed = await reviewSubmittedRun(ctx.infra.gateway(), ctx.infra.db, run.id, principal.userId, autoMode);
         if (reviewed.auto_approved || reviewed.changes_requested) nudgeAutoRunMachinesSoon(ctx.infra.db, task.projectId);
+        await notifyPendingReview(ctx.infra.db, await getTask(ctx.infra.db, task.id), run.id, ctx.body.summary);
         return { ...submitted, ...reviewed };
       },
       {
@@ -438,7 +444,7 @@ export function executionRoutes(infra: Infra) {
           .limit(1);
         // A daemon run has no one at the keyboard: "resume" only makes sense
         // when its machine can be handed the run again right now.
-        if (mode === "resume" && blockedRun?.machineId) {
+        if (mode === "resume" && blockedRun && isDaemonRun(blockedRun)) {
           const blocker = await daemonResumeBlocker(ctx.infra.db, blockedRun, task.projectId);
           if (blocker) throw errors.conflict("RESUME_NEEDS_MACHINE", blocker, { machine_id: blockedRun.machineId, suggested_mode: "ready" });
         }
@@ -454,7 +460,7 @@ export function executionRoutes(infra: Infra) {
           nudgeAutoRunMachinesSoon(ctx.infra.db, task.projectId);
           return { task: updated };
         }
-        if (blockedRun?.machineId) {
+        if (blockedRun && isDaemonRun(blockedRun)) {
           const dispatched = await dispatchResume(ctx.infra.db, blockedRun, task);
           return { task: updated, resume_dispatched: dispatched.acked, ...(dispatched.acked ? {} : { resume_reason: dispatched.reason }) };
         }

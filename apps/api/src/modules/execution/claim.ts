@@ -40,9 +40,9 @@ export async function claimTask(
     taskId: string;
     body: ClaimTaskInput;
     actor: ActorInput;
-    /** The caller's machine when its sdd-agent claims a dispatched task (the
-     * route verifies ownership). Marks a daemon run: cancel/resume are pushed to it. */
+    /** Verified machine attribution, independent of interactive/daemon execution. */
     machineId?: string | null;
+    daemonExecution?: boolean;
   },
 ) {
   const task = await getTask(db, input.taskId);
@@ -94,7 +94,7 @@ export async function claimTask(
         // executor id is descriptive metadata only (lease checks compare this).
         executorId: input.actor.id,
         machineId: input.machineId ?? null,
-        metadata: { declared_executor: input.body.executor.id },
+        metadata: { declared_executor: input.body.executor.id, daemon_execution: input.daemonExecution === true },
         status: "CREATED",
       })
       .returning();

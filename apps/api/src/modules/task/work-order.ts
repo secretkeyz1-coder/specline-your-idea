@@ -143,7 +143,7 @@ export async function generateExecutionPrompt(
         `   user to copy a fresh prompt from the web app.`,
         connect.autoApprove
           ? `   Auto mode is on: submission sends the implementation diff, test logs and screenshots to the orchestrator reviewer. Approval requires proven acceptance coverage.`
-          : `   Every submission waits for the user's review (they can switch auto-approve on in the web app).`,
+          : `   Review follows the saved permission mode for this repository and machine. Reconnecting does not change it. AUTO_RUN automatically reviews eligible work; MANUAL waits for the user. Enable auto-approve on the specific connection in the web app.`,
         `   Tasks marked "needs a human reviewer" always wait for the user.`,
       ]
     : [

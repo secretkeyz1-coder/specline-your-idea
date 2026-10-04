@@ -53,13 +53,15 @@ export function registerTask(program: Command): void {
           const inReview = open.filter((t) => t.workflowStatus === "NEEDS_REVIEW");
           const blocked = open.filter((t) => t.workflowStatus === "BLOCKED");
           if (summary.total === summary.done) {
-            const link = readRepoLink(findRepoRoot()!);
-            if (link?.permission_mode === "AUTO_RUN") {
+            const localLink = readRepoLink(findRepoRoot()!);
+            const { links } = await api<{ links: Array<{ link: { machineId: string; permissionMode: string; status: string } }> }>("GET", `/api/v1/agents/repo-links?project_id=${projectId}`);
+            const saved = links.find(row => row.link.machineId === localLink?.machine_id && row.link.status === "ACTIVE");
+            if (saved?.link.permissionMode === "AUTO_RUN") {
               const reviewed = await api<{ status: string; message?: string }>("POST", `/api/v1/projects/${projectId}/orchestrate`);
               if (reviewed.status === "FIX_TASKS_READY") { console.log("FIX_TASKS_READY: release review generated corrections. Run sddctl task next again."); return; }
               if (reviewed.status !== "COMPLETE") { console.log(`${reviewed.status}: ${reviewed.message ?? "Release review still needs attention"}`); return; }
             }
-            if (link?.permission_mode !== "AUTO_RUN") { console.log("BUILD_DONE: tasks are finished; run feature Convergence and release approval in the web app."); return; }
+            if (saved?.link.permissionMode !== "AUTO_RUN") { console.log("BUILD_DONE: tasks are finished; run feature Convergence and release approval in the web app."); return; }
             console.log("ALL_DONE: tasks and feature release reviews passed.");
           } else if (summary.review > 0) {
             console.log(
@@ -222,7 +224,7 @@ export function registerTask(program: Command): void {
         const evidenceScreens = [...new Set([...(detail.task.contract?.ui_screen_keys ?? []), ...(detail.task.contract?.verification?.required ?? []).flatMap(r => [...r.command.matchAll(/e2e\/render\/([\w.-]+)\.spec\./g)].map(m => m[1]!))])];
         const collected = collectRunEvidence(repoRoot, state.base_commit ?? null, evidenceScreens);
         const files = collected.files_changed;
-        const result = await api<{ auto_approved?: boolean; auto_approve_withheld?: string; task?: { workflowStatus?: string } }>(
+        const result = await api<{ auto_approved?: boolean; changes_requested?: boolean; auto_approve_withheld?: string; task?: { workflowStatus?: string } }>(
           "POST",
           `/api/v1/runs/${runId}/request-review`,
           {
@@ -239,6 +241,8 @@ export function registerTask(program: Command): void {
           submitted: key.toUpperCase(),
           review: result.auto_approved
             ? "approved by AI review with acceptance coverage and passing checks"
+            : result.changes_requested
+              ? result.task?.workflowStatus === "READY" ? "AI review requested corrections; task requeued — run sddctl task next" : "AI review requested corrections; inspect the review before continuing"
             : result.auto_approve_withheld
               ? `waiting for a reviewer: ${result.auto_approve_withheld}`
               : "waiting for a reviewer",

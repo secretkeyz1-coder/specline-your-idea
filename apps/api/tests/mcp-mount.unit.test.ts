@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Elysia } from "elysia";
-import { mcpRoutes } from "../src/modules/mcp/mount.js";
+import { buildMcpDeps, mcpRoutes } from "../src/modules/mcp/mount.js";
 import type { Infra } from "../src/infra.js";
 
 // Fake only persistence; exercise the real Elysia mount, auth resolver and MCP SDK.
 function fixture() {
   const row = {
     user: { id: "smoke-user", email: "smoke@example.com", displayName: "Smoke", status: "ACTIVE" },
-    token: { id: "smoke-token", scopes: ["project:read"], workspaceId: null, projectId: null, revokedAt: null, expiresAt: null },
+    token: { machineId: "paired-machine", id: "smoke-token", scopes: ["project:read"], workspaceId: null, projectId: null, revokedAt: null, expiresAt: null },
   };
   const selection = { from: () => selection, innerJoin: () => selection, where: () => selection, limit: async () => [row] };
   const update = { set: () => update, where: async () => [] };
@@ -21,6 +21,10 @@ function fixture() {
 const initialize = { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-03-26", capabilities: {}, clientInfo: { name: "regression", version: "1" } } };
 
 describe("MCP HTTP mount preserves the request body", () => {
+  test("authentication retains the paired machine identity", async () => {
+    const principal = await buildMcpDeps(fixture()).resolvePrincipal("fixture");
+    expect(principal?.tokenMachineId).toBe("paired-machine");
+  });
   test("authenticated initialize reaches the SDK with valid JSON", async () => {
     const app = new Elysia().use(mcpRoutes(fixture()));
     const response = await app.handle(new Request("http://localhost/mcp", {

@@ -11,10 +11,10 @@ import { buildContextPack } from "../prompt/service.js";
 import { getProject } from "../project/service.js";
 import { getApprovedRevision } from "../artifact/service.js";
 import { getTask, getTaskByKey, listTasks } from "../task/repo.js";
-import { claimTask, heartbeatRun, startRun, reportProgress, reportTestResult, blockRun, submitRunForReview } from "../execution/service.js";
+import { notifyPendingReview, claimTask, heartbeatRun, startRun, reportProgress, reportTestResult, blockRun, submitRunForReview } from "../execution/service.js";
 import { findNextClaimable } from "../execution/scheduler.js";
 import { createBug } from "../bug/service.js";
-import { autoReviewAllowed, reviewSubmittedRun } from "../review/automation.js";
+import { runAutoReviewAllowed, reviewSubmittedRun } from "../review/automation.js";
 import { nudgeAutoRunMachinesSoon } from "../agent/gateway.js";
 /**
  * MCP mount (T131/T132): /mcp served by the API process. The same domain
@@ -33,6 +33,7 @@ async function toMcpPrincipal(infra: Infra, bearer: string): Promise<McpPrincipa
     tokenId: row.token.id,
     tokenWorkspaceId: row.token.workspaceId,
     tokenProjectId: row.token.projectId,
+    tokenMachineId: row.token.machineId,
   };
 }
 
@@ -47,7 +48,7 @@ function asPrincipal(mcp: McpPrincipal): Principal {
     tokenWorkspaceId: mcp.tokenWorkspaceId,
     tokenProjectId: mcp.tokenProjectId,
     tokenId: mcp.tokenId,
-    tokenMachineId: null,
+    tokenMachineId: mcp.tokenMachineId ?? null,
   };
 }
 
@@ -213,8 +214,14 @@ export function buildMcpDeps(infra: Infra): SddMcpDeps {
       try {
         const task = await resolveTaskFor(db, principal, taskIdOrKey);
         await authorizeProjectAccess(db, asPrincipal(principal), task.projectId, { scope: "task:execute" });
+        const machineId = principal.tokenMachineId ?? null;
+        if (machineId) {
+          const [machine] = await db.select().from(schema.localMachines).where(and(eq(schema.localMachines.id, machineId), eq(schema.localMachines.userId, principal.userId))).limit(1);
+          if (!machine || machine.status === "REVOKED") throw errors.forbidden("Token machine is not an active machine owned by you");
+        }
         return await claimTask(db, {
           taskId: task.id,
+          machineId,
           body: { executor: { type: "MCP_CLIENT", id: executorId }, lease_seconds: 900 },
           actor: actorOf(principal),
         });
@@ -297,14 +304,17 @@ export function buildMcpDeps(infra: Infra): SddMcpDeps {
         const task = await resolveTaskFor(db, principal, taskIdOrKey);
         await authorizeProjectAccess(db, asPrincipal(principal), task.projectId, { scope: "run:submit" });
         const run = await latestOwnedRun(db, task.id, principal.userId);
+        if (principal.tokenMachineId && run.machineId && principal.tokenMachineId !== run.machineId) throw errors.forbidden("Run belongs to a different machine");
         const submitted = await submitRunForReview(db, {
           runId: run.id,
+          deferReviewNotification: true,
           body: { summary: body.summary, commit_sha: body.commit_sha, files_changed: body.files_changed ?? [], evidence: body.evidence },
           actor: actorOf(principal),
         });
-        const allowed = await autoReviewAllowed(db, task.projectId, principal.userId, run.machineId);
+        const allowed = await runAutoReviewAllowed(db, task.projectId, principal.userId, run, principal.tokenMachineId);
         const reviewed = await reviewSubmittedRun(infra.gateway(), db, run.id, principal.userId, allowed);
         if (reviewed.auto_approved || reviewed.changes_requested) nudgeAutoRunMachinesSoon(db, task.projectId);
+        await notifyPendingReview(db, await getTask(db, task.id), run.id, body.summary);
         return { ...submitted, ...reviewed };
       } catch (error) {
         return mcpError(error);

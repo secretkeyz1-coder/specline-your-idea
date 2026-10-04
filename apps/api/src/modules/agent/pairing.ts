@@ -36,7 +36,8 @@ export type PairingPermissionMode = "MANUAL" | "ASSISTED" | "AUTO_RUN";
 const MODE_RANK: Record<PairingPermissionMode, number> = { MANUAL: 0, ASSISTED: 1, AUTO_RUN: 2 };
 
 /** The pairing code sets the ceiling; the laptop may only ask for less autonomy. */
-export function effectivePermissionMode(granted: PairingPermissionMode, requested?: PairingPermissionMode | null): PairingPermissionMode {
+export function effectivePermissionMode(granted: PairingPermissionMode, requested?: PairingPermissionMode | null, current?: PairingPermissionMode | null, preserve = false): PairingPermissionMode {
+  if (preserve && !requested) return current ?? "MANUAL";
   if (!requested) return granted;
   return MODE_RANK[requested] < MODE_RANK[granted] ? requested : granted;
 }
@@ -49,6 +50,7 @@ export interface PairingPayload {
   e: number; // expiry epoch ms
   n: string; // single-use nonce
   s?: 1; // self-connect: the claim acts as `u`, no separate login
+  k?: 1; // omitted browser preference: keep the existing repository mode
 }
 
 const b64u = (buf: Buffer | string) =>
@@ -63,6 +65,7 @@ export function createPairingCode(
     permissionMode: PairingPermissionMode;
     ttlMinutes?: number;
     selfConnect?: boolean;
+    preserveMode?: boolean;
   },
 ): { code: string; expiresAt: Date } {
   const expiresAt = Date.now() + (input.ttlMinutes ?? 15) * 60_000;
@@ -74,6 +77,7 @@ export function createPairingCode(
     e: expiresAt,
     n: b64u(randomBytes(16)),
     ...(input.selfConnect ? { s: 1 as const } : {}),
+    ...(input.preserveMode ? { k: 1 as const } : {}),
   };
   const body = b64u(JSON.stringify(payload));
   const sig = b64u(createHmac("sha256", secret).update(body).digest().subarray(0, 20));
@@ -161,7 +165,6 @@ async function claimVerifiedPairing(
     repository: { fingerprint: string; display_path: string; default_branch?: string | null };
   },
 ) {
-  const permissionMode = effectivePermissionMode(payload.m, input.requestedMode);
   // The claimer is who the machine will act as: they must be able to work on
   // the project (write access, token narrowing respected, machine:register).
   const claimerAccess = await authorizeProjectAccess(db, input.claimer, payload.p, { write: true, scope: "machine:register" });
@@ -232,11 +235,12 @@ async function claimVerifiedPairing(
     .from(schema.repositoryLinks)
     .where(and(eq(schema.repositoryLinks.projectId, payload.p), eq(schema.repositoryLinks.machineId, machine.id)))
     .limit(1);
+  const permissionMode = effectivePermissionMode(payload.m, input.requestedMode, existingLink?.permissionMode, payload.k === 1);
   let link;
   if (existingLink) {
     const [updated] = await db
       .update(schema.repositoryLinks)
-      .set({ repoFingerprint, displayPath: input.repository.display_path, defaultBranch: input.repository.default_branch ?? null, permissionMode, status: "ACTIVE" })
+      .set({ repoFingerprint, displayPath: input.repository.display_path, defaultBranch: input.repository.default_branch ?? null, ...(payload.k === 1 && !input.requestedMode ? {} : { permissionMode }), status: "ACTIVE" })
       .where(eq(schema.repositoryLinks.id, existingLink.id))
       .returning();
     link = updated!;
@@ -318,10 +322,10 @@ export async function mintSelfConnectCode(
   infra: Infra,
   principal: Principal,
   project: { id: string; workspaceId: string },
-  autoApprove: boolean,
+  autoApprove?: boolean,
 ): Promise<{ code: string; expiresAt: Date; autoApprove: boolean } | null> {
   const options = await selfConnectOptions(infra.db, principal, project.id);
-  if (autoApprove && !options.auto_approve) {
+  if (autoApprove !== undefined && !options.auto_approve) {
     throw errors.forbidden("Only a project admin in the web app can connect a machine with auto-approve");
   }
   if (!options.self_connect) return null;
@@ -335,6 +339,7 @@ export async function mintSelfConnectCode(
     permissionMode,
     ttlMinutes: 60,
     selfConnect: true,
+    preserveMode: autoApprove === undefined,
   });
   await audit(infra.db, {
     workspaceId: project.workspaceId,
@@ -347,7 +352,7 @@ export async function mintSelfConnectCode(
     entityId: project.id,
     metadata: { permission_mode: permissionMode, expires_at: expiresAt.toISOString(), self_connect: true },
   });
-  return { code, expiresAt, autoApprove };
+  return { code, expiresAt, autoApprove: autoApprove === true };
 }
 
 /** Pairing routes: code creation (browser session, admin) + claim (the
@@ -373,6 +378,7 @@ export function pairingRoutes(infra: Infra) {
           userId: principal.userId,
           permissionMode,
           ttlMinutes: 15,
+          preserveMode: ctx.body.permission_mode === undefined,
         });
         await audit(infra.db, {
           workspaceId: project.workspaceId,

@@ -1,5 +1,7 @@
 <script lang="ts">
   import { enhance, deserialize } from "$app/forms";
+  import { invalidateAll } from "$app/navigation";
+  import type { MachineRepoLink } from "../../../machines/links.js";
   import {
     CircleCheck,
     Pencil,
@@ -34,6 +36,7 @@
       tasks: TaskSummary[];
       graph: { acyclic: boolean; cycle?: string[] };
       promptOptions: { self_connect: boolean; auto_approve: boolean };
+      repositoryLinks: MachineRepoLink[];
     };
     form: {
       ok?: boolean;
@@ -47,8 +50,25 @@
   let showGraph = $state(false);
   let moreOpen = $state(false);
   let promptCopied = $state(false);
-  /** Admin choice baked into the prompt's connect code. */
-  let promptAutoApprove = $state(false);
+  let selectedLinkId = $state("");
+  const selectedLink = $derived(data.repositoryLinks.find(row => row.link.id === selectedLinkId) ?? (data.repositoryLinks.length === 1 ? data.repositoryLinks[0] : undefined));
+  async function saveApprovalMode(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const selected = selectedLink;
+    if (!selected?.can_change_mode) return;
+    const mode = input.checked ? "AUTO_RUN" : "MANUAL";
+    input.checked = selected.link.permissionMode === "AUTO_RUN";
+    busy = "approval";
+    try {
+      const response = await fetch("?/approvalMode", { method: "POST", body: new URLSearchParams({ linkId: selected.link.id, mode }) });
+      const result = deserialize<{ saved?: boolean }, { message?: string }>(await response.text());
+      if (result.type !== "success") throw new Error(result.type === "failure" ? result.data?.message : "Could not save approval mode.");
+      await invalidateAll();
+      promptError = null;
+    } catch (error) {
+      promptError = error instanceof Error ? error.message : "Could not save approval mode.";
+    } finally { busy = null; }
+  }
 
   // Filter & Search states
   let searchQuery = $state("");
@@ -153,7 +173,7 @@
       const res = await fetch("?/executionPrompt", {
         method: "POST",
         headers: { "content-type": "application/x-www-form-urlencoded; charset=UTF-8" },
-        body: new URLSearchParams(promptAutoApprove && data.promptOptions.auto_approve ? { auto_approve: "on" } : {}),
+        body: new URLSearchParams(),
       });
       const result = deserialize<{ prompt?: string }, { message?: string }>(await res.text());
       const prompt = result.type === "success" ? result.data?.prompt : undefined;
@@ -192,14 +212,25 @@
     {:else}<ClipboardList class="size-4" aria-hidden="true" />{/if}
     <span>{busy === "prompt" ? "Preparing…" : promptCopied ? "Copied" : "Copy agent prompt"}</span>
   </button>
-  {#if data.promptOptions.auto_approve}
+  {#if data.repositoryLinks.length > 1}
+    <select aria-label="Repository connection approval setting" class="select select-sm" bind:value={selectedLinkId} disabled={busy !== null}>
+      <option value="">Select a machine connection</option>
+      {#each data.repositoryLinks as row}
+        <option value={row.link.id}>{row.link.displayPath} — machine {row.link.machineId.slice(0, 8)}</option>
+      {/each}
+    </select>
+  {/if}
+  {#if selectedLink}
     <label
-      class="flex min-h-9 cursor-pointer items-center gap-2 text-[13px] text-base-content/80 {primary ? '' : 'px-3'}"
-      title="The copied prompt connects the agent's machine with auto-approve: runs whose required checks pass are approved without a reviewer."
+      class="flex min-h-9 items-center gap-2 text-[13px] text-base-content/80 {primary ? '' : 'px-3'}"
+      title="Saved for this repository and machine. Unchecked requires human review. Checked automatically reviews eligible work; human-required, manual verification, evidence, quality and security gates still apply."
     >
-      <input type="checkbox" class="checkbox checkbox-sm" bind:checked={promptAutoApprove} disabled={busy !== null} />
-      Auto-approve
+      <input type="checkbox" class="checkbox checkbox-sm" checked={selectedLink.link.permissionMode === 'AUTO_RUN'} onchange={saveApprovalMode} disabled={busy !== null || !selectedLink.can_change_mode} />
+      Auto-approve (saved)
     </label>
+    <span class="text-xs text-base-content/60">Human-required work and failed evidence, quality or security checks still need attention.</span>
+  {:else}
+    <span class="text-xs text-base-content/60">{data.repositoryLinks.length ? 'Select the connection to view its saved approval mode.' : 'Connect your repository first; then enable persistent auto-approve here.'}</span>
   {/if}
 {/snippet}
 

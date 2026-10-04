@@ -397,7 +397,7 @@ export function taskRoutes(infra: Infra) {
         await authorizeProjectAccess(ctx.infra.db, principal, project.id, { scope: "task:read" });
         // Copied from the web app, the prompt carries a single-use connect
         // code so the agent is signed in by `sddctl connect` — no device flow.
-        const connect = await mintSelfConnectCode(ctx.infra, principal, project, ctx.query.auto_approve === "true");
+        const connect = await mintSelfConnectCode(ctx.infra, principal, project, ctx.query.auto_approve === undefined ? undefined : ctx.query.auto_approve === "true");
         const { generateExecutionPrompt } = await import("./service.js");
         const prompt = await generateExecutionPrompt(ctx.infra.db, project, { serverUrl: ctx.infra.config.API_PUBLIC_URL, connect });
         return { prompt, connect_expires_at: connect?.expiresAt.toISOString() ?? null };

@@ -25,6 +25,7 @@ export interface McpPrincipal {
   /** PAT narrowing — MCP calls must respect it (docs/13 §5–6, C12). */
   tokenWorkspaceId: string | null;
   tokenProjectId: string | null;
+  tokenMachineId?: string | null;
 }
 
 export interface SddMcpServices {

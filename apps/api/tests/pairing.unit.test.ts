@@ -42,6 +42,19 @@ describe("pairing codes", () => {
   });
 });
 
+describe("persistent reconnect mode", () => {
+  test("omitted preference preserves saved checked and unchecked modes", () => {
+    expect(effectivePermissionMode("MANUAL", null, "AUTO_RUN", true)).toBe("AUTO_RUN");
+    expect(effectivePermissionMode("MANUAL", null, "MANUAL", true)).toBe("MANUAL");
+    expect(effectivePermissionMode("MANUAL", null, null, true)).toBe("MANUAL");
+  });
+  test("deliberate mode change and laptop ceiling remain enforced", () => {
+    expect(effectivePermissionMode("MANUAL", null, "AUTO_RUN", false)).toBe("MANUAL");
+    expect(effectivePermissionMode("MANUAL", "AUTO_RUN", "MANUAL", true)).toBe("MANUAL");
+    expect(effectivePermissionMode("AUTO_RUN", "MANUAL", "AUTO_RUN", true)).toBe("MANUAL");
+  });
+});
+
 describe("effectivePermissionMode", () => {
   test("the code is a ceiling; requests can only lower it", () => {
     expect(effectivePermissionMode("MANUAL", "AUTO_RUN")).toBe("MANUAL");

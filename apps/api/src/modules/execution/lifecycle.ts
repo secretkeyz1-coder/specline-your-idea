@@ -5,7 +5,7 @@ import { getTask, updateTaskFields } from "../task/repo.js";
 import { getProject } from "../project/service.js";
 import { audit } from "../audit/service.js";
 import { publish, topics } from "../../events/bus.js";
-import { appendTaskEvent, transitionTask, type ActorInput } from "./events.js";
+import { isDaemonRun, appendTaskEvent, transitionTask, type ActorInput } from "./events.js";
 
 /** Ending runs outside the happy path: retiring open runs, unblocking and cancelling tasks. */
 
@@ -42,10 +42,11 @@ export async function retireOpenRuns(db: DbExecutor, taskId: string, to: "FAILED
 /** Open runs of a task that a machine's sdd-agent is executing — read BEFORE
  * retiring them, so the caller can tell those machines to stop. */
 export async function openMachineRuns(db: DbExecutor, taskId: string): Promise<Array<{ id: string; taskId: string; machineId: string | null }>> {
-  return db
-    .select({ id: schema.taskRuns.id, taskId: schema.taskRuns.taskId, machineId: schema.taskRuns.machineId })
+  const runs = await db
+    .select({ id: schema.taskRuns.id, taskId: schema.taskRuns.taskId, machineId: schema.taskRuns.machineId, metadata: schema.taskRuns.metadata })
     .from(schema.taskRuns)
     .where(and(eq(schema.taskRuns.taskId, taskId), inArray(schema.taskRuns.status, [...OPEN_RUN_STATUSES]), isNotNull(schema.taskRuns.machineId)));
+  return runs.filter(isDaemonRun);
 }
 
 /**

@@ -4,6 +4,15 @@ import { bugTransitionNeedsHuman } from "../src/modules/bug/service.js";
 import { convergenceVerdictStale } from "../src/modules/convergence/service.js";
 import { dependencyEditAllowed } from "../src/modules/task/repo.js";
 import { mcpFailure, textContent } from "@sdd/mcp";
+import { daemonResumeBlocker, dispatchResume } from "../src/modules/agent/gateway.js";
+import type { DbExecutor } from "@sdd/db";
+
+test("machine-attributed interactive runs resume without a daemon socket or AUTO_RUN grant", async () => {
+  const db = { select: () => { throw new Error("Interactive resume must not consult daemon links"); } } as unknown as DbExecutor;
+  const run = { id: "run", machineId: "machine", metadata: { daemon_execution: false } };
+  expect(await daemonResumeBlocker(db, run, "project")).toBeNull();
+  expect(await dispatchResume(db, run, { id: "task", key: "TASK-001", projectId: "project" })).toEqual({ acked: false, reason: "NOT_A_DAEMON_RUN" });
+});
 
 /** Auto-approve is a web-app decision; tokens can create/keep/lower a link, never raise it. */
 describe("repository link permission policy", () => {
