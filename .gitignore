@@ -53,6 +53,20 @@ packages/db/drizzle/meta/_journal.json.bak
 .playwright-mcp/
 .impeccable/
 
+# Reference data only: vendor build graphs belong in the external archive.
+/Referensi UI/**/package*.json
+/Referensi UI/**/*lock*
+/Referensi UI/**/*.js
+/Referensi UI/**/*.mjs
+/Referensi UI/**/*.cjs
+/Referensi UI/**/*.ts
+/Referensi UI/**/*.scss
+/Referensi UI/**/*.sass
+/Referensi UI/**/*.less
+/Referensi UI/**/*.map
+/Referensi UI/**/node_modules/
+/Referensi UI/**/.github/
+
 # First public package: preserve local restricted vendors and generated previews
 /Referensi UI/preline/
 /Referensi UI/tabler/

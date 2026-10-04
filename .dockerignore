@@ -13,6 +13,36 @@ docs
 apps/web/tests
 test-results
 
+# Allow only curated reference data into the build context.
+Referensi UI/**
+!Referensi UI/**/
+!Referensi UI/**/*.html
+!Referensi UI/**/*.htm
+!Referensi UI/**/*.css
+!Referensi UI/**/*.png
+!Referensi UI/**/*.jpg
+!Referensi UI/**/*.jpeg
+!Referensi UI/**/*.gif
+!Referensi UI/**/*.webp
+!Referensi UI/**/*.avif
+!Referensi UI/**/*.ico
+!Referensi UI/**/*.svg
+!Referensi UI/**/*.woff
+!Referensi UI/**/*.woff2
+!Referensi UI/**/*.ttf
+!Referensi UI/**/*.otf
+!Referensi UI/**/*.eot
+!Referensi UI/**/LICENSE*
+!Referensi UI/**/license*
+!Referensi UI/**/NOTICE*
+!Referensi UI/**/notice*
+!Referensi UI/**/COPYING*
+!Referensi UI/LICENSES/**
+!Referensi UI/README.md
+!Referensi UI/asset-inventory.json
+Referensi UI/**/node_modules
+Referensi UI/**/.git
+
 # First public package: preserve local restricted vendors and generated previews
 /Referensi UI/preline/
 /Referensi UI/tabler/

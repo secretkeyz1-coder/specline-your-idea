@@ -12,7 +12,7 @@ RUN bun install --frozen-lockfile --linker=hoisted
 COPY tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/web ./apps/web
-COPY ["Referensi UI", "./Referensi UI"]
+# Reference assets are not a build input; copy only into the runtime below.
 RUN cd apps/web && bun run build
 
 FROM oven/bun:1.4 AS runtime
@@ -26,7 +26,8 @@ RUN printf 'sdd:x:1000:\n' >> /etc/group \
     && printf 'sdd:x:1000:1000::/app:/usr/sbin/nologin\n' >> /etc/passwd
 COPY --from=build /app/apps/web/build ./build
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build ["/app/Referensi UI", "./Referensi UI"]
+# .dockerignore allowlists visual reference assets and upstream notices only.
+COPY ["Referensi UI", "./Referensi UI"]
 # Preserve project/upstream notices alongside the scoped reference collection.
 COPY LICENSE THIRD_PARTY_NOTICES.md ./
 COPY third-party-licenses ./third-party-licenses

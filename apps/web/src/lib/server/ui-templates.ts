@@ -3,6 +3,7 @@ import { existsSync, statSync } from "node:fs";
 import { resolve, relative, isAbsolute, dirname } from "node:path";
 import { createHash } from "node:crypto";
 import { UI_TEMPLATES, isExcludedUiTemplatePath, type UiTemplate, type UiTemplateCategory } from "../ui-templates.js";
+import { sanitizeReferenceHtml } from "./ui-reference-policy.js";
 
 export function templateRoot(): string {
   const candidates = [
@@ -82,7 +83,8 @@ export async function readUiTemplate(id: string, kind: "html" | "preview" = "htm
   const file = await realpath(resolve(root, kind === "preview" ? `previews/${template.id}.png` : template.file));
   const within = relative(root, file);
   if (within.startsWith("..") || isAbsolute(within) || isExcludedUiTemplatePath(within)) throw new Error("Template file is outside the public collection.");
-  return { template, content: await readFile(file) };
+  const content = await readFile(file);
+  return { template, content: kind === "html" ? Buffer.from(sanitizeReferenceHtml(content.toString())) : content };
 }
 
 /** Include local stylesheet evidence for adaptation; never fetch template URLs or execute its scripts. */

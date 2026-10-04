@@ -26,9 +26,11 @@
     "@types/sanitize-html": "^2.16.1",
     "daisyui": "^5.7.46",
     "playwright": "^1.63.0",
+    "postcss": "8.5.10",
     "svelte": "^5.57.0",
     "svelte-check": "^4.3.4",
     "tailwindcss": "^4.3.3",
+    "tailwindcss-reference": "npm:tailwindcss@3.4.19",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   }

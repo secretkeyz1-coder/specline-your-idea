@@ -1,27 +1,27 @@
-<!DOCTYPE html>
+
 <html lang="en">
 
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Cards List - Bulma Templates</title>
-      <!-- Bulma Version 1.0.4 -->
+
     <link rel="stylesheet" href="https://unpkg.com/bulma@1.0.4/css/bulma.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
-    <link rel="stylesheet" href="../css/cards.css">
+    <link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free/css/all.min.css" />
+
+    <link rel="stylesheet" href="../css/cards.css" />
     <style> ::-webkit-scrollbar{height:10px;width:10px}::-webkit-scrollbar-track{background:#efefef;border-radius:6px}::-webkit-scrollbar-thumb{background:#d5d5d5;border-radius:6px}::-webkit-scrollbar-thumb:hover{background:#c4c4c4}</style>
   </head>
 
   <body>
 
-    <!-- START NAV -->
+
     <nav class="navbar" aria-label="main navigation">
       <div class="container">
         <div class="navbar-brand">
           <a class="navbar-item" href="#">
-            <img src="../images/cards/bulma-logo-white.png" alt="Logo">
+            <img src="../images/cards/bulma-logo-white.png" alt="Logo" />
           </a>
           <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
             <span aria-hidden="true"></span>
@@ -53,13 +53,13 @@
         </div>
       </div>
     </nav>
-    <!-- END NAV -->
+
 
     <div class="container">
       <div class="section">
         <div class="columns">
           <div class="column has-text-centered">
-            <h1 class="title" style="color: ghostwhite;">Bulma Card Layout Template</h1><br>
+            <h1 class="title" style="color:ghostwhite">Bulma Card Layout Template</h1><br />
           </div>
         </div>
         <div id="app" class="row columns is-multiline">
@@ -67,21 +67,21 @@
             <div class="card large">
               <div class="card-image">
                 <figure class="image is-16by9">
-                  <img :src="card.image" alt="Image">
+                  <img :src="card.image" alt="Image" />
                 </figure>
               </div>
               <div class="card-content">
                 <div class="media">
                   <div class="media-left">
                     <figure class="image is-48x48">
-                      <img :src="card.avatar" alt="Image">
+                      <img :src="card.avatar" alt="Image" />
                     </figure>
                   </div>
                   <div class="media-content">
                     <p class="title is-4 no-padding">{{card.user.title}}</p>
                     <p>
                       <span class="title is-6">
-                        <a :href=`http://twitter.com/${card.user.handle}`> {{card.user.handle}} </a> </span> </p>
+                        <a :href="`http://twitter.com/${card.user.handle}`"> {{card.user.handle}} </a> </span> </p>
                     <p class="subtitle is-6">{{card.user.title}}</p>
                   </div>
                 </div>
@@ -106,34 +106,14 @@
           </div>
           <p>
             <strong>Bulma</strong> by <a href="http://jgthms.com">Jeremy Thomas</a>.
-            The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. <br>
+            The source code is licensed <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. <br />
           </p>
         </div>
       </div>
     </footer>
 
-    <script src="../js/cardsData.js"></script>
-    <script>
-      // Using Vue to populate cards to reduce redundant code...
-      var app = new Vue({
-        el: '#app',
-        data: {
-          cardData: cardsData
-        }
-      })
 
-      // Handling burger menu...
-      document.addEventListener('DOMContentLoaded', () => {
-        const burger = document.querySelector('.navbar-burger');
-        const menu = document.getElementById(burger.dataset.target);
-        if (burger && menu) {
-          burger.addEventListener('click', () => {
-            burger.classList.toggle('is-active');
-            menu.classList.toggle('is-active');
-          });
-        }
-      });
-    </script>
+
   </body>
 
 </html>

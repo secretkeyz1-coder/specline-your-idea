@@ -4,6 +4,86 @@ import { getUiTemplates, readUiTemplate, templateHtmlForAnalysis, templateHtmlFo
 import { mkdtemp, mkdir, writeFile, unlink, rm, utimes } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { templateRoot } from "../src/lib/server/ui-templates.js";
+import { sanitizeReferenceHtml, isReferenceAsset, REFERENCE_CSP } from "../src/lib/server/ui-reference-policy.js";
+import { curateReferences } from "../scripts/curate-ui-references.js";
+
+test("reference policy discards execution while retaining visual SVG/style evidence", () => {
+  const html = sanitizeReferenceHtml('<html><head><script>bad()</script><style>.card{display:grid}</style><meta http-equiv="refresh" content="0;url=https://example.com"></head><body onload="bad()"><iframe srcdoc="bad"></iframe><a href="javascript:bad()">x</a><svg viewBox="0 0 24 24"><path d="M0 0" /></svg></body></html>');
+  expect(html).not.toMatch(/<script|<iframe|onload|javascript:|http-equiv|srcdoc/i);
+  expect(html).toContain('viewBox="0 0 24 24"');
+  expect(html).toContain("display:grid");
+  const svg = sanitizeReferenceHtml('<svg viewBox="0 0 10 10"><defs><linearGradient id="a"><stop offset="0%" /></linearGradient><radialGradient id="b"/><clipPath id="c"><rect width="10" /></clipPath></defs><rect fill="url(#a)" clip-path="url(#c)" /></svg>');
+  expect(svg).toContain('<linearGradient id="a">');
+  expect(svg).toContain('<radialGradient id="b">');
+  expect(svg).toContain('<clipPath id="c">');
+  expect(svg).toContain('fill="url(#a)"');
+  const urls = sanitizeReferenceHtml('<a HREF="javascript:alert(1)">x</a><img SRC="java&#10;script:alert(1)"><svg><use XLink:href="vbscript:bad()"/></svg>');
+  expect(urls).not.toMatch(/(?:java|vb)script|alert\(1\)|bad\(\)/i);
+  expect(REFERENCE_CSP).toContain("script-src 'none'");
+  for (const file of ["x.js", "x.json", "node_modules/a.css", ".git/a.html", "x.scss"]) expect(isReferenceAsset(file)).toBe(false);
+});
+
+test("attribution preservation cannot reintroduce markup through browser comment boundaries", () => {
+  const reproduction = sanitizeReferenceHtml('<!-- MIT --!><script>alert(1)</script><!-- -->');
+  expect(reproduction).toContain("MIT");
+  expect(reproduction).not.toMatch(/<script|alert\(1\)|--!>/i);
+  const nested = sanitizeReferenceHtml('<!-- Copyright MIT <img src=x onerror=bad()> <!-- nested --!><script>bad()</script>');
+  const notice = /<!--([\s\S]*?)-->/.exec(nested)![1]!;
+  expect(notice).toContain("Copyright MIT");
+  expect(notice).toContain("&lt;img");
+  expect(notice).not.toMatch(/[<>-]/);
+  expect(nested.replace(/<!--[\s\S]*?-->/g, "")).not.toMatch(/<script|<img|bad\(\)/i);
+});
+
+test("published inventory is hash-valid, script-free, and keeps all catalogue roots", async () => {
+  const root = templateRoot();
+  const inventory = JSON.parse(await readFile(join(root, "asset-inventory.json"), "utf8"));
+  expect(inventory.preservedArchiveFiles).toBe(6099);
+  expect(inventory.files).toHaveLength(1506);
+  for (const file of inventory.files) {
+    const data = await readFile(join(root, file.path));
+    expect(createHash("sha256").update(data).digest("hex")).toBe(file.sha256);
+    expect(file.path).not.toMatch(/(?:package.*\.json|lock|\.(?:js|ts|scss|less|map))$/i);
+    if (/\.html?$/i.test(file.path)) expect(data.toString()).not.toMatch(/<script\b|\son\w+\s*=|<iframe\b/i);
+    if (/(?:^|\/)(?:license|notice)/i.test(file.path)) expect(file.sha256).toBe(file.sourceSha256);
+  }
+  expect((await getUiTemplates(root)).length).toBe(294);
+  expect(new Set((await getUiTemplates(root)).map(t => t.file.split("/")[0])).size).toBe(15);
+  const foundation = await readFile(join(root, "tailwindcss-templates/layouts/foundation.html"), "utf8");
+  expect(foundation).toContain("Roboto Condensed");
+  expect(foundation).toContain(".bg-black");
+});
+
+test("curation verifies source hashes and produces deterministic visual dependency closure", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "sdd-curation-"));
+  try {
+    const archive = join(temp, "archive"), root = join(archive, "Referensi UI");
+    await mkdir(join(root, "assets"), { recursive: true });
+    const sources: Record<string, string> = {
+      "index.html": '<html><head><link rel="stylesheet" href="assets/theme.css"></head><body><img src="assets/image.svg"><script src="vendor.js"></script></body></html>',
+      "assets/theme.css": '@import "extra.css";body{background:url(image.svg)}',
+      "assets/extra.css": "body{display:grid}", "assets/image.svg": '<svg xmlns="http://www.w3.org/2000/svg"/>',
+      "vendor.js": "danger()", "package.json": '{"dependencies":{"legacy":"1"}}', "LICENSE": "Original notice",
+    };
+    const files = [];
+    for (const [path, data] of Object.entries(sources)) {
+      await writeFile(join(root, path), data);
+      files.push({ path, bytes: Buffer.byteLength(data), sha256: createHash("sha256").update(data).digest("hex") });
+    }
+    await writeFile(join(archive, "inventory.sha256.json"), JSON.stringify({ publicationRevision: "fixture", files }));
+    const a = await curateReferences(archive, join(temp, "a"));
+    const b = await curateReferences(archive, join(temp, "b"));
+    expect(a).toEqual(b);
+    expect(a.files.map(f => f.path)).toEqual(["LICENSE", "assets/extra.css", "assets/image.svg", "assets/theme.css", "index.html"]);
+    expect(a.missingLocalReferences).toEqual([]);
+    await expect(curateReferences(archive, join(temp, "a"))).rejects.toThrow("Output already exists");
+    await writeFile(join(root, "vendor.js"), "changed");
+    await expect(curateReferences(archive, join(temp, "bad"))).rejects.toThrow("Archive verification failed");
+  } finally { await rm(temp, { recursive: true, force: true }); }
+});
 
 test("curated UI templates have unique IDs and real HTML; local previews are optional", async () => {
   expect(new Set(UI_TEMPLATES.map((t) => t.id)).size).toBe(UI_TEMPLATES.length);

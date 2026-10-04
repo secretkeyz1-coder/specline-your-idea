@@ -132,6 +132,12 @@ that does not make every bundled asset MIT. For example:
   central archive name ThemeSelection with 2022. Resolve version provenance
   before distribution, without deleting either notice.
 
+### Asset-only publication separation (2026-10-04)
+
+The full publication collection at `cb049a4` (6,099 files, 205,454,391 bytes) was copied into the owner-local sibling `../SPECLINE VENDOR ARCHIVE cb049a4/` and every SHA256 verified before removing public build sources. Archive inventory SHA256: `ab729accd50c3690322838435161da49bc5036311625866c40b4ca1b9f17f0f9`. The independent `NEW SPEC KIT/Referensi UI` original was never changed. This publication no longer contains vendor package manifests, lockfiles, source build graphs or executable JavaScript. The tracked bundle retains 1,506 original files (all 393 HTML pages, linked visual assets and original notices); 4,593 archived files are omitted. Public curation removes scripts/handlers/active embeds, and six Tailwind CDN pages receive statically compiled Tailwind 3.4.19 CSS with attribution comments, not evaluated vendor configuration. These are modified reference copies, not verbatim runnable upstream applications.
+
+`Referensi UI/asset-inventory.json` records distributed/source SHA256 hashes, archive digest and unresolved/external references. Original license/NOTICE files remain byte-identical. Central texts for excluded sources are historical licensing evidence only, not redistributed source assets. Upstream version/build provenance remains incomplete; byte hashes establish local preservation, not exact upstream identity. Font/image/icon/trademark/CDN clearance gaps below remain. No blanket MIT claim or claim that all 415 historical dependency alerts were individually remediated/dismissed is made. Full sources can be restored from the verified archive into a new owner-local directory outside the publication; see the collection README. Vendor demo interactions/charts are not shipped as live functionality.
+
 ### Local vendor publication-hygiene modifications (2026-10-03)
 
 - In 25 HTML files under `Referensi UI/material-kit/`, the bundled Google Maps
@@ -152,8 +158,7 @@ copyright headers and license files remain unchanged; no relicensing is implied.
 The owner approved Apache-2.0 for original project code and exclusion of Preline
 from the first public package on 2026-10-03. The conservative package scope also
 excludes **Tabler and TailAdmin** pending nested-vendor review, and **all generated previews**.
-Local originals remain in `Referensi UI/preline/`, `Referensi UI/tabler/`, `Referensi UI/tailadmin/` and
-`Referensi UI/previews/`. Git/Docker exclusions preserve local files while keeping
+In the original NEW SPEC KIT source, local originals remain in the original reference paths; this publication's complete collection is preserved in the external sibling archive described above. Git/Docker exclusions keep
 routine publication/build contexts scoped; catalog discovery, curated entries,
 file reads, CSS evidence and preview serving exclude these vendor paths.
 This is a reversible packaging decision, not a finding that redistribution is

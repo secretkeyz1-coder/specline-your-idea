@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+
 <html lang="en" class="theme-light">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Inbox - Free Bulma template</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
-    <!-- Bulma Version 1-->
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet" />
+
     <link rel="stylesheet" href="https://unpkg.com/bulma@1.0.2/css/bulma.min.css" />
-    <link rel="stylesheet" type="text/css" href="../css/inbox.css">
+    <link rel="stylesheet" type="text/css" href="../css/inbox.css" />
 </head>
 
 <body>
@@ -18,7 +18,7 @@
         <div class="container">
             <div class="navbar-brand">
                 <a class="navbar-item" href="../">
-                    <img src="https://bulma.io/assets/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox">
+                    <img src="https://bulma.io/assets/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" />
                 </a>
 
                 <div class="navbar-burger burger" data-target="navMenu">
@@ -42,7 +42,7 @@
                         <a class="navbar-item">
                         Settings
                         </a>
-                        <hr class="navbar-divider">
+                        <hr class="navbar-divider" />
                         <a class="navbar-item">
                         Logout
                         </a>
@@ -126,13 +126,13 @@
             <div class="box message-preview">
                 <div class="top">
                     <div class="avatar">
-                        <img src="https://placeholder.photo/128x128">
+                        <img src="https://placeholder.photo/128x128" />
                     </div>
                     <div class="address">
                         <div class="name">John Smith</div>
                         <div class="email">someone@gmail.com</div>
                     </div>
-                    <hr>
+                    <hr />
                     <div class="content">
                     </div>
                 </div>
@@ -154,59 +154,12 @@
             </div>
         </div>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/vue@2.5.16/dist/vue.min.js"></script>
-    <script src="../js/bulma.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js" integrity="sha256-QHdJObhDO++VITP6S4tMlDHRWMaUOk+s/xWIRgF/YY0=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js" integrity="sha256-4PIvl58L9q7iwjT654TQJM+C/acEyoG738iL8B8nhXg=" crossorigin="anonymous"></script>
-    <script>
-        $(document).ready(function() {
-            window.inbox = {};
-            window.paginate = {
-                total: Math.random() * (54236 - 100) + 3
-            }
-            for (var i = 0; i <= 10; i++) {
-                window.inbox[i] = {
-                    from: faker.name.findName(),
-                    timestamp: null,
-                    subject: faker.lorem.sentence().substring(0, 40),
-                    snippet: faker.lorem.lines(),
-                    fullMail: window.faker.lorem.paragraphs(faker.random.number(40)),
-                    email: faker.internet.email()
-                };
-            }
-            var inboxVue = new Vue({
-                el: '#mail-app',
-                data: {
-                    messages: window.inbox,
-                    paginate: {
-                        pointer: {
-                            start: 1,
-                            end: 10
-                        },
-                        total: 100
-                    }
-                },
-                methods: {
-                    showMessage: function(msg, index) {
-                        $('#message-pane').removeClass('is-hidden');
-                        $('.card').removeClass('active');
-                        $('#msg-card-' + index).addClass('active');
-                        $('.message .address .name').text(msg.from);
-                        $('.message .address .email').text(msg.email);
-                        var msg_body = '<p>' +
-                            msg.snippet +
-                            '</p>' +
-                            '<br>' +
-                            '<p>' +
-                            msg.fullMail +
-                            '</p>';
-                        $('.message .content').html(msg_body);
-                    }
-                }
-            });
-        });
-    </script>
+
+
+
+
+
+
 </body>
 
 </html>

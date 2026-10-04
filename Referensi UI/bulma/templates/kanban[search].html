@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+
 <html lang="en" class="theme-light">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>bulma|vue kanban</title>
-    <!-- Bulma Version 1-->
+
     <link rel="stylesheet" href="https://unpkg.com/bulma@1.0.4/css/bulma.min.css" />
-    <link rel="stylesheet" href="../css/kanban.css">
+    <link rel="stylesheet" href="../css/kanban.css" />
 
   </head>
   <body>
@@ -13,7 +13,7 @@
       <nav class="navbar has-shadow">
         <div class="container">
           <div class="navbar-brand"><a class="navbar-item" href="../">
-          <img src="https://bulma.io/assets/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox"/></a>
+          <img src="https://bulma.io/assets/images/bulma-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" /></a>
         </div>
       </div>
     </nav>
@@ -24,7 +24,7 @@
             <div class="card-content">
               <div class="content">
                 <div class="control has-icons-left has-icons-right search-field">
-                  <input class="input is-large" type="text" placeholder="" v-model="search" /><span class="icon is-medium is-left"><i class="fa fa-search"></i></span>
+                  <input class="input is-large" type="text" v-model="search" /><span class="icon is-medium is-left"><i class="fa fa-search"></i></span>
                   <span class="icon is-medium is-right">
                     <i class="delete is-medium clear-search" @click="clearSearchField()" v-if="search.length"></i>
                   </span>
@@ -40,19 +40,19 @@
            Powered by  <span class="tag is-link">Vue.js</span>. All the data is stored inside of <span class="tag is-black">kanban.js</span> file, and can be easily changed according to your needs.
         </p>
     </div>
-    <!-- Loop through the parent array -->
+
     <section class="container cards-container">
       <div class="columns is-centered is-multiline" id="sectioncontainer">
         <div class="column is-narrow" v-for="yxy in filteredCards">
           <article class="message" :class="'is-' + yxy.cardColor">
             <div class="message-header">
-              <!-- Make a header using the `name` property from the current season in the loop -->
+
               <p>{{ title }} » {{  yxy.name }}</p>
               <button class="delete" aria-label="delete" @click="removeCard(yxy)"></button>
             </div>
             <div class="message-body">
               <div class="board-item">
-                <!-- Loop through the `items` array from the current season to show each item -->
+
                 <div class="board-item-content" v-for="item in yxy.items"><span>{{ item }}</span></div>
               </div>
             </div>
@@ -75,7 +75,7 @@
       </div>
     </div>
   </footer>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.js'></script>
-<script  src="../js/kanban.js"></script>
+
+
 </body>
 </html>
